@@ -39,6 +39,15 @@ type Column = {
   hideable?: boolean;
 };
 
+export type CrudAction = {
+  key: string;
+  label: string;
+  icon?: React.ComponentType<{ size?: number }>;
+  variant?: "default" | "primary" | "destructive";
+  show?: (row: any) => boolean;
+  onClick: (row: any) => void | Promise<void>;
+};
+
 type Props = {
   table: string;
   title: string;
@@ -53,7 +62,13 @@ type Props = {
   onView?: (row: any) => void;
   enableDuplicate?: boolean;
   enableBulk?: boolean;
-  bulkToggleField?: string; // e.g. "is_active"
+  bulkToggleField?: string;
+  readOnly?: boolean;
+  disableCreate?: boolean;
+  disableEdit?: boolean;
+  disableDelete?: boolean;
+  customActions?: CrudAction[];
+  selectQuery?: string;
 };
 
 function slugify(s: string) { return String(s || "").toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""); }
