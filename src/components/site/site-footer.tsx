@@ -1,17 +1,19 @@
-import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Instagram, Facebook, Twitter, Youtube } from "lucide-react";
+import { useSession } from "@/hooks/use-session";
+import { filterMenu, MenuLink } from "./site-header";
 
 export function SiteFooter() {
+  const { user, isAdmin } = useSession();
   const { data: menus } = useQuery({
     queryKey: ["menu", "footer"],
     queryFn: async () => {
       const { data } = await supabase
         .from("menu_items")
-        .select("*")
+        .select("id,label,url,target,visibility,role_required,css_class,location")
         .in("location", ["footer_1", "footer_2", "footer_3"])
         .eq("is_active", true)
         .order("sort_order");
@@ -50,7 +52,7 @@ export function SiteFooter() {
   const contact = settings?.contact ?? {};
   const social = settings?.social ?? {};
 
-  const col = (loc: string) => menus?.filter((m) => m.location === loc) ?? [];
+  const col = (loc: string) => filterMenu(menus?.filter((m) => m.location === loc) as any, { authenticated: !!user, isAdmin });
 
   return (
     <footer className="mt-24 border-t border-border bg-surface text-foreground">
@@ -72,7 +74,7 @@ export function SiteFooter() {
           <div className="eyebrow mb-4">House</div>
           <ul className="space-y-2 text-sm">
             {col("footer_1").map((m) => (
-              <li key={m.id}><Link to={m.url as any} className="text-muted-foreground hover:text-primary">{m.label}</Link></li>
+              <li key={m.id}><MenuLink item={m} className="text-muted-foreground hover:text-primary">{m.label}</MenuLink></li>
             ))}
           </ul>
         </div>
@@ -80,7 +82,7 @@ export function SiteFooter() {
           <div className="eyebrow mb-4">Service</div>
           <ul className="space-y-2 text-sm">
             {col("footer_2").map((m) => (
-              <li key={m.id}><Link to={m.url as any} className="text-muted-foreground hover:text-primary">{m.label}</Link></li>
+              <li key={m.id}><MenuLink item={m} className="text-muted-foreground hover:text-primary">{m.label}</MenuLink></li>
             ))}
           </ul>
         </div>
@@ -108,7 +110,7 @@ export function SiteFooter() {
         <div>{footer.copyright ?? "© AURELIA. All rights reserved."}</div>
         <div className="flex gap-6">
           {col("footer_3").map((m) => (
-            <Link key={m.id} to={m.url as any} className="hover:text-primary">{m.label}</Link>
+            <MenuLink key={m.id} item={m} className="hover:text-primary">{m.label}</MenuLink>
           ))}
         </div>
       </div>

@@ -3,19 +3,32 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { SiteHeader } from "@/components/site/site-header";
 import { SiteFooter } from "@/components/site/site-footer";
+import { buildSeoHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/blog/$slug")({
   component: BlogPost,
   errorComponent: ({ reset }) => <div className="p-8 text-center"><p>Something went wrong.</p><button onClick={reset} className="underline">Retry</button></div>,
   notFoundComponent: () => <div className="p-8 text-center">Article not found. <Link to="/blog" className="underline">Back to blog</Link></div>,
-  head: ({ params }) => ({
-    meta: [
-      { title: `Article — ${params.slug}` },
-      { property: "og:url", content: `/blog/${params.slug}` },
-      { property: "og:type", content: "article" },
-    ],
-    links: [{ rel: "canonical", href: `/blog/${params.slug}` }],
-  }),
+  loader: async ({ params }) => {
+    const { data } = await supabase
+      .from("blog_posts")
+      .select("title,excerpt,cover_image,meta_title,meta_description,og_title,og_description,og_image,twitter_title,twitter_description,twitter_image,canonical_url")
+      .eq("slug", params.slug)
+      .eq("is_published", true)
+      .maybeSingle();
+    return data;
+  },
+  head: ({ params, loaderData }) => {
+    const p = loaderData as any;
+    return buildSeoHead({
+      title: p?.meta_title || p?.title || `Article — ${params.slug}`,
+      description: p?.excerpt || null,
+      path: `/blog/${params.slug}`,
+      image: p?.cover_image || null,
+      type: "article",
+      seo: p,
+    });
+  },
 });
 
 function BlogPost() {
