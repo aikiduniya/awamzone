@@ -58,16 +58,6 @@ export function ProductCard({ product }: { product: Product }) {
           >
             <Heart size={16} fill={saved ? "currentColor" : "none"} />
           </button>
-          <button
-            onClick={(e) => {
-              e.preventDefault();
-              add.mutate({ product_id: product.id });
-            }}
-            className="absolute inset-x-3 bottom-3 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all bg-background/90 text-foreground text-[11px] uppercase tracking-[0.24em] py-3 hover:bg-primary hover:text-primary-foreground"
-          >
-            Add to bag
-          </button>
-        </div>
         <div className="mt-4 flex items-baseline justify-between gap-3">
           <div className="font-serif text-lg leading-tight">{product.name}</div>
           <div className="text-sm">
