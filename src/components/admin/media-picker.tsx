@@ -56,6 +56,7 @@ export function MediaLibrary({ onPick, multi = false, folder }: { onPick?: (urls
   const [currentFolder, setCurrentFolder] = useState(folder ?? "");
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [editing, setEditing] = useState<MediaAsset | null>(null);
 
   const load = async () => {
     setLoading(true);
