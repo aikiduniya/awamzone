@@ -7,10 +7,10 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/_authenticated/admin/qa")({ component: QaAdmin });
 
 function QaAdmin() {
-  const setPublished = async (id: string, is_published: boolean) => {
-    const { error } = await supabase.from("product_questions").update({ is_published }).eq("id", id);
+  const setPublished = async (id: string, is_approved: boolean) => {
+    const { error } = await supabase.from("product_questions").update({ is_approved }).eq("id", id);
     if (error) toast.error(error.message);
-    else toast.success(is_published ? "Published" : "Unpublished");
+    else toast.success(is_approved ? "Published" : "Unpublished");
   };
 
   return (
@@ -27,16 +27,16 @@ function QaAdmin() {
         { key: "product", label: "Product", render: (r) => r.products?.name ?? "—", sortable: false },
         { key: "question", label: "Question" },
         { key: "answer", label: "Answer", render: (r) => <span className="text-muted-foreground line-clamp-2 max-w-md inline-block">{r.answer ?? "—"}</span>, sortable: false },
-        { key: "is_published", label: "Live", render: (r) => (r.is_published ? "✓" : "—") },
+        { key: "is_approved", label: "Live", render: (r) => (r.is_approved ? "✓" : "—") },
       ]}
       fields={[
         { key: "question", label: "Question", type: "textarea", colSpan: 2 },
         { key: "answer", label: "Answer", type: "textarea", colSpan: 2 },
-        { key: "is_published", label: "Published", type: "checkbox" },
+        { key: "is_approved", label: "Published", type: "checkbox" },
       ]}
       customActions={[
-        { key: "publish", label: "Publish", icon: CheckCircle2, variant: "primary", show: (r) => !r.is_published, onClick: (r) => setPublished(r.id, true) },
-        { key: "unpublish", label: "Unpublish", icon: XCircle, show: (r) => r.is_published, onClick: (r) => setPublished(r.id, false) },
+        { key: "publish", label: "Publish", icon: CheckCircle2, variant: "primary", show: (r) => !r.is_approved, onClick: (r) => setPublished(r.id, true) },
+        { key: "unpublish", label: "Unpublish", icon: XCircle, show: (r) => r.is_approved, onClick: (r) => setPublished(r.id, false) },
       ]}
     />
   );
