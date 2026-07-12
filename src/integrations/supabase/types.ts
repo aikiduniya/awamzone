@@ -828,6 +828,78 @@ export type Database = {
         }
         Relationships: []
       }
+      hero_slides: {
+        Row: {
+          background_color: string | null
+          created_at: string
+          desktop_image: string | null
+          ends_at: string | null
+          id: string
+          is_active: boolean
+          kicker: string | null
+          mobile_image: string | null
+          overlay_opacity: number | null
+          primary_label: string | null
+          primary_link: string | null
+          secondary_label: string | null
+          secondary_link: string | null
+          sort_order: number
+          starts_at: string | null
+          subtitle: string | null
+          text_align: string | null
+          text_position: string | null
+          title: string | null
+          updated_at: string
+          video_url: string | null
+        }
+        Insert: {
+          background_color?: string | null
+          created_at?: string
+          desktop_image?: string | null
+          ends_at?: string | null
+          id?: string
+          is_active?: boolean
+          kicker?: string | null
+          mobile_image?: string | null
+          overlay_opacity?: number | null
+          primary_label?: string | null
+          primary_link?: string | null
+          secondary_label?: string | null
+          secondary_link?: string | null
+          sort_order?: number
+          starts_at?: string | null
+          subtitle?: string | null
+          text_align?: string | null
+          text_position?: string | null
+          title?: string | null
+          updated_at?: string
+          video_url?: string | null
+        }
+        Update: {
+          background_color?: string | null
+          created_at?: string
+          desktop_image?: string | null
+          ends_at?: string | null
+          id?: string
+          is_active?: boolean
+          kicker?: string | null
+          mobile_image?: string | null
+          overlay_opacity?: number | null
+          primary_label?: string | null
+          primary_link?: string | null
+          secondary_label?: string | null
+          secondary_link?: string | null
+          sort_order?: number
+          starts_at?: string | null
+          subtitle?: string | null
+          text_align?: string | null
+          text_position?: string | null
+          title?: string | null
+          updated_at?: string
+          video_url?: string | null
+        }
+        Relationships: []
+      }
       home_sections: {
         Row: {
           config: Json
