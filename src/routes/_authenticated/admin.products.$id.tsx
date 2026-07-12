@@ -118,21 +118,63 @@ function ProductEditor() {
           </section>
 
           <section className="border border-border p-6 space-y-4">
-            <h3 className="font-serif text-xl">Media</h3>
-            <div className="grid grid-cols-4 gap-3">
-              {f.images.map((src: string, i: number) => (
-                <div key={i} className="relative aspect-square bg-surface">
-                  <img src={src} className="h-full w-full object-cover" alt="" />
-                  <button type="button" onClick={() => rmImg(i)} className="absolute top-1 right-1 bg-background/80 p-1"><X size={12} /></button>
-                </div>
-              ))}
+            <div className="flex items-center justify-between">
+              <h3 className="font-serif text-xl">Media Gallery</h3>
+              <span className="text-xs text-muted-foreground">Images · Videos · YouTube · Vimeo</span>
             </div>
-            <div className="flex gap-2 items-center flex-wrap">
+
+            {f.images.length > 0 ? (
+              <div className="grid grid-cols-4 gap-3">
+                {f.images.map((src: string, i: number) => {
+                  const m = classifyMedia(src);
+                  return (
+                    <div key={i} className="relative aspect-square bg-surface border border-border overflow-hidden group">
+                      {m.kind === "image" && <img src={m.url} className="h-full w-full object-cover" alt="" />}
+                      {m.kind === "video" && <video src={m.url} className="h-full w-full object-cover" muted playsInline preload="metadata" />}
+                      {m.kind === "youtube" && m.thumbnail && <img src={m.thumbnail} className="h-full w-full object-cover" alt="" />}
+                      {m.kind === "vimeo" && <div className="h-full w-full grid place-items-center bg-black text-white/70 text-[10px] uppercase tracking-widest">Vimeo</div>}
+                      {m.kind !== "image" && (
+                        <span className="absolute inset-0 grid place-items-center bg-black/25 text-white pointer-events-none"><Play size={18} /></span>
+                      )}
+                      <div className="absolute top-1 left-1 text-[9px] uppercase tracking-widest bg-background/85 px-1.5 py-0.5 rounded">{m.kind}</div>
+                      <div className="absolute inset-x-1 bottom-1 flex items-center justify-between opacity-0 group-hover:opacity-100 transition">
+                        <a href={m.url} target="_blank" rel="noreferrer" className="bg-background/85 p-1 rounded border border-border" title="Preview"><ZoomIn size={12} /></a>
+                        <div className="flex items-center gap-1">
+                          <button type="button" disabled={i === 0} onClick={() => { const arr = [...f.images]; [arr[i - 1], arr[i]] = [arr[i], arr[i - 1]]; setF({ ...f, images: arr }); }} className="bg-background/85 px-1.5 rounded border border-border text-[10px] disabled:opacity-30">←</button>
+                          <button type="button" disabled={i === f.images.length - 1} onClick={() => { const arr = [...f.images]; [arr[i], arr[i + 1]] = [arr[i + 1], arr[i]]; setF({ ...f, images: arr }); }} className="bg-background/85 px-1.5 rounded border border-border text-[10px] disabled:opacity-30">→</button>
+                          <button type="button" onClick={() => rmImg(i)} className="bg-destructive text-destructive-foreground p-1 rounded"><X size={12} /></button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="text-xs text-muted-foreground border border-dashed border-border p-6 text-center">
+                No media yet. Add images, videos, or YouTube / Vimeo links below.
+              </div>
+            )}
+
+            <div className="flex gap-2 items-center flex-wrap pt-2 border-t border-border/50">
               <MediaPicker multi folder="products" onPick={(urls) => setF({ ...f, images: [...f.images, ...urls] })} />
-              <span className="text-xs text-muted-foreground">or paste URL:</span>
-              <input value={imgInput} onChange={(e) => setImgInput(e.target.value)} placeholder="https://…" className="flex-1 bg-transparent border border-border px-3 py-2 text-sm" />
-              <button type="button" onClick={addImg} className="border border-primary text-primary px-4 py-2 text-xs uppercase tracking-[0.2em]">Add URL</button>
+              <span className="text-xs text-muted-foreground">or paste a URL (image, .mp4, YouTube, Vimeo):</span>
+              <input
+                value={imgInput}
+                onChange={(e) => setImgInput(e.target.value)}
+                placeholder="https://…"
+                className="flex-1 min-w-[240px] bg-transparent border border-border px-3 py-2 text-sm"
+              />
+              <button type="button" onClick={addImg} className="border border-primary text-primary px-4 py-2 text-xs uppercase tracking-[0.2em]">Add</button>
             </div>
+
+            {f.images.length > 0 && (
+              <details className="pt-3 border-t border-border/50">
+                <summary className="cursor-pointer text-xs uppercase tracking-[0.2em] text-muted-foreground hover:text-primary">Preview gallery (customer view)</summary>
+                <div className="mt-4 max-w-md">
+                  <ProductGallery urls={f.images} alt={f.name || "Product"} />
+                </div>
+              </details>
+            )}
           </section>
 
           {!isNew && (
