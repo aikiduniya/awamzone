@@ -33,6 +33,8 @@ function CartPage() {
               {items.map((it: any) => {
                 if (!it.product) return null;
                 const price = effectivePrice(it.product);
+                const stock = Number(it.product.stock ?? 0);
+                const atMax = it.quantity >= stock;
                 return (
                   <div key={it.id} className="flex gap-6 border-b border-border pb-6">
                     <Link to="/product/$slug" params={{ slug: it.product.slug }} className="w-28 h-36 shrink-0 overflow-hidden bg-surface">
@@ -42,12 +44,22 @@ function CartPage() {
                       <div>
                         <Link to="/product/$slug" params={{ slug: it.product.slug }} className="font-serif text-xl hover:text-primary">{it.product.name}</Link>
                         <div className="text-primary mt-1">{formatMoney(price)}</div>
+                        {atMax && <div className="text-[11px] text-destructive mt-1">Maximum available stock reached ({stock})</div>}
+                        {!atMax && stock > 0 && stock <= 5 && <div className="text-[11px] text-muted-foreground mt-1">Only {stock - it.quantity} left</div>}
                       </div>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center border border-border">
-                          <button onClick={() => updateQty.mutate({ id: it.id, quantity: it.quantity - 1 })} className="px-3 py-2 hover:text-primary"><Minus size={12} /></button>
+                          <button onClick={() => updateQty.mutate({ id: it.id, quantity: it.quantity - 1 })} className="px-3 py-2 hover:text-primary" aria-label="Decrease"><Minus size={12} /></button>
                           <span className="px-4 text-sm">{it.quantity}</span>
-                          <button onClick={() => updateQty.mutate({ id: it.id, quantity: it.quantity + 1 })} className="px-3 py-2 hover:text-primary"><Plus size={12} /></button>
+                          <button
+                            disabled={atMax}
+                            onClick={() => {
+                              if (atMax) return toast.error(`Only ${stock} in stock`);
+                              updateQty.mutate({ id: it.id, quantity: it.quantity + 1 });
+                            }}
+                            className="px-3 py-2 hover:text-primary disabled:opacity-30 disabled:cursor-not-allowed"
+                            aria-label="Increase"
+                          ><Plus size={12} /></button>
                         </div>
                         <button onClick={() => remove.mutate(it.id)} className="text-muted-foreground hover:text-destructive" aria-label="Remove">
                           <X size={16} />
@@ -57,6 +69,7 @@ function CartPage() {
                   </div>
                 );
               })}
+
             </div>
 
             <div className="border border-border p-6 h-fit sticky top-24">
