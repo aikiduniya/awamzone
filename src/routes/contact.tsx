@@ -39,6 +39,17 @@ function ContactPage() {
     if (!parsed.success) return toast.error(parsed.error.issues[0]?.message || "Invalid input");
     if (parsed.data.website) return; // bot
     setSending(true);
+    // Rate limit: max 3 submissions per 10 minutes per email
+    const { data: allowed } = await supabase.rpc("hit_rate_limit", {
+      _bucket: "contact_form",
+      _key: parsed.data.email.toLowerCase(),
+      _limit: 3,
+      _window_seconds: 600,
+    });
+    if (allowed === false) {
+      setSending(false);
+      return toast.error("Too many messages. Please try again later.");
+    }
     const payload = {
       name: parsed.data.name,
       email: parsed.data.email,
