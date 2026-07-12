@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { AlertTriangle, PackageX } from "lucide-react";
+import { AlertTriangle, PackageX, Package, CheckCircle2, DollarSign } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/inventory")({
   component: InventoryPage,
@@ -47,6 +47,16 @@ function InventoryPage() {
 
   const outCount = rows?.filter((r: any) => r.stock <= 0).length ?? 0;
   const lowCount = rows?.filter((r: any) => r.stock > 0 && r.stock <= (r.low_stock_threshold ?? 5)).length ?? 0;
+  const inStockCount = (rows?.length ?? 0) - outCount;
+  const totalValue = (rows ?? []).reduce((s: number, r: any) => s + Number(r.price || 0) * Number(r.stock || 0), 0);
+
+  const cards = [
+    { label: "Total products", value: rows?.length ?? 0, icon: Package, tint: "bg-indigo-500" },
+    { label: "In stock", value: inStockCount, icon: CheckCircle2, tint: "bg-emerald-500" },
+    { label: "Low stock", value: lowCount, icon: AlertTriangle, tint: "bg-amber-500" },
+    { label: "Out of stock", value: outCount, icon: PackageX, tint: "bg-rose-500" },
+    { label: "Inventory value", value: totalValue.toLocaleString(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 0 }), icon: DollarSign, tint: "bg-teal-500" },
+  ];
 
   return (
     <div>
@@ -55,25 +65,20 @@ function InventoryPage() {
         <p className="text-sm text-muted-foreground mt-1">Track stock levels and make adjustments.</p>
       </div>
 
-      <div className="grid grid-cols-3 gap-4 mb-6">
-        <div className="border border-border rounded p-4">
-          <div className="text-xs uppercase tracking-wider text-muted-foreground">Total products</div>
-          <div className="text-2xl font-serif mt-1">{rows?.length ?? 0}</div>
-        </div>
-        <div className="border border-border rounded p-4 flex items-start gap-2">
-          <AlertTriangle className="text-amber-500 mt-1" size={18} />
-          <div>
-            <div className="text-xs uppercase tracking-wider text-muted-foreground">Low stock</div>
-            <div className="text-2xl font-serif mt-1">{lowCount}</div>
-          </div>
-        </div>
-        <div className="border border-border rounded p-4 flex items-start gap-2">
-          <PackageX className="text-destructive mt-1" size={18} />
-          <div>
-            <div className="text-xs uppercase tracking-wider text-muted-foreground">Out of stock</div>
-            <div className="text-2xl font-serif mt-1">{outCount}</div>
-          </div>
-        </div>
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+        {cards.map((c) => {
+          const Icon = c.icon;
+          return (
+            <div key={c.label} className="group relative overflow-hidden rounded-xl border border-border bg-card p-4 transition hover:-translate-y-0.5 hover:shadow-lg">
+              <div className={`absolute -right-4 -top-4 h-16 w-16 rounded-full opacity-20 blur-2xl ${c.tint}`} />
+              <div className="flex items-center justify-between mb-2">
+                <div className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">{c.label}</div>
+                <div className={`h-8 w-8 rounded-lg text-white inline-flex items-center justify-center ${c.tint}`}><Icon size={14} /></div>
+              </div>
+              <div className="text-2xl font-serif">{c.value}</div>
+            </div>
+          );
+        })}
       </div>
 
       <div className="flex gap-2 mb-4">
