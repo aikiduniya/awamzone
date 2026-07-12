@@ -125,7 +125,7 @@ function CheckoutPage() {
       const payRes = await adapter.initiate({
         supabase: supabase as any,
         orderId: result.order_id, orderNumber: result.order_number,
-        amount: result.total, currency: "USD",
+        amount: result.total, currency: settings.currency,
         customerEmail: form.email,
         returnUrl: `${window.location.origin}/order/${result.order_id}`,
         cancelUrl: `${window.location.origin}/checkout`,
