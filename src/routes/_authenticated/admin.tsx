@@ -68,6 +68,8 @@ const NAV_GROUPS: NavGroup[] = [
     { to: "/admin/webhooks", label: "Webhooks", icon: Webhook },
     { to: "/admin/api-keys", label: "API Keys", icon: KeyRound },
     { to: "/admin/audit-logs", label: "Audit Logs", icon: ShieldCheck },
+    { to: "/admin/theme", label: "Theme", icon: Sparkles },
+    { to: "/admin/smtp", label: "SMTP", icon: Send },
     { to: "/admin/settings", label: "Settings", icon: Settings },
   ]},
 ];
