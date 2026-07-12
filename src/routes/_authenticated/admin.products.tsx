@@ -2,10 +2,11 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { formatMoney } from "@/lib/format";
-import { ArrowDown, ArrowUp, ArrowUpDown, Plus, Search, X } from "lucide-react";
+import { ArrowDown, ArrowUp, ArrowUpDown, Plus, Search, X, Pencil, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { PaginationBar } from "@/components/admin/pagination-bar";
+import { AdminHeader, IconButton, useConfirm, Empty, TableSkeleton } from "@/components/admin/admin-ui";
 
 export const Route = createFileRoute("/_authenticated/admin/products")({
   component: ProductsList,
@@ -53,11 +54,20 @@ function ProductsList() {
   const rows = data?.rows ?? [];
   const total = data?.count ?? 0;
 
-  const remove = async (id: string) => {
-    if (!confirm("Delete product?")) return;
-    const { error } = await supabase.from("products").delete().eq("id", id);
-    if (error) toast.error(error.message);
-    else { toast.success("Deleted"); refetch(); }
+  const { confirm, dialog: confirmDialog } = useConfirm();
+
+  const remove = (id: string, name: string) => {
+    confirm({
+      title: "Delete product?",
+      description: `“${name}” will be permanently removed. This cannot be undone.`,
+      confirmLabel: "Delete",
+      destructive: true,
+      onConfirm: async () => {
+        const { error } = await supabase.from("products").delete().eq("id", id);
+        if (error) toast.error(error.message);
+        else { toast.success("Deleted"); refetch(); }
+      },
+    });
   };
 
   const toggleSort = (key: string) => {
@@ -80,15 +90,17 @@ function ProductsList() {
 
   return (
     <>
-      <div className="flex items-end justify-between mb-8">
-        <div>
-          <div className="eyebrow mb-2">Catalog</div>
-          <h1 className="text-4xl font-serif">Products</h1>
-        </div>
-        <Link to="/admin/products/$id" params={{ id: "new" }} className="inline-flex items-center gap-2 border border-primary bg-primary text-primary-foreground px-4 py-2 text-xs uppercase tracking-[0.2em]">
-          <Plus size={14} /> New Product
-        </Link>
-      </div>
+      {confirmDialog}
+      <AdminHeader
+        eyebrow="Catalog"
+        title="Products"
+        description="Manage your storefront catalog, pricing, and stock."
+        actions={
+          <Link to="/admin/products/$id" params={{ id: "new" }} className="inline-flex items-center gap-2 border border-primary bg-primary text-primary-foreground px-4 py-2 text-xs uppercase tracking-[0.2em]">
+            <Plus size={14} /> New Product
+          </Link>
+        }
+      />
 
       <div className="flex flex-wrap items-center gap-3 mb-4">
         <div className="flex items-center gap-2 border border-border rounded px-3 py-2 flex-1 max-w-md">
@@ -109,23 +121,23 @@ function ProductsList() {
         {isFetching && <span className="text-xs text-muted-foreground">Loading…</span>}
       </div>
 
-      <div className="border border-border rounded">
+      <div className="border border-border rounded bg-background">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-surface">
+            <thead className="bg-secondary sticky top-0 z-10">
               <tr className="text-left">
                 {th("Product", "name")}
                 {th("SKU", "sku")}
-                <th className="p-4 eyebrow">Category</th>
+                <th className="p-4 text-xs uppercase tracking-[0.18em] text-muted-foreground">Category</th>
                 {th("Price", "price")}
                 {th("Stock", "stock")}
                 {th("Status", "status")}
-                <th></th>
+                <th className="p-4 text-right sticky right-0 bg-secondary" />
               </tr>
             </thead>
             <tbody>
               {isLoading ? (
-                <tr><td colSpan={7} className="p-6 text-center text-muted-foreground">Loading…</td></tr>
+                <tr><td colSpan={7} className="p-0"><TableSkeleton cols={6} /></td></tr>
               ) : rows.length ? rows.map((p: any) => (
                 <tr key={p.id} className="border-t border-border hover:bg-secondary/40">
                   <td className="p-4">
@@ -142,13 +154,17 @@ function ProductsList() {
                   <td className="p-4 text-right">{formatMoney(p.sale_price ?? p.price)}</td>
                   <td className="p-4 text-right">{p.stock}</td>
                   <td className="p-4 text-xs uppercase tracking-[0.2em]">{p.status}</td>
-                  <td className="p-4 text-right space-x-3 whitespace-nowrap">
-                    <Link to="/admin/products/$id" params={{ id: p.id }} className="text-primary text-xs uppercase tracking-[0.2em]">Edit</Link>
-                    <button onClick={() => remove(p.id)} className="text-destructive text-xs uppercase tracking-[0.2em]">Delete</button>
+                  <td className="p-4 text-right whitespace-nowrap sticky right-0 bg-background">
+                    <div className="inline-flex items-center gap-1">
+                      <Link to="/admin/products/$id" params={{ id: p.id }} aria-label="Edit" className="h-8 w-8 grid place-items-center rounded hover:bg-secondary text-foreground/80 hover:text-primary">
+                        <Pencil size={14} />
+                      </Link>
+                      <IconButton label="Delete" icon={Trash2} variant="destructive" onClick={() => remove(p.id, p.name)} />
+                    </div>
                   </td>
                 </tr>
               )) : (
-                <tr><td colSpan={7} className="p-6 text-center text-muted-foreground">No products match your filters.</td></tr>
+                <tr><td colSpan={7} className="p-0"><Empty>No products match your filters.</Empty></td></tr>
               )}
             </tbody>
           </table>

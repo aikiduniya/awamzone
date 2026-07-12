@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Plus, Trash2, Edit, Zap } from "lucide-react";
 import { toast } from "sonner";
-import { AdminHeader, Field, Empty } from "@/components/admin/admin-ui";
+import { AdminHeader, Field, Empty, useConfirm } from "@/components/admin/admin-ui";
 
 export const Route = createFileRoute("/_authenticated/admin/flash-sales")({ component: FlashSalesAdmin });
 
@@ -22,6 +22,7 @@ const BLANK = {
 
 function FlashSalesAdmin() {
   const qc = useQueryClient();
+  const { confirm, dialog: confirmDialog } = useConfirm();
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
 
@@ -60,14 +61,23 @@ function FlashSalesAdmin() {
     qc.invalidateQueries({ queryKey: ["admin-flash"] });
   };
 
-  const del = async (id: string) => {
-    if (!confirm("Delete?")) return;
-    await supabase.from("flash_sales").delete().eq("id", id);
-    qc.invalidateQueries({ queryKey: ["admin-flash"] });
+  const del = (r: any) => {
+    confirm({
+      title: "Delete flash sale?",
+      description: `“${r.name}” will be removed.`,
+      confirmLabel: "Delete",
+      destructive: true,
+      onConfirm: async () => {
+        await supabase.from("flash_sales").delete().eq("id", r.id);
+        qc.invalidateQueries({ queryKey: ["admin-flash"] });
+        toast.success("Deleted");
+      },
+    });
   };
 
   return (
     <div>
+      {confirmDialog}
       <AdminHeader title="Flash Sales & Deal of the Day" description="Schedule limited-time discounts on products or categories." actions={
         <Button onClick={openNew}><Plus size={14} className="mr-1" /> New sale</Button>
       } />
@@ -94,7 +104,7 @@ function FlashSalesAdmin() {
                   <td className="p-3">{r.is_active ? "Yes" : "No"}</td>
                   <td className="p-3 text-right">
                     <Button size="icon" variant="ghost" onClick={() => openEdit(r)}><Edit size={14} /></Button>
-                    <Button size="icon" variant="ghost" onClick={() => del(r.id)}><Trash2 size={14} /></Button>
+                    <Button size="icon" variant="ghost" onClick={() => del(r)}><Trash2 size={14} /></Button>
                   </td>
                 </tr>
               ))}

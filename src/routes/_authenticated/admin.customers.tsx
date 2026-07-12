@@ -1,10 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { AdminHeader, Empty } from "@/components/admin/admin-ui";
+import { AdminHeader, Empty, IconButton, TableSkeleton } from "@/components/admin/admin-ui";
 import { toast } from "sonner";
 import { useEffect, useState } from "react";
-import { ArrowDown, ArrowUp, ArrowUpDown, Search, X } from "lucide-react";
+import { ArrowDown, ArrowUp, ArrowUpDown, Search, X, Pencil } from "lucide-react";
 import { PaginationBar } from "@/components/admin/pagination-bar";
 
 export const Route = createFileRoute("/_authenticated/admin/customers")({ component: CustomersAdmin });
@@ -100,41 +100,43 @@ function CustomersAdmin() {
         {isFetching && <span className="text-xs text-muted-foreground">Loading…</span>}
       </div>
 
-      {isLoading ? <div className="text-sm text-muted-foreground">Loading…</div> : rows.length === 0 && !debouncedQ ? <Empty>No customers</Empty> : (
-        <div className="border border-border rounded">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-secondary">
-                <tr className="text-left">
-                  {th("Name", "full_name")}
-                  <th className="p-3 text-xs uppercase tracking-[0.18em] text-muted-foreground">Group</th>
-                  {th("Banned", "is_banned")}
-                  {th("Joined", "created_at")}
-                  <th />
+      <div className="border border-border rounded bg-background">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="bg-secondary sticky top-0 z-10">
+              <tr className="text-left">
+                {th("Name", "full_name")}
+                <th className="p-3 text-xs uppercase tracking-[0.18em] text-muted-foreground">Group</th>
+                {th("Banned", "is_banned")}
+                {th("Joined", "created_at")}
+                <th className="p-3 sticky right-0 bg-secondary" />
+              </tr>
+            </thead>
+            <tbody>
+              {isLoading ? (
+                <tr><td colSpan={5} className="p-0"><TableSkeleton cols={4} /></td></tr>
+              ) : rows.length === 0 ? (
+                <tr><td colSpan={5} className="p-0"><Empty>No customers match your filters.</Empty></td></tr>
+              ) : rows.map((c: any) => (
+                <tr key={c.id} className="border-t border-border hover:bg-secondary/40">
+                  <td className="p-3">{c.full_name || "—"}</td>
+                  <td className="p-3">{c.customer_groups?.name || "—"}</td>
+                  <td className="p-3">{c.is_banned ? <span className="text-destructive">Banned</span> : "—"}</td>
+                  <td className="p-3 text-xs text-muted-foreground">{new Date(c.created_at).toLocaleDateString()}</td>
+                  <td className="p-3 text-right sticky right-0 bg-background">
+                    <IconButton label="Edit customer" icon={Pencil} variant="primary" onClick={() => setEditing({ ...c })} />
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {rows.length === 0 ? (
-                  <tr><td colSpan={5} className="p-6 text-center text-muted-foreground">No customers match your filters.</td></tr>
-                ) : rows.map((c: any) => (
-                  <tr key={c.id} className="border-t border-border hover:bg-secondary/40">
-                    <td className="p-3">{c.full_name || "—"}</td>
-                    <td className="p-3">{c.customer_groups?.name || "—"}</td>
-                    <td className="p-3">{c.is_banned ? "🚫" : "—"}</td>
-                    <td className="p-3 text-xs text-muted-foreground">{new Date(c.created_at).toLocaleDateString()}</td>
-                    <td className="p-3 text-right"><button onClick={() => setEditing({ ...c })} className="text-primary text-xs uppercase tracking-[0.2em]">Edit</button></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <PaginationBar page={page} pageSize={pageSize} total={total} onPage={setPage} onPageSize={(n) => { setPageSize(n); setPage(1); }} />
+              ))}
+            </tbody>
+          </table>
         </div>
-      )}
+        <PaginationBar page={page} pageSize={pageSize} total={total} onPage={setPage} onPageSize={(n) => { setPageSize(n); setPage(1); }} />
+      </div>
 
       {editing && (
-        <div className="fixed inset-0 bg-background/80 backdrop-blur flex items-center justify-center p-4 z-50" onClick={() => setEditing(null)}>
-          <div className="bg-surface border border-border w-full max-w-lg p-6" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center p-4 z-50" onClick={() => setEditing(null)}>
+          <div className="bg-background border border-border w-full max-w-lg p-6 rounded shadow-xl animate-in zoom-in-95 duration-150" onClick={(e) => e.stopPropagation()}>
             <div className="flex justify-between items-center mb-6"><h3 className="font-serif text-2xl">{editing.full_name}</h3><button onClick={() => setEditing(null)}><X /></button></div>
             <div className="space-y-3">
               <div>

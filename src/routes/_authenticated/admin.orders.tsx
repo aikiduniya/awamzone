@@ -5,9 +5,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { formatMoney } from "@/lib/format";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { ArrowDown, ArrowUp, ArrowUpDown, Search, X } from "lucide-react";
+import { ArrowDown, ArrowUp, ArrowUpDown, Search, X, Eye } from "lucide-react";
 import { updateOrderStatus, createShipment, refundOrder } from "@/lib/orders.functions";
 import { PaginationBar } from "@/components/admin/pagination-bar";
+import { AdminHeader, IconButton, TableSkeleton, Empty, AdminModal } from "@/components/admin/admin-ui";
 
 const STATUSES = ["pending","confirmed","processing","packed","shipped","delivered","cancelled","returned","refunded"] as const;
 const PAYMENT_STATUSES = ["pending","paid","failed","refunded","partial_refund"] as const;
@@ -135,9 +136,7 @@ function OrdersAdmin() {
 
   return (
     <>
-      <div className="flex flex-wrap gap-4 items-end justify-between mb-6">
-        <div><div className="eyebrow mb-2">Sales</div><h1 className="text-4xl font-serif">Orders</h1></div>
-      </div>
+      <AdminHeader eyebrow="Sales" title="Orders" description="Search, filter, and manage every order in one place." />
 
       <div className="flex flex-wrap items-center gap-3 mb-4">
         <div className="flex items-center gap-2 border border-border rounded px-3 py-2 flex-1 min-w-[240px] max-w-md">
@@ -159,15 +158,15 @@ function OrdersAdmin() {
         {isFetching && <span className="text-xs text-muted-foreground">Loading…</span>}
       </div>
 
-      <div className="border border-border rounded">
+      <div className="border border-border rounded bg-background">
         <div className="overflow-x-auto">
           {isLoading ? (
-            <div className="p-8 text-center text-sm text-muted-foreground">Loading…</div>
+            <TableSkeleton cols={7} />
           ) : rows.length === 0 ? (
-            <div className="p-12 text-center text-sm text-muted-foreground">No orders match this filter.</div>
+            <Empty>No orders match this filter.</Empty>
           ) : (
             <table className="w-full text-sm min-w-[720px]">
-              <thead className="bg-surface">
+              <thead className="bg-secondary sticky top-0 z-10">
                 <tr className="text-left">
                   {th("Order", "order_number")}
                   {th("Date", "created_at")}
@@ -175,7 +174,7 @@ function OrdersAdmin() {
                   {th("Status", "status")}
                   {th("Payment", "payment_status")}
                   {th("Total", "total")}
-                  <th />
+                  <th className="p-4 text-right sticky right-0 bg-secondary" />
                 </tr>
               </thead>
               <tbody>
@@ -187,7 +186,9 @@ function OrdersAdmin() {
                     <td className="p-4 text-xs uppercase tracking-[0.2em]">{o.status}</td>
                     <td className="p-4 text-xs uppercase tracking-[0.2em]">{o.payment_status}</td>
                     <td className="p-4 text-right">{formatMoney(o.total)}</td>
-                    <td className="p-4 text-right"><button onClick={() => openOrder(o.id)} className="text-primary text-xs uppercase tracking-[0.2em]">View</button></td>
+                    <td className="p-4 text-right sticky right-0 bg-background">
+                      <IconButton label="View order" icon={Eye} variant="primary" onClick={() => openOrder(o.id)} />
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -198,8 +199,8 @@ function OrdersAdmin() {
       </div>
 
       {selected && (
-        <div className="fixed inset-0 bg-background/85 backdrop-blur z-50 overflow-auto p-4" onClick={() => setSelected(null)}>
-          <div className="bg-surface border border-border max-w-4xl mx-auto p-6 md:p-8" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm-sm z-50 overflow-auto p-4 animate-in fade-in duration-150" onClick={() => setSelected(null)}>
+          <div className="bg-background border border-border rounded shadow-xl max-w-4xl mx-auto my-8 p-6 md:p-8 animate-in zoom-in-95 duration-150" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-start justify-between mb-6">
               <div>
                 <div className="eyebrow mb-1">Order</div>

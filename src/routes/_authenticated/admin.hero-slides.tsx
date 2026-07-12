@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { AdminHeader, AdminCard, Field, Empty } from "@/components/admin/admin-ui";
+import { AdminHeader, AdminCard, Field, Empty, useConfirm } from "@/components/admin/admin-ui";
 import { MediaPicker } from "@/components/admin/media-picker";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -53,6 +53,7 @@ const empty: Partial<Slide> = {
 
 function HeroSlidesAdmin() {
   const qc = useQueryClient();
+  const { confirm, dialog: confirmDialog } = useConfirm();
   const { data: slides = [] } = useQuery({
     queryKey: ["admin-hero-slides"],
     queryFn: async () => {
@@ -116,6 +117,7 @@ function HeroSlidesAdmin() {
 
   return (
     <>
+      {confirmDialog}
       <AdminHeader
         title="Hero Banner"
         description="Manage homepage banner slides. Supports images, background video, scheduling, and multiple CTAs."
@@ -178,9 +180,16 @@ function HeroSlidesAdmin() {
                     <Edit3 size={15} />
                   </button>
                   <button
-                    onClick={() => { if (confirm(`Delete slide "${s.title || "Untitled"}"?`)) remove.mutate(s.id); }}
+                    onClick={() => confirm({
+                      title: `Delete slide "${s.title || "Untitled"}"?`,
+                      description: "This cannot be undone.",
+                      confirmLabel: "Delete",
+                      destructive: true,
+                      onConfirm: () => remove.mutate(s.id),
+                    })}
                     title="Delete"
-                    className="h-8 w-8 grid place-items-center rounded hover:bg-secondary text-muted-foreground hover:text-destructive"
+                    aria-label="Delete slide"
+                    className="h-8 w-8 grid place-items-center rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive"
                   >
                     <Trash2 size={15} />
                   </button>
@@ -202,8 +211,8 @@ function SlideEditor({ value, onSave, onCancel, saving }: { value: Partial<Slide
   const isVideo = !!form.video_url;
 
   return (
-    <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm grid place-items-center p-4 overflow-auto">
-      <div className="w-full max-w-3xl bg-card border border-border rounded-lg my-8">
+    <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm-sm grid place-items-center p-4 overflow-auto">
+      <div className="w-full max-w-3xl bg-background border border-border rounded shadow-xl my-8 animate-in zoom-in-95 duration-150">
         <div className="p-6 border-b border-border flex items-center justify-between">
           <h2 className="font-serif text-xl">{form.id ? "Edit slide" : "New slide"}</h2>
           <button onClick={onCancel} className="text-muted-foreground hover:text-foreground">✕</button>

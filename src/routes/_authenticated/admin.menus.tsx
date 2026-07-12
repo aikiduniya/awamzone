@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { AdminHeader, Empty } from "@/components/admin/admin-ui";
+import { AdminHeader, Empty, useConfirm } from "@/components/admin/admin-ui";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -47,6 +47,7 @@ type Item = {
 
 function MenusAdmin() {
   const [location, setLocation] = useState("header");
+  const { confirm, dialog: confirmDialog } = useConfirm();
 
   const { data: items = [], refetch } = useQuery({
     queryKey: ["admin-menu-items", location],
@@ -98,10 +99,18 @@ function MenusAdmin() {
     refetch();
   };
 
-  const remove = async (id: string) => {
-    if (!confirm("Delete this item (and any children)?")) return;
-    await supabase.from("menu_items").delete().eq("id", id);
-    refetch();
+  const remove = (id: string, label: string) => {
+    confirm({
+      title: "Delete menu item?",
+      description: `“${label}” and any children will be permanently removed.`,
+      confirmLabel: "Delete",
+      destructive: true,
+      onConfirm: async () => {
+        await supabase.from("menu_items").delete().eq("id", id);
+        refetch();
+        toast.success("Deleted");
+      },
+    });
   };
 
   const move = async (item: Item, dir: -1 | 1) => {
@@ -121,6 +130,7 @@ function MenusAdmin() {
 
   return (
     <>
+      {confirmDialog}
       <AdminHeader title="Menus" description="Manage header, footer, mobile & sidebar navigation. Supports nested dropdowns, icons, and visibility rules." />
 
       <div className="mb-6 flex flex-wrap gap-2">
@@ -179,7 +189,7 @@ function MenuRow({ item, children, parents, onUpdate, onRemove, onMove }: {
   children: Item[];
   parents: Item[];
   onUpdate: (id: string, patch: Partial<Item>) => void;
-  onRemove: (id: string) => void;
+  onRemove: (id: string, label: string) => void;
   onMove: (item: Item, dir: -1 | 1) => void;
 }) {
   const [open, setOpen] = useState(false);
@@ -197,7 +207,7 @@ function MenuRow({ item, children, parents, onUpdate, onRemove, onMove }: {
           </button>
         </div>
         <label className="flex items-center gap-1 text-[11px]"><input type="checkbox" checked={item.is_active} onChange={(e) => onUpdate(item.id, { is_active: e.target.checked })} /> Active</label>
-        <button onClick={() => onRemove(item.id)} className="text-destructive hover:opacity-70" aria-label="Delete"><Trash2 size={14} /></button>
+        <button onClick={() => onRemove(item.id, item.label)} className="text-destructive hover:opacity-70" aria-label="Delete"><Trash2 size={14} /></button>
       </div>
 
       {open && (

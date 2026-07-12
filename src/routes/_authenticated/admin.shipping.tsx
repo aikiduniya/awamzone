@@ -7,12 +7,13 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Plus, Trash2, Edit, ChevronDown, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
-import { AdminHeader, Field, Empty } from "@/components/admin/admin-ui";
+import { AdminHeader, Field, Empty, useConfirm } from "@/components/admin/admin-ui";
 
 export const Route = createFileRoute("/_authenticated/admin/shipping")({ component: ShippingAdmin });
 
 function ShippingAdmin() {
   const qc = useQueryClient();
+  const { confirm, dialog: confirmDialog } = useConfirm();
   const [zoneOpen, setZoneOpen] = useState(false);
   const [rateOpen, setRateOpen] = useState(false);
   const [zone, setZone] = useState<any>(null);
@@ -53,11 +54,33 @@ function ShippingAdmin() {
     if (error) return toast.error(error.message);
     setRateOpen(false); qc.invalidateQueries({ queryKey: ["admin-rates"] });
   };
-  const delZone = async (id: string) => { if (confirm("Delete zone and its rates?")) { await supabase.from("shipping_zones").delete().eq("id", id); qc.invalidateQueries({ queryKey: ["admin-zones"] }); qc.invalidateQueries({ queryKey: ["admin-rates"] }); } };
-  const delRate = async (id: string) => { if (confirm("Delete rate?")) { await supabase.from("shipping_rates").delete().eq("id", id); qc.invalidateQueries({ queryKey: ["admin-rates"] }); } };
+  const delZone = (z: any) => confirm({
+    title: "Delete this shipping zone?",
+    description: `“${z.name}” and all rates inside it will be removed.`,
+    confirmLabel: "Delete",
+    destructive: true,
+    onConfirm: async () => {
+      await supabase.from("shipping_zones").delete().eq("id", z.id);
+      qc.invalidateQueries({ queryKey: ["admin-zones"] });
+      qc.invalidateQueries({ queryKey: ["admin-rates"] });
+      toast.success("Deleted");
+    },
+  });
+  const delRate = (r: any) => confirm({
+    title: "Delete this rate?",
+    description: `“${r.name}” will be removed.`,
+    confirmLabel: "Delete",
+    destructive: true,
+    onConfirm: async () => {
+      await supabase.from("shipping_rates").delete().eq("id", r.id);
+      qc.invalidateQueries({ queryKey: ["admin-rates"] });
+      toast.success("Deleted");
+    },
+  });
 
   return (
     <div>
+      {confirmDialog}
       <AdminHeader title="Shipping Zones & Rates" description="Group countries into zones, then add flat, weight-based or price-tier rates." actions={
         <Button onClick={() => { setZone({ name: "", countries: [], is_active: true, sort_order: 0 }); setZoneOpen(true); }}><Plus size={14} className="mr-1" /> New zone</Button>
       } />
@@ -75,7 +98,7 @@ function ShippingAdmin() {
                 <div className="flex gap-2">
                   <Button size="sm" variant="outline" onClick={() => { setRate({ zone_id: z.id, name: "", method_type: "flat", cost: 0, is_active: true, sort_order: 0 }); setRateOpen(true); }}><Plus size={14} className="mr-1" />Rate</Button>
                   <Button size="icon" variant="ghost" onClick={() => { setZone({ ...z, countries: z.countries.join(", ") }); setZoneOpen(true); }}><Edit size={14} /></Button>
-                  <Button size="icon" variant="ghost" onClick={() => delZone(z.id)}><Trash2 size={14} /></Button>
+                  <Button size="icon" variant="ghost" onClick={() => delZone(z)}><Trash2 size={14} /></Button>
                 </div>
               </div>
               {expanded[z.id] && (
@@ -106,7 +129,7 @@ function ShippingAdmin() {
                             <td className="p-3 text-muted-foreground">{r.estimated_days ?? "—"}</td>
                             <td className="p-3 text-right">
                               <Button size="icon" variant="ghost" onClick={() => { setRate(r); setRateOpen(true); }}><Edit size={14} /></Button>
-                              <Button size="icon" variant="ghost" onClick={() => delRate(r.id)}><Trash2 size={14} /></Button>
+                              <Button size="icon" variant="ghost" onClick={() => delRate(r)}><Trash2 size={14} /></Button>
                             </td>
                           </tr>
                         ))}
