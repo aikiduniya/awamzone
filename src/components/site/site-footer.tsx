@@ -7,12 +7,13 @@ import { useSession } from "@/hooks/use-session";
 import { filterMenu, MenuLink } from "./site-header";
 
 export function SiteFooter() {
+  const { user, isAdmin } = useSession();
   const { data: menus } = useQuery({
     queryKey: ["menu", "footer"],
     queryFn: async () => {
       const { data } = await supabase
         .from("menu_items")
-        .select("*")
+        .select("id,label,url,target,visibility,role_required,css_class,location")
         .in("location", ["footer_1", "footer_2", "footer_3"])
         .eq("is_active", true)
         .order("sort_order");
@@ -51,7 +52,7 @@ export function SiteFooter() {
   const contact = settings?.contact ?? {};
   const social = settings?.social ?? {};
 
-  const col = (loc: string) => menus?.filter((m) => m.location === loc) ?? [];
+  const col = (loc: string) => filterMenu(menus?.filter((m) => m.location === loc) as any, { authenticated: !!user, isAdmin });
 
   return (
     <footer className="mt-24 border-t border-border bg-surface text-foreground">
