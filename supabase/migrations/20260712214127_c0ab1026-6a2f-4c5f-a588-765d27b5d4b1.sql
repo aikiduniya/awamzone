@@ -1,0 +1,1 @@
+DELETE FROM public.menu_items WHERE (label ILIKE 'journal' OR url ILIKE '%/journal%');
