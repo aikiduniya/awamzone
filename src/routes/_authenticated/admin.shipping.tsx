@@ -80,6 +80,7 @@ function ShippingAdmin() {
 
   return (
     <div>
+      {confirmDialog}
       <AdminHeader title="Shipping Zones & Rates" description="Group countries into zones, then add flat, weight-based or price-tier rates." actions={
         <Button onClick={() => { setZone({ name: "", countries: [], is_active: true, sort_order: 0 }); setZoneOpen(true); }}><Plus size={14} className="mr-1" /> New zone</Button>
       } />
