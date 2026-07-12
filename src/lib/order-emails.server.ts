@@ -133,15 +133,17 @@ async function send(to: string, subject: string, html: string, ctx: Awaited<Retu
     return { sent: false, reason: "not_configured" as const };
   }
   try {
-    const res = await sendLovableEmail({
-      apiKey,
-      senderDomain: ctx.senderDomain,
-      from: `${ctx.fromName} <${ctx.fromEmail}>`,
-      to,
-      subject,
-      html,
-      idempotencyKey: idemKey,
-    });
+    const res = await sendLovableEmail(
+      {
+        to,
+        from: `${ctx.fromName} <${ctx.fromEmail}>`,
+        sender_domain: ctx.senderDomain,
+        subject,
+        html,
+        text: html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim(),
+      },
+      { apiKey, idempotencyKey: idemKey },
+    );
     return res;
   } catch (err) {
     if (err instanceof EmailAPIError) {
