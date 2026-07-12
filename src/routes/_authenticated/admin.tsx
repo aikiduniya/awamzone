@@ -55,6 +55,7 @@ const NAV_GROUPS: NavGroup[] = [
     { to: "/admin/purchase-orders", label: "Purchase Orders", icon: ClipboardList },
   ]},
   { label: "Content", items: [
+    { to: "/admin/hero-slides", label: "Hero Banner", icon: Sparkles },
     { to: "/admin/home-sections", label: "Homepage", icon: Sparkles },
     { to: "/admin/menus", label: "Menus", icon: MenuIcon },
     { to: "/admin/pages", label: "CMS Pages", icon: FileText },
