@@ -210,6 +210,7 @@ export function SiteHeader() {
           </Link>
 
           <nav className="hidden md:flex items-center gap-8 text-xs uppercase tracking-[0.24em]">
+            <CategoriesMenu />
             {items.map((m) => (
               <MenuLink key={m.id} item={m} className="text-foreground/80 hover:text-primary transition-colors">
                 {m.label}
