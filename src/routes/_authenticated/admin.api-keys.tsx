@@ -70,12 +70,6 @@ function ApiKeysAdmin() {
           </table>
         </div>
       )}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
 
       {creating && (
         <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center p-4 z-50" onClick={() => setCreating(false)}>
