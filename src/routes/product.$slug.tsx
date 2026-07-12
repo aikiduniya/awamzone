@@ -218,6 +218,9 @@ function ProductPage() {
             </div>
           </section>
         )}
+
+        <ProductQA productId={product.id} />
+        <RecentlyViewed excludeId={product.id} />
       </div>
     </SiteShell>
   );
