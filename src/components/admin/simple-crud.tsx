@@ -4,7 +4,7 @@ import { ReactNode, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
   ArrowDown, ArrowUp, ArrowUpDown, Plus, Search, X, Eye, Pencil, Trash2, Copy,
-  RefreshCw, Download, Printer, Columns3, MoreHorizontal, CheckCircle2, XCircle,
+  RefreshCw, Download, Printer, Columns3, CheckCircle2, XCircle,
 } from "lucide-react";
 import { AdminHeader, Empty } from "./admin-ui";
 import { PaginationBar } from "./pagination-bar";
