@@ -6,6 +6,7 @@ export const Route = createFileRoute("/_authenticated/admin/email-templates")({ 
 function EmailTemplatesAdmin() {
   return (
     <SimpleCrud
+      bulkToggleField="is_active"
       table="email_templates"
       title="Email Templates"
       description="Transactional email content. Use {{variable}} tokens."

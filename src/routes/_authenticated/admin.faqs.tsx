@@ -6,6 +6,7 @@ export const Route = createFileRoute("/_authenticated/admin/faqs")({ component: 
 function FaqsAdmin() {
   return (
     <SimpleCrud
+      bulkToggleField="is_published"
       table="faqs"
       title="FAQs"
       description="Frequently asked questions shown on the storefront."

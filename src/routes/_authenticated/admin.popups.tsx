@@ -6,6 +6,7 @@ export const Route = createFileRoute("/_authenticated/admin/popups")({ component
 function PopupsAdmin() {
   return (
     <SimpleCrud
+      bulkToggleField="is_active"
       table="popups"
       title="Popups & Announcements"
       description="Promo popups, newsletter overlays, timed announcements."
