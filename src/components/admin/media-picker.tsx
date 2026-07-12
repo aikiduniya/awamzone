@@ -119,7 +119,7 @@ export function MediaLibrary({ onPick, multi = false, folder }: { onPick?: (urls
         </select>
         <Button type="button" size="sm" variant="outline" onClick={newFolder}><FolderPlus size={14} className="mr-1" /> Folder</Button>
         <label className="inline-flex">
-          <input type="file" multiple accept="image/*" className="hidden" onChange={(e) => onUpload(e.target.files)} />
+          <input type="file" multiple accept="image/*,video/*" className="hidden" onChange={(e) => onUpload(e.target.files)} />
           <span className={cn("inline-flex items-center gap-1 h-9 px-3 rounded-md text-sm cursor-pointer bg-primary text-primary-foreground hover:opacity-90", uploading && "opacity-50 pointer-events-none")}>
             <Upload size={14} /> {uploading ? "Uploading…" : "Upload"}
           </span>
