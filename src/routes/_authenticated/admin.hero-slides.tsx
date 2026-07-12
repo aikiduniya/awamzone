@@ -53,6 +53,7 @@ const empty: Partial<Slide> = {
 
 function HeroSlidesAdmin() {
   const qc = useQueryClient();
+  const { confirm, dialog: confirmDialog } = useConfirm();
   const { data: slides = [] } = useQuery({
     queryKey: ["admin-hero-slides"],
     queryFn: async () => {
@@ -116,6 +117,7 @@ function HeroSlidesAdmin() {
 
   return (
     <>
+      {confirmDialog}
       <AdminHeader
         title="Hero Banner"
         description="Manage homepage banner slides. Supports images, background video, scheduling, and multiple CTAs."
@@ -178,9 +180,16 @@ function HeroSlidesAdmin() {
                     <Edit3 size={15} />
                   </button>
                   <button
-                    onClick={() => { if (confirm(`Delete slide "${s.title || "Untitled"}"?`)) remove.mutate(s.id); }}
+                    onClick={() => confirm({
+                      title: `Delete slide "${s.title || "Untitled"}"?`,
+                      description: "This cannot be undone.",
+                      confirmLabel: "Delete",
+                      destructive: true,
+                      onConfirm: () => remove.mutate(s.id),
+                    })}
                     title="Delete"
-                    className="h-8 w-8 grid place-items-center rounded hover:bg-secondary text-muted-foreground hover:text-destructive"
+                    aria-label="Delete slide"
+                    className="h-8 w-8 grid place-items-center rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive"
                   >
                     <Trash2 size={15} />
                   </button>
