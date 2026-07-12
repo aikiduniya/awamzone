@@ -78,7 +78,7 @@ function ApiKeysAdmin() {
 
       {newKey && (
         <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-surface border border-primary w-full max-w-lg p-6">
+          <div className="bg-background border border-primary w-full max-w-lg p-6 rounded shadow-xl animate-in zoom-in-95 duration-150">
             <h3 className="font-serif text-2xl mb-2">Your API key</h3>
             <p className="text-sm text-muted-foreground mb-4">Copy this key now. It will not be shown again.</p>
             <div className="bg-background border border-border p-3 font-mono text-xs break-all mb-4">{newKey.raw}</div>
