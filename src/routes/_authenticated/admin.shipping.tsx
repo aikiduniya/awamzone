@@ -97,7 +97,7 @@ function ShippingAdmin() {
                 <div className="flex gap-2">
                   <Button size="sm" variant="outline" onClick={() => { setRate({ zone_id: z.id, name: "", method_type: "flat", cost: 0, is_active: true, sort_order: 0 }); setRateOpen(true); }}><Plus size={14} className="mr-1" />Rate</Button>
                   <Button size="icon" variant="ghost" onClick={() => { setZone({ ...z, countries: z.countries.join(", ") }); setZoneOpen(true); }}><Edit size={14} /></Button>
-                  <Button size="icon" variant="ghost" onClick={() => delZone(z.id)}><Trash2 size={14} /></Button>
+                  <Button size="icon" variant="ghost" onClick={() => delZone(z)}><Trash2 size={14} /></Button>
                 </div>
               </div>
               {expanded[z.id] && (
@@ -128,7 +128,7 @@ function ShippingAdmin() {
                             <td className="p-3 text-muted-foreground">{r.estimated_days ?? "—"}</td>
                             <td className="p-3 text-right">
                               <Button size="icon" variant="ghost" onClick={() => { setRate(r); setRateOpen(true); }}><Edit size={14} /></Button>
-                              <Button size="icon" variant="ghost" onClick={() => delRate(r.id)}><Trash2 size={14} /></Button>
+                              <Button size="icon" variant="ghost" onClick={() => delRate(r)}><Trash2 size={14} /></Button>
                             </td>
                           </tr>
                         ))}
