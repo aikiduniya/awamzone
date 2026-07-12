@@ -121,39 +121,80 @@ function OrdersAdmin() {
     finally { setBusy(false); }
   };
 
+  const th = (label: string, key: string) => {
+    const active = sortCol === key;
+    return (
+      <th className="p-4">
+        <button onClick={() => toggleSort(key)} className="inline-flex items-center gap-1 eyebrow hover:text-foreground">
+          {label}
+          {active ? (sortAsc ? <ArrowUp size={11} /> : <ArrowDown size={11} />) : <ArrowUpDown size={11} className="opacity-40" />}
+        </button>
+      </th>
+    );
+  };
+
   return (
     <>
-      <div className="flex flex-wrap gap-4 items-end justify-between mb-8">
+      <div className="flex flex-wrap gap-4 items-end justify-between mb-6">
         <div><div className="eyebrow mb-2">Sales</div><h1 className="text-4xl font-serif">Orders</h1></div>
-        <select value={status} onChange={(e) => setStatus(e.target.value)} className="bg-transparent border border-border px-3 py-2 text-sm">
+      </div>
+
+      <div className="flex flex-wrap items-center gap-3 mb-4">
+        <div className="flex items-center gap-2 border border-border rounded px-3 py-2 flex-1 min-w-[240px] max-w-md">
+          <Search size={14} className="text-muted-foreground" />
+          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search order # or email…" className="flex-1 bg-transparent text-sm focus:outline-none" />
+          {q && <button onClick={() => setQ("")} className="text-muted-foreground hover:text-foreground"><X size={12} /></button>}
+        </div>
+        <select value={status} onChange={(e) => { setStatus(e.target.value); setPage(1); }} className="h-10 rounded border border-border bg-transparent px-3 text-sm">
           <option value="all">All statuses</option>
           {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
         </select>
+        <select value={paymentStatus} onChange={(e) => { setPaymentStatus(e.target.value); setPage(1); }} className="h-10 rounded border border-border bg-transparent px-3 text-sm">
+          <option value="all">All payments</option>
+          {PAYMENT_STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
+        </select>
+        <input type="date" value={dateFrom} onChange={(e) => { setDateFrom(e.target.value); setPage(1); }} className="h-10 rounded border border-border bg-transparent px-2 text-sm" />
+        <span className="text-xs text-muted-foreground">→</span>
+        <input type="date" value={dateTo} onChange={(e) => { setDateTo(e.target.value); setPage(1); }} className="h-10 rounded border border-border bg-transparent px-2 text-sm" />
+        {isFetching && <span className="text-xs text-muted-foreground">Loading…</span>}
       </div>
 
-      <div className="border border-border overflow-x-auto">
-        {isLoading ? (
-          <div className="p-8 text-center text-sm text-muted-foreground">Loading…</div>
-        ) : data?.length === 0 ? (
-          <div className="p-12 text-center text-sm text-muted-foreground">No orders match this filter.</div>
-        ) : (
-        <table className="w-full text-sm min-w-[720px]">
-          <thead className="bg-surface"><tr className="text-left eyebrow"><th className="p-4">Order</th><th className="p-4">Date</th><th className="p-4">Customer</th><th className="p-4">Status</th><th className="p-4">Payment</th><th className="p-4 text-right">Total</th><th /></tr></thead>
-          <tbody>
-            {data?.map((o) => (
-              <tr key={o.id} className="border-t border-border">
-                <td className="p-4 font-mono text-primary">{o.order_number}</td>
-                <td className="p-4 text-muted-foreground">{new Date(o.created_at).toLocaleDateString()}</td>
-                <td className="p-4">{o.email}</td>
-                <td className="p-4 text-xs uppercase tracking-[0.2em]">{o.status}</td>
-                <td className="p-4 text-xs uppercase tracking-[0.2em]">{o.payment_status}</td>
-                <td className="p-4 text-right">{formatMoney(o.total)}</td>
-                <td className="p-4 text-right"><button onClick={() => openOrder(o.id)} className="text-primary text-xs uppercase tracking-[0.2em]">View</button></td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        )}
+      <div className="border border-border rounded">
+        <div className="overflow-x-auto">
+          {isLoading ? (
+            <div className="p-8 text-center text-sm text-muted-foreground">Loading…</div>
+          ) : rows.length === 0 ? (
+            <div className="p-12 text-center text-sm text-muted-foreground">No orders match this filter.</div>
+          ) : (
+            <table className="w-full text-sm min-w-[720px]">
+              <thead className="bg-surface">
+                <tr className="text-left">
+                  {th("Order", "order_number")}
+                  {th("Date", "created_at")}
+                  {th("Customer", "email")}
+                  {th("Status", "status")}
+                  {th("Payment", "payment_status")}
+                  {th("Total", "total")}
+                  <th />
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((o: any) => (
+                  <tr key={o.id} className="border-t border-border hover:bg-secondary/40">
+                    <td className="p-4 font-mono text-primary">{o.order_number}</td>
+                    <td className="p-4 text-muted-foreground">{new Date(o.created_at).toLocaleDateString()}</td>
+                    <td className="p-4">{o.email}</td>
+                    <td className="p-4 text-xs uppercase tracking-[0.2em]">{o.status}</td>
+                    <td className="p-4 text-xs uppercase tracking-[0.2em]">{o.payment_status}</td>
+                    <td className="p-4 text-right">{formatMoney(o.total)}</td>
+                    <td className="p-4 text-right"><button onClick={() => openOrder(o.id)} className="text-primary text-xs uppercase tracking-[0.2em]">View</button></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+        <PaginationBar page={page} pageSize={pageSize} total={total} onPage={setPage} onPageSize={(n) => { setPageSize(n); setPage(1); }} />
       </div>
 
       {selected && (
