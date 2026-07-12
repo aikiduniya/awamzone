@@ -6,6 +6,7 @@ import { useSession } from "@/hooks/use-session";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { formatMoney } from "@/lib/format";
+import { useSiteSettings } from "@/lib/site-settings";
 import {
   effectivePrice as engineEffectivePrice, findZoneForCountry,
   calculateShipping, rateApplies, calculateTax, validateCoupon,
