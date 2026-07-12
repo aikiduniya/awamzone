@@ -1,6 +1,9 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { Heart } from "lucide-react";
 import { effectivePrice, formatMoney, discountPct } from "@/lib/format";
 import { useCart } from "@/hooks/use-cart";
+import { useWishlist } from "@/hooks/use-wishlist";
+import { cn } from "@/lib/utils";
 
 type Product = {
   id: string;
@@ -14,9 +17,12 @@ type Product = {
 
 export function ProductCard({ product }: { product: Product }) {
   const { add } = useCart();
+  const wish = useWishlist();
+  const navigate = useNavigate();
   const img = product.images?.[0] ?? "https://images.unsplash.com/photo-1601924582970-9238bcb495d9?w=800";
   const price = effectivePrice(product);
   const off = discountPct(product);
+  const saved = wish.has(product.id);
 
   return (
     <div className="group relative">
@@ -33,6 +39,25 @@ export function ProductCard({ product }: { product: Product }) {
               −{off}%
             </div>
           )}
+          <button
+            type="button"
+            aria-label={saved ? "Remove from wishlist" : "Add to wishlist"}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              if (!wish.authenticated) {
+                navigate({ to: "/auth" });
+                return;
+              }
+              wish.toggle.mutate(product.id);
+            }}
+            className={cn(
+              "absolute right-3 top-3 h-9 w-9 grid place-items-center rounded-full bg-background/85 backdrop-blur border border-border/60 hover:border-primary transition",
+              saved && "text-primary border-primary",
+            )}
+          >
+            <Heart size={16} fill={saved ? "currentColor" : "none"} />
+          </button>
           <button
             onClick={(e) => {
               e.preventDefault();
