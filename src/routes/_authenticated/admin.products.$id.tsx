@@ -4,6 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { ArrowLeft, X } from "lucide-react";
+import { MediaPicker } from "@/components/admin/media-picker";
+import { ProductVariantsEditor } from "@/components/admin/product-variants";
+
 
 export const Route = createFileRoute("/_authenticated/admin/products/$id")({
   component: ProductEditor,
@@ -122,11 +125,21 @@ function ProductEditor() {
                 </div>
               ))}
             </div>
-            <div className="flex gap-2">
-              <input value={imgInput} onChange={(e) => setImgInput(e.target.value)} placeholder="Paste image URL" className="flex-1 bg-transparent border border-border px-3 py-2" />
-              <button type="button" onClick={addImg} className="border border-primary text-primary px-4 text-xs uppercase tracking-[0.2em]">Add</button>
+            <div className="flex gap-2 items-center flex-wrap">
+              <MediaPicker multi folder="products" onPick={(urls) => setF({ ...f, images: [...f.images, ...urls] })} />
+              <span className="text-xs text-muted-foreground">or paste URL:</span>
+              <input value={imgInput} onChange={(e) => setImgInput(e.target.value)} placeholder="https://…" className="flex-1 bg-transparent border border-border px-3 py-2 text-sm" />
+              <button type="button" onClick={addImg} className="border border-primary text-primary px-4 py-2 text-xs uppercase tracking-[0.2em]">Add URL</button>
             </div>
           </section>
+
+          {!isNew && (
+            <section className="border border-border p-6 space-y-4">
+              <h3 className="font-serif text-xl">Variants</h3>
+              <p className="text-xs text-muted-foreground">Define options like Size/Color, then generate the variant matrix.</p>
+              <ProductVariantsEditor productId={id} />
+            </section>
+          )}
 
           <section className="border border-border p-6 space-y-4">
             <h3 className="font-serif text-xl">Pricing & Inventory</h3>

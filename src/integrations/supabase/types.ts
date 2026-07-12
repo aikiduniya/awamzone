@@ -340,6 +340,48 @@ export type Database = {
         }
         Relationships: []
       }
+      media_assets: {
+        Row: {
+          alt_text: string | null
+          created_at: string
+          filename: string
+          folder: string
+          height: number | null
+          id: string
+          mime_type: string | null
+          path: string
+          size_bytes: number | null
+          uploaded_by: string | null
+          width: number | null
+        }
+        Insert: {
+          alt_text?: string | null
+          created_at?: string
+          filename: string
+          folder?: string
+          height?: number | null
+          id?: string
+          mime_type?: string | null
+          path: string
+          size_bytes?: number | null
+          uploaded_by?: string | null
+          width?: number | null
+        }
+        Update: {
+          alt_text?: string | null
+          created_at?: string
+          filename?: string
+          folder?: string
+          height?: number | null
+          id?: string
+          mime_type?: string | null
+          path?: string
+          size_bytes?: number | null
+          uploaded_by?: string | null
+          width?: number | null
+        }
+        Relationships: []
+      }
       menu_items: {
         Row: {
           created_at: string
@@ -931,6 +973,64 @@ export type Database = {
           value?: Json
         }
         Relationships: []
+      }
+      stock_movements: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          delta: number
+          id: string
+          note: string | null
+          order_id: string | null
+          product_id: string | null
+          reason: string
+          variant_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          delta: number
+          id?: string
+          note?: string | null
+          order_id?: string | null
+          product_id?: string | null
+          reason: string
+          variant_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          delta?: number
+          id?: string
+          note?: string | null
+          order_id?: string | null
+          product_id?: string | null
+          reason?: string
+          variant_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_movements_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_movements_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_movements_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "product_variants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {

@@ -2,7 +2,7 @@ import { createFileRoute, Link, Outlet, redirect, useLocation, useNavigate } fro
 import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@/hooks/use-session";
 import { useEffect } from "react";
-import { LayoutDashboard, Package, ShoppingCart, Tag, FolderTree, Sparkles, FileText, Settings, LogOut, Home } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingCart, Tag, FolderTree, Sparkles, FileText, Settings, LogOut, Home, ImageIcon, Boxes } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/admin")({
@@ -20,9 +20,11 @@ export const Route = createFileRoute("/_authenticated/admin")({
 const NAV = [
   { to: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { to: "/admin/products", label: "Products", icon: Package },
+  { to: "/admin/inventory", label: "Inventory", icon: Boxes },
   { to: "/admin/orders", label: "Orders", icon: ShoppingCart },
   { to: "/admin/categories", label: "Categories", icon: FolderTree },
   { to: "/admin/brands", label: "Brands", icon: Tag },
+  { to: "/admin/media", label: "Media", icon: ImageIcon },
   { to: "/admin/home-sections", label: "Homepage", icon: Sparkles },
   { to: "/admin/pages", label: "CMS Pages", icon: FileText },
   { to: "/admin/settings", label: "Settings", icon: Settings },
