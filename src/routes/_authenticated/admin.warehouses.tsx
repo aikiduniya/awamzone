@@ -6,6 +6,7 @@ export const Route = createFileRoute("/_authenticated/admin/warehouses")({ compo
 function WarehousesAdmin() {
   return (
     <SimpleCrud
+      bulkToggleField="is_active"
       table="warehouses"
       title="Warehouses"
       description="Physical stock locations."

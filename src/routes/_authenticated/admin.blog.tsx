@@ -7,6 +7,7 @@ function BlogAdmin() {
   return (
     <div className="space-y-10">
       <SimpleCrud
+      bulkToggleField="is_published"
         table="blog_categories"
         title="Blog Categories"
         description="Organize blog posts into topics."
@@ -19,6 +20,7 @@ function BlogAdmin() {
         ]}
       />
       <SimpleCrud
+      bulkToggleField="is_published"
         table="blog_posts"
         title="Blog Posts"
         description="Publish articles, guides, and announcements."

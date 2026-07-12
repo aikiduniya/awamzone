@@ -8,6 +8,7 @@ const EVENTS = ["order.created", "order.paid", "order.shipped", "order.cancelled
 function WebhooksAdmin() {
   return (
     <SimpleCrud
+      bulkToggleField="is_active"
       table="webhooks"
       title="Webhooks"
       description="Send events to external systems in real-time."

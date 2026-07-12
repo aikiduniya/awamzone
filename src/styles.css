@@ -94,6 +94,56 @@
   --sidebar-ring: oklch(0.78 0.13 85);
 }
 
+/* Light-mode fallback palette. Applied when the resolved theme is "light"
+   and the admin has not yet saved a custom light palette. Uses the same
+   luxury champagne accent, ivory paper background, obsidian ink. */
+html:not(.dark) {
+  --background: oklch(0.985 0.005 85);
+  --foreground: oklch(0.16 0.005 60);
+
+  --surface: oklch(0.97 0.006 85);
+  --surface-foreground: oklch(0.16 0.005 60);
+
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.16 0.005 60);
+
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.16 0.005 60);
+
+  --primary: oklch(0.62 0.14 75); /* deeper champagne for AA contrast on light */
+  --primary-foreground: oklch(0.99 0.005 85);
+
+  --gold: oklch(0.62 0.14 75);
+  --gold-foreground: oklch(0.99 0.005 85);
+
+  --secondary: oklch(0.945 0.006 85);
+  --secondary-foreground: oklch(0.16 0.005 60);
+
+  --muted: oklch(0.945 0.006 85);
+  --muted-foreground: oklch(0.45 0.01 60);
+
+  --accent: oklch(0.62 0.14 75);
+  --accent-foreground: oklch(0.99 0.005 85);
+
+  --destructive: oklch(0.55 0.22 27);
+  --destructive-foreground: oklch(0.99 0.005 85);
+
+  --border: oklch(0.9 0.006 85);
+  --input: oklch(0.94 0.006 85);
+  --ring: oklch(0.62 0.14 75);
+
+  --sidebar: oklch(0.97 0.006 85);
+  --sidebar-foreground: oklch(0.16 0.005 60);
+  --sidebar-primary: oklch(0.62 0.14 75);
+  --sidebar-primary-foreground: oklch(0.99 0.005 85);
+  --sidebar-accent: oklch(0.945 0.006 85);
+  --sidebar-accent-foreground: oklch(0.16 0.005 60);
+  --sidebar-border: oklch(0.9 0.006 85);
+  --sidebar-ring: oklch(0.62 0.14 75);
+
+  color-scheme: light;
+}
+
 @layer base {
   * {
     border-color: var(--color-border);
