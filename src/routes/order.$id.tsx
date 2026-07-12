@@ -71,6 +71,11 @@ function OrderPage() {
         <div className="eyebrow mb-2 text-primary">Thank you</div>
         <h1 className="text-4xl md:text-5xl font-serif mb-3">Order Confirmed</h1>
         <p className="text-muted-foreground">Order #{order.order_number} · <span className="uppercase tracking-[0.2em] text-xs">{order.status}</span></p>
+        <div className="mt-4">
+          <Link to="/invoice/$orderId" params={{ orderId: order.id }} className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-primary border border-primary px-4 py-2 hover:bg-primary hover:text-primary-foreground transition">
+            Download invoice
+          </Link>
+        </div>
 
         <div className="mt-10 border border-border p-6">
           <div className="space-y-3 mb-6">

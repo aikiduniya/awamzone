@@ -163,7 +163,10 @@ function OrdersTab({ orders }: { orders: any[] }) {
               <td className="p-4 text-muted-foreground">{new Date(o.created_at).toLocaleDateString()}</td>
               <td className="p-4"><span className="text-xs uppercase tracking-[0.2em]">{o.status}</span></td>
               <td className="p-4 text-right">{formatMoney(o.total)}</td>
-              <td className="p-4 text-right"><Link to="/order/$id" params={{ id: o.id }} className="text-primary text-xs uppercase tracking-[0.2em]">View</Link></td>
+              <td className="p-4 text-right space-x-3">
+                <Link to="/order/$id" params={{ id: o.id }} className="text-primary text-xs uppercase tracking-[0.2em]">View</Link>
+                <Link to="/invoice/$orderId" params={{ orderId: o.id }} className="text-muted-foreground hover:text-primary text-xs uppercase tracking-[0.2em]">Invoice</Link>
+              </td>
             </tr>
           ))}
         </tbody>
