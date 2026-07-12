@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Upload, Image as ImageIcon, Trash2, Search, FolderPlus } from "lucide-react";
+import { Upload, Image as ImageIcon, Trash2, Search, FolderPlus, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -18,6 +18,9 @@ export type MediaAsset = {
   mime_type: string | null;
   size_bytes: number | null;
   alt_text: string | null;
+  title?: string | null;
+  caption?: string | null;
+  description?: string | null;
   created_at: string;
   url?: string;
 };
@@ -53,6 +56,7 @@ export function MediaLibrary({ onPick, multi = false, folder }: { onPick?: (urls
   const [currentFolder, setCurrentFolder] = useState(folder ?? "");
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [editing, setEditing] = useState<MediaAsset | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -131,16 +135,22 @@ export function MediaLibrary({ onPick, multi = false, folder }: { onPick?: (urls
           {filtered.map((a) => (
             <div key={a.id} className={cn("group relative border rounded overflow-hidden cursor-pointer", selected[a.id] && "ring-2 ring-primary")} onClick={() => toggle(a.id)}>
               {a.mime_type?.startsWith("image/") ? (
-                <img src={a.url} alt={a.alt_text ?? a.filename} className="aspect-square object-cover w-full" loading="lazy" />
+                <img src={a.url} alt={a.alt_text ?? a.filename} title={a.title ?? undefined} className="aspect-square object-cover w-full" loading="lazy" />
               ) : (
                 <div className="aspect-square grid place-items-center bg-muted"><ImageIcon size={24} /></div>
               )}
               <div className="p-1.5 text-[10px] truncate bg-background/80">{a.filename}</div>
-              <button type="button" onClick={(e) => { e.stopPropagation(); del(a); }} className="absolute top-1 right-1 p-1 rounded bg-destructive text-destructive-foreground opacity-0 group-hover:opacity-100 transition"><Trash2 size={12} /></button>
+              <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition">
+                <button type="button" onClick={(e) => { e.stopPropagation(); setEditing(a); }} className="p-1 rounded bg-background/90 border border-border" aria-label="Edit"><Pencil size={12} /></button>
+                <button type="button" onClick={(e) => { e.stopPropagation(); del(a); }} className="p-1 rounded bg-destructive text-destructive-foreground" aria-label="Delete"><Trash2 size={12} /></button>
+              </div>
             </div>
           ))}
         </div>
       )}
+
+      <MediaEditDialog asset={editing} onClose={() => setEditing(null)} onSaved={load} />
+
 
       {onPick && (
         <div className="flex justify-end pt-2 border-t">
@@ -150,6 +160,50 @@ export function MediaLibrary({ onPick, multi = false, folder }: { onPick?: (urls
     </div>
   );
 }
+
+function MediaEditDialog({ asset, onClose, onSaved }: { asset: MediaAsset | null; onClose: () => void; onSaved: () => void }) {
+  const [form, setForm] = useState<Partial<MediaAsset>>({});
+  useEffect(() => { if (asset) setForm(asset); }, [asset]);
+  const save = async () => {
+    if (!asset) return;
+    const { error } = await supabase.from("media_assets").update({
+      alt_text: form.alt_text ?? null,
+      title: form.title ?? null,
+      caption: form.caption ?? null,
+      description: form.description ?? null,
+    }).eq("id", asset.id);
+    if (error) return toast.error(error.message);
+    toast.success("Saved");
+    onSaved(); onClose();
+  };
+  return (
+    <Dialog open={!!asset} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-w-lg">
+        <DialogHeader><DialogTitle>Image details</DialogTitle></DialogHeader>
+        {asset && (
+          <div className="space-y-3">
+            <img src={asset.url} alt={asset.alt_text ?? asset.filename} className="w-full max-h-60 object-contain bg-muted" />
+            <div className="space-y-2">
+              <label className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Alt text (required for SEO/accessibility)</label>
+              <Input value={form.alt_text ?? ""} onChange={(e) => setForm({ ...form, alt_text: e.target.value })} placeholder="Descriptive alt text" />
+              <label className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Title</label>
+              <Input value={form.title ?? ""} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Image title" />
+              <label className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Caption</label>
+              <Input value={form.caption ?? ""} onChange={(e) => setForm({ ...form, caption: e.target.value })} placeholder="Short caption" />
+              <label className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Description</label>
+              <textarea rows={3} value={form.description ?? ""} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Longer description" className="w-full border border-input bg-background px-3 py-2 rounded-md text-sm" />
+            </div>
+            <div className="flex justify-end gap-2 pt-2 border-t">
+              <Button variant="outline" onClick={onClose}>Cancel</Button>
+              <Button onClick={save}>Save</Button>
+            </div>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 
 export function MediaPicker({ onPick, multi = false, trigger, folder }: { onPick: (urls: string[]) => void; multi?: boolean; trigger?: React.ReactNode; folder?: string }) {
   const [open, setOpen] = useState(false);

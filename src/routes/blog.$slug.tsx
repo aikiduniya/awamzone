@@ -7,7 +7,7 @@ import { SiteFooter } from "@/components/site/site-footer";
 export const Route = createFileRoute("/blog/$slug")({
   component: BlogPost,
   errorComponent: ({ reset }) => <div className="p-8 text-center"><p>Something went wrong.</p><button onClick={reset} className="underline">Retry</button></div>,
-  notFoundComponent: () => <div className="p-8 text-center">Article not found. <Link to="/blog" className="underline">Back to journal</Link></div>,
+  notFoundComponent: () => <div className="p-8 text-center">Article not found. <Link to="/blog" className="underline">Back to blog</Link></div>,
   head: ({ params }) => ({
     meta: [
       { title: `Article — ${params.slug}` },
@@ -32,7 +32,7 @@ function BlogPost() {
     <div className="min-h-screen bg-background">
       <SiteHeader />
       <article className="container mx-auto px-6 py-16 max-w-3xl">
-        <Link to="/blog" className="eyebrow mb-4 inline-block">← Journal</Link>
+        <Link to="/blog" className="eyebrow mb-4 inline-block">← Blog</Link>
         <h1 className="text-5xl font-serif mb-4">{post.title}</h1>
         {post.published_at && <div className="text-xs text-muted-foreground mb-8">{new Date(post.published_at).toLocaleDateString()}</div>}
         {post.cover_image && <img src={post.cover_image} alt={post.title} className="w-full aspect-[16/9] object-cover mb-10" />}

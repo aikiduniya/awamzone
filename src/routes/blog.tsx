@@ -8,10 +8,12 @@ export const Route = createFileRoute("/blog")({
   component: BlogIndex,
   head: () => ({
     meta: [
-      { title: "Journal — Aurelia" },
+      { title: "Blog — Aurelia" },
       { name: "description", content: "Stories, guides, and news from our team." },
-      { property: "og:title", content: "Journal — Aurelia" },
+      { property: "og:title", content: "Blog — Aurelia" },
+      { property: "og:description", content: "Stories, guides, and news from our team." },
       { property: "og:url", content: "/blog" },
+      { property: "og:type", content: "website" },
     ],
     links: [{ rel: "canonical", href: "/blog" }],
   }),
@@ -27,8 +29,9 @@ function BlogIndex() {
     <div className="min-h-screen bg-background">
       <SiteHeader />
       <main className="container mx-auto px-6 py-16 max-w-5xl">
-        <div className="eyebrow mb-3">Journal</div>
+        <div className="eyebrow mb-3">Blog</div>
         <h1 className="text-5xl font-serif mb-12">Stories & Guides</h1>
+
         {!posts?.length ? (
           <p className="text-muted-foreground">No articles yet.</p>
         ) : (
