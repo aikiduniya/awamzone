@@ -259,14 +259,63 @@ export type Database = {
           },
         ]
       }
+      coupon_usages: {
+        Row: {
+          coupon_id: string
+          created_at: string
+          discount_amount: number
+          id: string
+          order_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          coupon_id: string
+          created_at?: string
+          discount_amount?: number
+          id?: string
+          order_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          coupon_id?: string
+          created_at?: string
+          discount_amount?: number
+          id?: string
+          order_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coupon_usages_coupon_id_fkey"
+            columns: ["coupon_id"]
+            isOneToOne: false
+            referencedRelation: "coupons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coupon_usages_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       coupons: {
         Row: {
+          applies_to: string
+          category_ids: string[] | null
           code: string
           created_at: string
+          description: string | null
           ends_at: string | null
           id: string
           is_active: boolean
+          max_discount: number | null
           min_purchase: number | null
+          name: string | null
+          per_user_limit: number | null
+          product_ids: string[] | null
           starts_at: string | null
           type: Database["public"]["Enums"]["coupon_type"]
           usage_limit: number | null
@@ -274,12 +323,19 @@ export type Database = {
           value: number
         }
         Insert: {
+          applies_to?: string
+          category_ids?: string[] | null
           code: string
           created_at?: string
+          description?: string | null
           ends_at?: string | null
           id?: string
           is_active?: boolean
+          max_discount?: number | null
           min_purchase?: number | null
+          name?: string | null
+          per_user_limit?: number | null
+          product_ids?: string[] | null
           starts_at?: string | null
           type?: Database["public"]["Enums"]["coupon_type"]
           usage_limit?: number | null
@@ -287,17 +343,87 @@ export type Database = {
           value?: number
         }
         Update: {
+          applies_to?: string
+          category_ids?: string[] | null
           code?: string
           created_at?: string
+          description?: string | null
           ends_at?: string | null
           id?: string
           is_active?: boolean
+          max_discount?: number | null
           min_purchase?: number | null
+          name?: string | null
+          per_user_limit?: number | null
+          product_ids?: string[] | null
           starts_at?: string | null
           type?: Database["public"]["Enums"]["coupon_type"]
           usage_limit?: number | null
           used_count?: number
           value?: number
+        }
+        Relationships: []
+      }
+      flash_sales: {
+        Row: {
+          applies_to: string
+          banner_image: string | null
+          category_ids: string[] | null
+          created_at: string
+          description: string | null
+          discount_type: string
+          discount_value: number
+          ends_at: string
+          id: string
+          is_active: boolean
+          is_deal_of_the_day: boolean
+          max_uses_per_product: number | null
+          name: string
+          priority: number
+          product_ids: string[] | null
+          slug: string | null
+          starts_at: string
+          updated_at: string
+        }
+        Insert: {
+          applies_to?: string
+          banner_image?: string | null
+          category_ids?: string[] | null
+          created_at?: string
+          description?: string | null
+          discount_type?: string
+          discount_value?: number
+          ends_at: string
+          id?: string
+          is_active?: boolean
+          is_deal_of_the_day?: boolean
+          max_uses_per_product?: number | null
+          name: string
+          priority?: number
+          product_ids?: string[] | null
+          slug?: string | null
+          starts_at: string
+          updated_at?: string
+        }
+        Update: {
+          applies_to?: string
+          banner_image?: string | null
+          category_ids?: string[] | null
+          created_at?: string
+          description?: string | null
+          discount_type?: string
+          discount_value?: number
+          ends_at?: string
+          id?: string
+          is_active?: boolean
+          is_deal_of_the_day?: boolean
+          max_uses_per_product?: number | null
+          name?: string
+          priority?: number
+          product_ids?: string[] | null
+          slug?: string | null
+          starts_at?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -624,31 +750,43 @@ export type Database = {
           code: string
           config: Json
           description: string | null
+          environment: string
+          icon_url: string | null
           id: string
           instructions: string | null
           is_active: boolean
           name: string
+          provider: string
           sort_order: number
+          supported_currencies: string[] | null
         }
         Insert: {
           code: string
           config?: Json
           description?: string | null
+          environment?: string
+          icon_url?: string | null
           id?: string
           instructions?: string | null
           is_active?: boolean
           name: string
+          provider?: string
           sort_order?: number
+          supported_currencies?: string[] | null
         }
         Update: {
           code?: string
           config?: Json
           description?: string | null
+          environment?: string
+          icon_url?: string | null
           id?: string
           instructions?: string | null
           is_active?: boolean
           name?: string
+          provider?: string
           sort_order?: number
+          supported_currencies?: string[] | null
         }
         Relationships: []
       }
@@ -956,6 +1094,98 @@ export type Database = {
         }
         Relationships: []
       }
+      shipping_rates: {
+        Row: {
+          cost: number
+          created_at: string
+          description: string | null
+          estimated_days: string | null
+          free_over: number | null
+          id: string
+          is_active: boolean
+          max_order_total: number | null
+          method_type: string
+          min_order_total: number | null
+          name: string
+          per_kg: number | null
+          sort_order: number
+          zone_id: string
+        }
+        Insert: {
+          cost?: number
+          created_at?: string
+          description?: string | null
+          estimated_days?: string | null
+          free_over?: number | null
+          id?: string
+          is_active?: boolean
+          max_order_total?: number | null
+          method_type?: string
+          min_order_total?: number | null
+          name: string
+          per_kg?: number | null
+          sort_order?: number
+          zone_id: string
+        }
+        Update: {
+          cost?: number
+          created_at?: string
+          description?: string | null
+          estimated_days?: string | null
+          free_over?: number | null
+          id?: string
+          is_active?: boolean
+          max_order_total?: number | null
+          method_type?: string
+          min_order_total?: number | null
+          name?: string
+          per_kg?: number | null
+          sort_order?: number
+          zone_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shipping_rates_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "shipping_zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shipping_zones: {
+        Row: {
+          countries: string[]
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          regions: string[] | null
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          countries?: string[]
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          regions?: string[] | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          countries?: string[]
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          regions?: string[] | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       site_settings: {
         Row: {
           key: string
@@ -1031,6 +1261,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      tax_rates: {
+        Row: {
+          category_ids: string[] | null
+          countries: string[]
+          created_at: string
+          id: string
+          is_active: boolean
+          is_compound: boolean
+          name: string
+          priority: number
+          rate: number
+          regions: string[] | null
+          updated_at: string
+        }
+        Insert: {
+          category_ids?: string[] | null
+          countries?: string[]
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          is_compound?: boolean
+          name: string
+          priority?: number
+          rate?: number
+          regions?: string[] | null
+          updated_at?: string
+        }
+        Update: {
+          category_ids?: string[] | null
+          countries?: string[]
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          is_compound?: boolean
+          name?: string
+          priority?: number
+          rate?: number
+          regions?: string[] | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       user_roles: {
         Row: {
