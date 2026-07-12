@@ -43,7 +43,7 @@ function ProductsList() {
         .order(sortCol, { ascending: sortAsc })
         .range(from, to);
       if (debouncedQ) query = query.or(`name.ilike.%${debouncedQ}%,sku.ilike.%${debouncedQ}%,slug.ilike.%${debouncedQ}%`);
-      if (status) query = query.eq("status", status);
+      if (status) query = query.eq("status", status as any);
       if (categoryId) query = query.eq("category_id", categoryId);
       const { data: rows, count } = await query;
       return { rows: rows ?? [], count: count ?? 0 };
