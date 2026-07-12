@@ -31,8 +31,10 @@ import { Route as AuthenticatedAccountRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as AuthenticatedAdminWebhooksRouteImport } from './routes/_authenticated/admin.webhooks'
 import { Route as AuthenticatedAdminWarehousesRouteImport } from './routes/_authenticated/admin.warehouses'
+import { Route as AuthenticatedAdminThemeRouteImport } from './routes/_authenticated/admin.theme'
 import { Route as AuthenticatedAdminTaxesRouteImport } from './routes/_authenticated/admin.taxes'
 import { Route as AuthenticatedAdminSuppliersRouteImport } from './routes/_authenticated/admin.suppliers'
+import { Route as AuthenticatedAdminSmtpRouteImport } from './routes/_authenticated/admin.smtp'
 import { Route as AuthenticatedAdminShippingRouteImport } from './routes/_authenticated/admin.shipping'
 import { Route as AuthenticatedAdminSettingsRouteImport } from './routes/_authenticated/admin.settings'
 import { Route as AuthenticatedAdminReviewsRouteImport } from './routes/_authenticated/admin.reviews'
@@ -173,6 +175,11 @@ const AuthenticatedAdminWarehousesRoute =
     path: '/warehouses',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminThemeRoute = AuthenticatedAdminThemeRouteImport.update({
+  id: '/theme',
+  path: '/theme',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
 const AuthenticatedAdminTaxesRoute = AuthenticatedAdminTaxesRouteImport.update({
   id: '/taxes',
   path: '/taxes',
@@ -184,6 +191,11 @@ const AuthenticatedAdminSuppliersRoute =
     path: '/suppliers',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminSmtpRoute = AuthenticatedAdminSmtpRouteImport.update({
+  id: '/smtp',
+  path: '/smtp',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
 const AuthenticatedAdminShippingRoute =
   AuthenticatedAdminShippingRouteImport.update({
     id: '/shipping',
@@ -394,8 +406,10 @@ export interface FileRoutesByFullPath {
   '/admin/reviews': typeof AuthenticatedAdminReviewsRoute
   '/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/admin/shipping': typeof AuthenticatedAdminShippingRoute
+  '/admin/smtp': typeof AuthenticatedAdminSmtpRoute
   '/admin/suppliers': typeof AuthenticatedAdminSuppliersRoute
   '/admin/taxes': typeof AuthenticatedAdminTaxesRoute
+  '/admin/theme': typeof AuthenticatedAdminThemeRoute
   '/admin/warehouses': typeof AuthenticatedAdminWarehousesRoute
   '/admin/webhooks': typeof AuthenticatedAdminWebhooksRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
@@ -446,8 +460,10 @@ export interface FileRoutesByTo {
   '/admin/reviews': typeof AuthenticatedAdminReviewsRoute
   '/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/admin/shipping': typeof AuthenticatedAdminShippingRoute
+  '/admin/smtp': typeof AuthenticatedAdminSmtpRoute
   '/admin/suppliers': typeof AuthenticatedAdminSuppliersRoute
   '/admin/taxes': typeof AuthenticatedAdminTaxesRoute
+  '/admin/theme': typeof AuthenticatedAdminThemeRoute
   '/admin/warehouses': typeof AuthenticatedAdminWarehousesRoute
   '/admin/webhooks': typeof AuthenticatedAdminWebhooksRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
@@ -501,8 +517,10 @@ export interface FileRoutesById {
   '/_authenticated/admin/reviews': typeof AuthenticatedAdminReviewsRoute
   '/_authenticated/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/_authenticated/admin/shipping': typeof AuthenticatedAdminShippingRoute
+  '/_authenticated/admin/smtp': typeof AuthenticatedAdminSmtpRoute
   '/_authenticated/admin/suppliers': typeof AuthenticatedAdminSuppliersRoute
   '/_authenticated/admin/taxes': typeof AuthenticatedAdminTaxesRoute
+  '/_authenticated/admin/theme': typeof AuthenticatedAdminThemeRoute
   '/_authenticated/admin/warehouses': typeof AuthenticatedAdminWarehousesRoute
   '/_authenticated/admin/webhooks': typeof AuthenticatedAdminWebhooksRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
@@ -556,8 +574,10 @@ export interface FileRouteTypes {
     | '/admin/reviews'
     | '/admin/settings'
     | '/admin/shipping'
+    | '/admin/smtp'
     | '/admin/suppliers'
     | '/admin/taxes'
+    | '/admin/theme'
     | '/admin/warehouses'
     | '/admin/webhooks'
     | '/admin/'
@@ -608,8 +628,10 @@ export interface FileRouteTypes {
     | '/admin/reviews'
     | '/admin/settings'
     | '/admin/shipping'
+    | '/admin/smtp'
     | '/admin/suppliers'
     | '/admin/taxes'
+    | '/admin/theme'
     | '/admin/warehouses'
     | '/admin/webhooks'
     | '/admin'
@@ -662,8 +684,10 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/reviews'
     | '/_authenticated/admin/settings'
     | '/_authenticated/admin/shipping'
+    | '/_authenticated/admin/smtp'
     | '/_authenticated/admin/suppliers'
     | '/_authenticated/admin/taxes'
+    | '/_authenticated/admin/theme'
     | '/_authenticated/admin/warehouses'
     | '/_authenticated/admin/webhooks'
     | '/_authenticated/admin/'
@@ -845,6 +869,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminWarehousesRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/theme': {
+      id: '/_authenticated/admin/theme'
+      path: '/theme'
+      fullPath: '/admin/theme'
+      preLoaderRoute: typeof AuthenticatedAdminThemeRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/taxes': {
       id: '/_authenticated/admin/taxes'
       path: '/taxes'
@@ -857,6 +888,13 @@ declare module '@tanstack/react-router' {
       path: '/suppliers'
       fullPath: '/admin/suppliers'
       preLoaderRoute: typeof AuthenticatedAdminSuppliersRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/smtp': {
+      id: '/_authenticated/admin/smtp'
+      path: '/smtp'
+      fullPath: '/admin/smtp'
+      preLoaderRoute: typeof AuthenticatedAdminSmtpRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/admin/shipping': {
@@ -1100,8 +1138,10 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminReviewsRoute: typeof AuthenticatedAdminReviewsRoute
   AuthenticatedAdminSettingsRoute: typeof AuthenticatedAdminSettingsRoute
   AuthenticatedAdminShippingRoute: typeof AuthenticatedAdminShippingRoute
+  AuthenticatedAdminSmtpRoute: typeof AuthenticatedAdminSmtpRoute
   AuthenticatedAdminSuppliersRoute: typeof AuthenticatedAdminSuppliersRoute
   AuthenticatedAdminTaxesRoute: typeof AuthenticatedAdminTaxesRoute
+  AuthenticatedAdminThemeRoute: typeof AuthenticatedAdminThemeRoute
   AuthenticatedAdminWarehousesRoute: typeof AuthenticatedAdminWarehousesRoute
   AuthenticatedAdminWebhooksRoute: typeof AuthenticatedAdminWebhooksRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
@@ -1135,8 +1175,10 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminReviewsRoute: AuthenticatedAdminReviewsRoute,
   AuthenticatedAdminSettingsRoute: AuthenticatedAdminSettingsRoute,
   AuthenticatedAdminShippingRoute: AuthenticatedAdminShippingRoute,
+  AuthenticatedAdminSmtpRoute: AuthenticatedAdminSmtpRoute,
   AuthenticatedAdminSuppliersRoute: AuthenticatedAdminSuppliersRoute,
   AuthenticatedAdminTaxesRoute: AuthenticatedAdminTaxesRoute,
+  AuthenticatedAdminThemeRoute: AuthenticatedAdminThemeRoute,
   AuthenticatedAdminWarehousesRoute: AuthenticatedAdminWarehousesRoute,
   AuthenticatedAdminWebhooksRoute: AuthenticatedAdminWebhooksRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
