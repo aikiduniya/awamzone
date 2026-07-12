@@ -188,7 +188,7 @@ function MenuRow({ item, children, parents, onUpdate, onRemove, onMove }: {
   children: Item[];
   parents: Item[];
   onUpdate: (id: string, patch: Partial<Item>) => void;
-  onRemove: (id: string) => void;
+  onRemove: (id: string, label: string) => void;
   onMove: (item: Item, dir: -1 | 1) => void;
 }) {
   const [open, setOpen] = useState(false);
@@ -206,7 +206,7 @@ function MenuRow({ item, children, parents, onUpdate, onRemove, onMove }: {
           </button>
         </div>
         <label className="flex items-center gap-1 text-[11px]"><input type="checkbox" checked={item.is_active} onChange={(e) => onUpdate(item.id, { is_active: e.target.checked })} /> Active</label>
-        <button onClick={() => onRemove(item.id)} className="text-destructive hover:opacity-70" aria-label="Delete"><Trash2 size={14} /></button>
+        <button onClick={() => onRemove(item.id, item.label)} className="text-destructive hover:opacity-70" aria-label="Delete"><Trash2 size={14} /></button>
       </div>
 
       {open && (
