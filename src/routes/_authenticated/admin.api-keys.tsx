@@ -59,7 +59,7 @@ function ApiKeysAdmin() {
 
       {creating && (
         <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center p-4 z-50" onClick={() => setCreating(false)}>
-          <div className="bg-surface border border-border w-full max-w-lg p-6" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-background border border-border w-full max-w-lg p-6 rounded shadow-xl animate-in zoom-in-95 duration-150" onClick={(e) => e.stopPropagation()}>
             <div className="flex justify-between items-center mb-6"><h3 className="font-serif text-2xl">New API Key</h3><button onClick={() => setCreating(false)}><X /></button></div>
             <input placeholder="Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="w-full bg-transparent border border-border px-3 py-2 mb-4" />
             <div className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground mb-2">Scopes</div>

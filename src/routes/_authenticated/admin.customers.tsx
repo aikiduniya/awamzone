@@ -134,7 +134,7 @@ function CustomersAdmin() {
 
       {editing && (
         <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center p-4 z-50" onClick={() => setEditing(null)}>
-          <div className="bg-surface border border-border w-full max-w-lg p-6" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-background border border-border w-full max-w-lg p-6 rounded shadow-xl animate-in zoom-in-95 duration-150" onClick={(e) => e.stopPropagation()}>
             <div className="flex justify-between items-center mb-6"><h3 className="font-serif text-2xl">{editing.full_name}</h3><button onClick={() => setEditing(null)}><X /></button></div>
             <div className="space-y-3">
               <div>
