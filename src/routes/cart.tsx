@@ -3,6 +3,7 @@ import { SiteShell } from "@/components/site/site-header";
 import { useCart } from "@/hooks/use-cart";
 import { effectivePrice, formatMoney } from "@/lib/format";
 import { Minus, Plus, X } from "lucide-react";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/cart")({
   head: () => ({ meta: [{ title: "Your Bag | AURELIA" }] }),
