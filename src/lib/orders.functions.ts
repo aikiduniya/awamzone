@@ -167,6 +167,11 @@ export const createShipment = createServerFn({ method: "POST" })
         status: "shipped" as any,
         tracking_number: data.tracking_number || null,
       }).eq("id", data.order_id);
+      try {
+        const { sendOrderEmail } = await import("@/lib/order-emails.server");
+        const { data: order } = await supabaseAdmin.from("orders").select("*").eq("id", data.order_id).maybeSingle();
+        if (order) await sendOrderEmail("shipped", order as any, { tracking_number: data.tracking_number, tracking_url: data.tracking_url });
+      } catch (e) { console.warn("[order-email] shipment hook failed:", (e as Error).message); }
     }
     return { shipment };
   });
