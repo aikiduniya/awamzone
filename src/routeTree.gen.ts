@@ -47,6 +47,7 @@ import { Route as AuthenticatedAdminPaymentsRouteImport } from './routes/_authen
 import { Route as AuthenticatedAdminPagesRouteImport } from './routes/_authenticated/admin.pages'
 import { Route as AuthenticatedAdminOrdersRouteImport } from './routes/_authenticated/admin.orders'
 import { Route as AuthenticatedAdminNewsletterRouteImport } from './routes/_authenticated/admin.newsletter'
+import { Route as AuthenticatedAdminMenusRouteImport } from './routes/_authenticated/admin.menus'
 import { Route as AuthenticatedAdminMediaRouteImport } from './routes/_authenticated/admin.media'
 import { Route as AuthenticatedAdminInventoryRouteImport } from './routes/_authenticated/admin.inventory'
 import { Route as AuthenticatedAdminHomeSectionsRouteImport } from './routes/_authenticated/admin.home-sections'
@@ -266,6 +267,11 @@ const AuthenticatedAdminNewsletterRoute =
     path: '/newsletter',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminMenusRoute = AuthenticatedAdminMenusRouteImport.update({
+  id: '/menus',
+  path: '/menus',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
 const AuthenticatedAdminMediaRoute = AuthenticatedAdminMediaRouteImport.update({
   id: '/media',
   path: '/media',
@@ -394,6 +400,7 @@ export interface FileRoutesByFullPath {
   '/admin/home-sections': typeof AuthenticatedAdminHomeSectionsRoute
   '/admin/inventory': typeof AuthenticatedAdminInventoryRoute
   '/admin/media': typeof AuthenticatedAdminMediaRoute
+  '/admin/menus': typeof AuthenticatedAdminMenusRoute
   '/admin/newsletter': typeof AuthenticatedAdminNewsletterRoute
   '/admin/orders': typeof AuthenticatedAdminOrdersRoute
   '/admin/pages': typeof AuthenticatedAdminPagesRoute
@@ -448,6 +455,7 @@ export interface FileRoutesByTo {
   '/admin/home-sections': typeof AuthenticatedAdminHomeSectionsRoute
   '/admin/inventory': typeof AuthenticatedAdminInventoryRoute
   '/admin/media': typeof AuthenticatedAdminMediaRoute
+  '/admin/menus': typeof AuthenticatedAdminMenusRoute
   '/admin/newsletter': typeof AuthenticatedAdminNewsletterRoute
   '/admin/orders': typeof AuthenticatedAdminOrdersRoute
   '/admin/pages': typeof AuthenticatedAdminPagesRoute
@@ -505,6 +513,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/home-sections': typeof AuthenticatedAdminHomeSectionsRoute
   '/_authenticated/admin/inventory': typeof AuthenticatedAdminInventoryRoute
   '/_authenticated/admin/media': typeof AuthenticatedAdminMediaRoute
+  '/_authenticated/admin/menus': typeof AuthenticatedAdminMenusRoute
   '/_authenticated/admin/newsletter': typeof AuthenticatedAdminNewsletterRoute
   '/_authenticated/admin/orders': typeof AuthenticatedAdminOrdersRoute
   '/_authenticated/admin/pages': typeof AuthenticatedAdminPagesRoute
@@ -562,6 +571,7 @@ export interface FileRouteTypes {
     | '/admin/home-sections'
     | '/admin/inventory'
     | '/admin/media'
+    | '/admin/menus'
     | '/admin/newsletter'
     | '/admin/orders'
     | '/admin/pages'
@@ -616,6 +626,7 @@ export interface FileRouteTypes {
     | '/admin/home-sections'
     | '/admin/inventory'
     | '/admin/media'
+    | '/admin/menus'
     | '/admin/newsletter'
     | '/admin/orders'
     | '/admin/pages'
@@ -672,6 +683,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/home-sections'
     | '/_authenticated/admin/inventory'
     | '/_authenticated/admin/media'
+    | '/_authenticated/admin/menus'
     | '/_authenticated/admin/newsletter'
     | '/_authenticated/admin/orders'
     | '/_authenticated/admin/pages'
@@ -981,6 +993,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminNewsletterRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/menus': {
+      id: '/_authenticated/admin/menus'
+      path: '/menus'
+      fullPath: '/admin/menus'
+      preLoaderRoute: typeof AuthenticatedAdminMenusRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/media': {
       id: '/_authenticated/admin/media'
       path: '/media'
@@ -1126,6 +1145,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminHomeSectionsRoute: typeof AuthenticatedAdminHomeSectionsRoute
   AuthenticatedAdminInventoryRoute: typeof AuthenticatedAdminInventoryRoute
   AuthenticatedAdminMediaRoute: typeof AuthenticatedAdminMediaRoute
+  AuthenticatedAdminMenusRoute: typeof AuthenticatedAdminMenusRoute
   AuthenticatedAdminNewsletterRoute: typeof AuthenticatedAdminNewsletterRoute
   AuthenticatedAdminOrdersRoute: typeof AuthenticatedAdminOrdersRoute
   AuthenticatedAdminPagesRoute: typeof AuthenticatedAdminPagesRoute
@@ -1163,6 +1183,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminHomeSectionsRoute: AuthenticatedAdminHomeSectionsRoute,
   AuthenticatedAdminInventoryRoute: AuthenticatedAdminInventoryRoute,
   AuthenticatedAdminMediaRoute: AuthenticatedAdminMediaRoute,
+  AuthenticatedAdminMenusRoute: AuthenticatedAdminMenusRoute,
   AuthenticatedAdminNewsletterRoute: AuthenticatedAdminNewsletterRoute,
   AuthenticatedAdminOrdersRoute: AuthenticatedAdminOrdersRoute,
   AuthenticatedAdminPagesRoute: AuthenticatedAdminPagesRoute,
