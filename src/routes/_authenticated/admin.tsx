@@ -54,6 +54,7 @@ const NAV_GROUPS: NavGroup[] = [
   ]},
   { label: "Content", items: [
     { to: "/admin/home-sections", label: "Homepage", icon: Sparkles },
+    { to: "/admin/menus", label: "Menus", icon: MenuIcon },
     { to: "/admin/pages", label: "CMS Pages", icon: FileText },
     { to: "/admin/blog", label: "Blog", icon: Rss },
     { to: "/admin/faqs", label: "FAQs", icon: HelpCircle },
