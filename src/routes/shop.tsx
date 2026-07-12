@@ -60,7 +60,7 @@ function Shop() {
         case "price_desc": query = query.order("price", { ascending: false }); break;
         case "name_asc": query = query.order("name", { ascending: true }); break;
         case "best": query = query.order("sales_count", { ascending: false }); break;
-        default: query = query.order("created_at", { ascending: false });
+        default: query = query.order("created_at", { ascending: false }); break;
       }
       const { data } = await query;
       return data ?? [];

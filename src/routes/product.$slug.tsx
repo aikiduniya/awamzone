@@ -46,7 +46,7 @@ function ProductPage() {
         .from("products")
         .select("id,name,slug,price,sale_price,images,stock")
         .eq("status", "active")
-        .eq("category_id", product!.category_id)
+        .eq("category_id", product!.category_id!)
         .neq("id", product!.id)
         .limit(4);
       return data ?? [];
