@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Plus, X, Copy, Trash2 } from "lucide-react";
-import { AdminHeader, Empty } from "@/components/admin/admin-ui";
+import { AdminHeader, Empty, useConfirm, IconButton } from "@/components/admin/admin-ui";
 
 export const Route = createFileRoute("/_authenticated/admin/api-keys")({ component: ApiKeysAdmin });
 

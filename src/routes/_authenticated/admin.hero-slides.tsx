@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { AdminHeader, AdminCard, Field, Empty } from "@/components/admin/admin-ui";
+import { AdminHeader, AdminCard, Field, Empty, useConfirm } from "@/components/admin/admin-ui";
 import { MediaPicker } from "@/components/admin/media-picker";
 import { useState } from "react";
 import { toast } from "sonner";

@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { AdminHeader, Empty } from "@/components/admin/admin-ui";
+import { AdminHeader, Empty, useConfirm } from "@/components/admin/admin-ui";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";

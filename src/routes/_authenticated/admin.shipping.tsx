@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Plus, Trash2, Edit, ChevronDown, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
-import { AdminHeader, Field, Empty } from "@/components/admin/admin-ui";
+import { AdminHeader, Field, Empty, useConfirm } from "@/components/admin/admin-ui";
 
 export const Route = createFileRoute("/_authenticated/admin/shipping")({ component: ShippingAdmin });
 
