@@ -2,7 +2,7 @@ import { createFileRoute, Link, Outlet, redirect, useLocation, useNavigate } fro
 import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@/hooks/use-session";
 import { useEffect } from "react";
-import { LayoutDashboard, Package, ShoppingCart, Tag, FolderTree, Sparkles, FileText, Settings, LogOut, Home, ImageIcon, Boxes, Ticket, Zap, Truck, Receipt, CreditCard, Star, MessageSquare, Undo2, Users, UsersRound, Building2, Warehouse, ClipboardList, Rss, HelpCircle, MegaphoneIcon, Mail, Inbox, Send, ShieldCheck, Webhook, KeyRound, ChevronDown } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingCart, Tag, FolderTree, Sparkles, FileText, Settings, LogOut, Home, ImageIcon, Boxes, Ticket, Zap, Truck, Receipt, CreditCard, Star, MessageSquare, Undo2, Users, UsersRound, Building2, Warehouse, ClipboardList, Rss, HelpCircle, MegaphoneIcon, Mail, Inbox, Send, ShieldCheck, Webhook, KeyRound, ChevronDown, Menu as MenuIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 
