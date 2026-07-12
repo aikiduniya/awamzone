@@ -84,6 +84,12 @@ function AdminLayout() {
   const location = useLocation();
   const navigate = useNavigate();
 
+  useEffect(() => {
+    if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "auto" });
+    const scroller = document.querySelector("main.flex-1");
+    if (scroller) (scroller as HTMLElement).scrollTop = 0;
+  }, [location.pathname]);
+
   const signOut = async () => {
     await supabase.auth.signOut();
     navigate({ to: "/" });

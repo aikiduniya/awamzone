@@ -17,13 +17,13 @@ export const Route = createFileRoute("/_authenticated/admin/")({
 });
 
 type StatCard = {
-  label: string; value: string | number; icon: any; tint: string; hint?: string;
+  label: string; value: string | number; icon: any; tint: string; hint?: string; to?: string;
 };
 
 function Card({ c }: { c: StatCard }) {
   const Icon = c.icon;
-  return (
-    <div className="group relative overflow-hidden rounded-xl border border-border bg-card p-5 transition hover:shadow-lg hover:-translate-y-0.5">
+  const body = (
+    <div className="group relative overflow-hidden rounded-xl border border-border bg-card p-5 transition hover:shadow-lg hover:-translate-y-0.5 h-full">
       <div className={`absolute -right-6 -top-6 h-24 w-24 rounded-full opacity-20 blur-2xl ${c.tint}`} />
       <div className="flex items-center justify-between mb-3">
         <div className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">{c.label}</div>
@@ -35,6 +35,8 @@ function Card({ c }: { c: StatCard }) {
       {c.hint && <div className="mt-1 text-xs text-muted-foreground">{c.hint}</div>}
     </div>
   );
+  if (c.to) return <Link to={c.to as any} className="block">{body}</Link>;
+  return body;
 }
 
 function Dashboard() {
@@ -141,17 +143,17 @@ function Dashboard() {
   });
 
   const cards: StatCard[] = useMemo(() => [
-    { label: "Today's Sales", value: formatMoney(data?.todaySales ?? 0), icon: DollarSign, tint: "bg-emerald-500", hint: "Since midnight" },
-    { label: "Monthly Revenue", value: formatMoney(data?.monthRevenue ?? 0), icon: TrendingUp, tint: "bg-blue-500", hint: "This month" },
-    { label: "Orders", value: data?.counts.orders ?? 0, icon: ShoppingCart, tint: "bg-indigo-500" },
-    { label: "Customers", value: data?.counts.customers ?? 0, icon: Users, tint: "bg-fuchsia-500" },
-    { label: "Products", value: data?.counts.products ?? 0, icon: Package, tint: "bg-violet-500" },
-    { label: "Pending Orders", value: data?.counts.pending ?? 0, icon: Clock, tint: "bg-amber-500" },
-    { label: "Low Stock", value: data?.counts.low ?? 0, icon: AlertTriangle, tint: "bg-orange-500" },
-    { label: "Out of Stock", value: data?.counts.out ?? 0, icon: PackageX, tint: "bg-rose-500" },
-    { label: "Returns", value: data?.counts.returns ?? 0, icon: Undo2, tint: "bg-red-500" },
-    { label: "Refunds", value: 0, icon: RefreshCcw, tint: "bg-pink-500" },
-    { label: "Revenue (6mo)", value: formatMoney(data?.totalRevenue ?? 0), icon: CalendarDays, tint: "bg-teal-500" },
+    { label: "Today's Sales", value: formatMoney(data?.todaySales ?? 0), icon: DollarSign, tint: "bg-emerald-500", hint: "Since midnight", to: "/admin/orders" },
+    { label: "Monthly Revenue", value: formatMoney(data?.monthRevenue ?? 0), icon: TrendingUp, tint: "bg-blue-500", hint: "This month", to: "/admin/orders" },
+    { label: "Orders", value: data?.counts.orders ?? 0, icon: ShoppingCart, tint: "bg-indigo-500", to: "/admin/orders" },
+    { label: "Customers", value: data?.counts.customers ?? 0, icon: Users, tint: "bg-fuchsia-500", to: "/admin/customers" },
+    { label: "Products", value: data?.counts.products ?? 0, icon: Package, tint: "bg-violet-500", to: "/admin/products" },
+    { label: "Pending Orders", value: data?.counts.pending ?? 0, icon: Clock, tint: "bg-amber-500", to: "/admin/orders" },
+    { label: "Low Stock", value: data?.counts.low ?? 0, icon: AlertTriangle, tint: "bg-orange-500", to: "/admin/inventory" },
+    { label: "Out of Stock", value: data?.counts.out ?? 0, icon: PackageX, tint: "bg-rose-500", to: "/admin/inventory" },
+    { label: "Returns", value: data?.counts.returns ?? 0, icon: Undo2, tint: "bg-red-500", to: "/admin/returns" },
+    { label: "Refunds", value: 0, icon: RefreshCcw, tint: "bg-pink-500", to: "/admin/returns" },
+    { label: "Revenue (6mo)", value: formatMoney(data?.totalRevenue ?? 0), icon: CalendarDays, tint: "bg-teal-500", to: "/admin/orders" },
     { label: "Conversion", value: `${(data?.conv ?? 0).toFixed(1)}%`, icon: Target, tint: "bg-cyan-500", hint: "Orders / Customers" },
   ], [data]);
 
