@@ -32,12 +32,15 @@ function FlashSalesAdmin() {
   const { data: cats } = useQuery({ queryKey: ["cats-mini2"], queryFn: async () => (await supabase.from("categories").select("id,name").order("name")).data ?? [] });
 
   const openNew = () => { setEditing({ ...BLANK }); setOpen(true); };
-  const openEdit = (r: any) => setEditing({
-    ...BLANK, ...r,
-    starts_at: r.starts_at ? r.starts_at.slice(0, 16) : "",
-    ends_at: r.ends_at ? r.ends_at.slice(0, 16) : "",
-    product_ids: r.product_ids ?? [], category_ids: r.category_ids ?? [],
-  }) || setOpen(true);
+  const openEdit = (r: any) => {
+    setEditing({
+      ...BLANK, ...r,
+      starts_at: r.starts_at ? r.starts_at.slice(0, 16) : "",
+      ends_at: r.ends_at ? r.ends_at.slice(0, 16) : "",
+      product_ids: r.product_ids ?? [], category_ids: r.category_ids ?? [],
+    });
+    setOpen(true);
+  };
 
   const save = async () => {
     if (!editing.starts_at || !editing.ends_at) return toast.error("Start & end are required");
