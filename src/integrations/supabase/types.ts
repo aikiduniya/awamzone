@@ -1078,6 +1078,7 @@ export type Database = {
           payment_method: string | null
           payment_reference: string | null
           payment_status: Database["public"]["Enums"]["payment_status"]
+          refunded_amount: number
           shipping_address: Json | null
           shipping_carrier: string | null
           shipping_cost: number
@@ -1103,6 +1104,7 @@ export type Database = {
           payment_method?: string | null
           payment_reference?: string | null
           payment_status?: Database["public"]["Enums"]["payment_status"]
+          refunded_amount?: number
           shipping_address?: Json | null
           shipping_carrier?: string | null
           shipping_cost?: number
@@ -1128,6 +1130,7 @@ export type Database = {
           payment_method?: string | null
           payment_reference?: string | null
           payment_status?: Database["public"]["Enums"]["payment_status"]
+          refunded_amount?: number
           shipping_address?: Json | null
           shipping_carrier?: string | null
           shipping_cost?: number
@@ -2208,7 +2211,12 @@ export type Database = {
         | "cancelled"
         | "returned"
         | "refunded"
-      payment_status: "pending" | "paid" | "failed" | "refunded"
+      payment_status:
+        | "pending"
+        | "paid"
+        | "failed"
+        | "refunded"
+        | "partially_refunded"
       product_status: "draft" | "active" | "archived"
     }
     CompositeTypes: {
@@ -2350,7 +2358,13 @@ export const Constants = {
         "returned",
         "refunded",
       ],
-      payment_status: ["pending", "paid", "failed", "refunded"],
+      payment_status: [
+        "pending",
+        "paid",
+        "failed",
+        "refunded",
+        "partially_refunded",
+      ],
       product_status: ["draft", "active", "archived"],
     },
   },
