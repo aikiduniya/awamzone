@@ -11,6 +11,7 @@ export const Route = createFileRoute("/_authenticated/admin/api-keys")({ compone
 const SCOPES = ["read:products", "write:products", "read:orders", "write:orders", "read:customers", "write:customers"];
 
 function ApiKeysAdmin() {
+  const { confirm, dialog: confirmDialog } = useConfirm();
   const { data, refetch } = useQuery({
     queryKey: ["api-keys"],
     queryFn: async () => (await supabase.from("api_keys").select("*").order("created_at", { ascending: false })).data ?? [],
@@ -18,6 +19,18 @@ function ApiKeysAdmin() {
   const [creating, setCreating] = useState(false);
   const [newKey, setNewKey] = useState<{ raw: string; name: string } | null>(null);
   const [form, setForm] = useState({ name: "", scopes: [] as string[] });
+
+  const revoke = (k: any) => confirm({
+    title: "Revoke this API key?",
+    description: `“${k.name}” will stop working immediately.`,
+    confirmLabel: "Revoke",
+    destructive: true,
+    onConfirm: async () => {
+      await supabase.from("api_keys").delete().eq("id", k.id);
+      refetch();
+      toast.success("Revoked");
+    },
+  });
 
   const generate = async () => {
     if (!form.name) return toast.error("Name is required");
@@ -48,8 +61,31 @@ function ApiKeysAdmin() {
                   <td className="p-3 text-xs text-muted-foreground">{(k.scopes || []).join(", ")}</td>
                   <td className="p-3 text-xs">{k.last_used_at ? new Date(k.last_used_at).toLocaleString() : "Never"}</td>
                   <td className="p-3 text-right">
-                    <button onClick={async () => { if (confirm("Revoke this key?")) { await supabase.from("api_keys").delete().eq("id", k.id); refetch(); } }} className="text-destructive"><Trash2 size={14} /></button>
+    <>
+      {confirmDialog}
+      <AdminHeader title="API Keys" description="Grant programmatic access to your storefront and admin APIs." actions={
+        <button onClick={() => setCreating(true)} className="inline-flex items-center gap-2 border border-primary bg-primary text-primary-foreground px-4 py-2 text-xs uppercase tracking-[0.2em]"><Plus size={14} /> New Key</button>
+      } />
+      {!data?.length ? <Empty>No API keys yet.</Empty> : (
+        <div className="border border-border rounded bg-background">
+          <table className="w-full text-sm">
+            <thead className="bg-secondary sticky top-0 z-10"><tr className="text-left"><th className="p-3 text-xs uppercase tracking-[0.18em] text-muted-foreground">Name</th><th className="p-3 text-xs uppercase tracking-[0.18em] text-muted-foreground">Prefix</th><th className="p-3 text-xs uppercase tracking-[0.18em] text-muted-foreground">Scopes</th><th className="p-3 text-xs uppercase tracking-[0.18em] text-muted-foreground">Last used</th><th className="p-3 sticky right-0 bg-secondary" /></tr></thead>
+            <tbody>
+              {data.map((k) => (
+                <tr key={k.id} className="border-t border-border hover:bg-secondary/40">
+                  <td className="p-3">{k.name}</td>
+                  <td className="p-3 font-mono text-xs">{k.key_prefix}…</td>
+                  <td className="p-3 text-xs text-muted-foreground">{(k.scopes || []).join(", ")}</td>
+                  <td className="p-3 text-xs">{k.last_used_at ? new Date(k.last_used_at).toLocaleString() : "Never"}</td>
+                  <td className="p-3 text-right sticky right-0 bg-background">
+                    <IconButton label="Revoke key" icon={Trash2} variant="destructive" onClick={() => revoke(k)} />
                   </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
                 </tr>
               ))}
             </tbody>
