@@ -13,11 +13,29 @@ import { toggleCompare, useCompareIds } from "@/hooks/use-compare";
 import { ProductQA } from "@/components/site/product-qa";
 import { RecentlyViewed } from "@/components/site/recently-viewed";
 import { pushRecentlyViewed } from "@/hooks/use-recently-viewed";
+import { buildSeoHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/product/$slug")({
-  head: ({ params }) => ({
-    meta: [{ title: `${params.slug} | AURELIA` }],
-  }),
+  loader: async ({ params }) => {
+    const { data } = await supabase
+      .from("products")
+      .select("name,description,short_description,images,meta_title,meta_description,og_title,og_description,og_image,twitter_title,twitter_description,twitter_image,canonical_url")
+      .eq("slug", params.slug)
+      .eq("status", "active")
+      .maybeSingle();
+    return data;
+  },
+  head: ({ params, loaderData }) => {
+    const p = loaderData as any;
+    return buildSeoHead({
+      title: p?.meta_title || (p?.name ? `${p.name} | AURELIA` : `${params.slug} | AURELIA`),
+      description: p?.short_description || p?.description || null,
+      path: `/product/${params.slug}`,
+      image: p?.images?.[0] || null,
+      type: "product",
+      seo: p,
+    });
+  },
   component: ProductPage,
 });
 

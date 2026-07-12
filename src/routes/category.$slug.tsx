@@ -3,9 +3,28 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { SiteShell } from "@/components/site/site-header";
 import { ProductCard } from "@/components/site/product-card";
+import { buildSeoHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/category/$slug")({
-  head: ({ params }) => ({ meta: [{ title: `${params.slug} | AURELIA` }] }),
+  loader: async ({ params }) => {
+    const { data } = await supabase
+      .from("categories")
+      .select("name,description,image_url,banner_url,meta_title,meta_description,og_title,og_description,og_image,twitter_title,twitter_description,twitter_image,canonical_url")
+      .eq("slug", params.slug)
+      .eq("is_active", true)
+      .maybeSingle();
+    return data;
+  },
+  head: ({ params, loaderData }) => {
+    const c = loaderData as any;
+    return buildSeoHead({
+      title: c?.meta_title || (c?.name ? `${c.name} | AURELIA` : `${params.slug} | AURELIA`),
+      description: c?.description || null,
+      path: `/category/${params.slug}`,
+      image: c?.banner_url || c?.image_url || null,
+      seo: c,
+    });
+  },
   component: CategoryPage,
 });
 
