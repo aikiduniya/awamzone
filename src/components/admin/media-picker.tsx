@@ -161,6 +161,50 @@ export function MediaLibrary({ onPick, multi = false, folder }: { onPick?: (urls
   );
 }
 
+function MediaEditDialog({ asset, onClose, onSaved }: { asset: MediaAsset | null; onClose: () => void; onSaved: () => void }) {
+  const [form, setForm] = useState<Partial<MediaAsset>>({});
+  useEffect(() => { if (asset) setForm(asset); }, [asset]);
+  const save = async () => {
+    if (!asset) return;
+    const { error } = await supabase.from("media_assets").update({
+      alt_text: form.alt_text ?? null,
+      title: form.title ?? null,
+      caption: form.caption ?? null,
+      description: form.description ?? null,
+    }).eq("id", asset.id);
+    if (error) return toast.error(error.message);
+    toast.success("Saved");
+    onSaved(); onClose();
+  };
+  return (
+    <Dialog open={!!asset} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-w-lg">
+        <DialogHeader><DialogTitle>Image details</DialogTitle></DialogHeader>
+        {asset && (
+          <div className="space-y-3">
+            <img src={asset.url} alt={asset.alt_text ?? asset.filename} className="w-full max-h-60 object-contain bg-muted" />
+            <div className="space-y-2">
+              <label className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Alt text (required for SEO/accessibility)</label>
+              <Input value={form.alt_text ?? ""} onChange={(e) => setForm({ ...form, alt_text: e.target.value })} placeholder="Descriptive alt text" />
+              <label className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Title</label>
+              <Input value={form.title ?? ""} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Image title" />
+              <label className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Caption</label>
+              <Input value={form.caption ?? ""} onChange={(e) => setForm({ ...form, caption: e.target.value })} placeholder="Short caption" />
+              <label className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Description</label>
+              <textarea rows={3} value={form.description ?? ""} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Longer description" className="w-full border border-input bg-background px-3 py-2 rounded-md text-sm" />
+            </div>
+            <div className="flex justify-end gap-2 pt-2 border-t">
+              <Button variant="outline" onClick={onClose}>Cancel</Button>
+              <Button onClick={save}>Save</Button>
+            </div>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+
 export function MediaPicker({ onPick, multi = false, trigger, folder }: { onPick: (urls: string[]) => void; multi?: boolean; trigger?: React.ReactNode; folder?: string }) {
   const [open, setOpen] = useState(false);
   return (
