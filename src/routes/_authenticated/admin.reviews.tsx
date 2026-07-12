@@ -1,54 +1,46 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { AdminHeader, Empty } from "@/components/admin/admin-ui";
+import { SimpleCrud } from "@/components/admin/simple-crud";
+import { CheckCircle2, XCircle, Star } from "lucide-react";
 import { toast } from "sonner";
-import { Star } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/reviews")({ component: ReviewsAdmin });
 
 function ReviewsAdmin() {
-  const { data, refetch } = useQuery({
-    queryKey: ["admin-reviews"],
-    queryFn: async () => (await supabase.from("reviews").select("*, products(name, slug)").order("created_at", { ascending: false })).data ?? [],
-  });
-
   const setApproved = async (id: string, is_approved: boolean) => {
     const { error } = await supabase.from("reviews").update({ is_approved }).eq("id", id);
-    if (error) return toast.error(error.message);
-    refetch();
-  };
-  const remove = async (id: string) => {
-    if (!confirm("Delete review?")) return;
-    await supabase.from("reviews").delete().eq("id", id); refetch();
+    if (error) toast.error(error.message);
+    else toast.success(is_approved ? "Approved" : "Rejected");
   };
 
   return (
-    <>
-      <AdminHeader title="Reviews Moderation" description="Approve, hide, or delete customer reviews." />
-      {!data?.length ? <Empty>No reviews</Empty> : (
-        <div className="space-y-3">
-          {data.map((r: any) => (
-            <div key={r.id} className="border border-border p-5">
-              <div className="flex items-start justify-between mb-2">
-                <div>
-                  <div className="text-xs text-muted-foreground">{r.products?.name}</div>
-                  <div className="font-serif text-lg">{r.title || "(no title)"}</div>
-                </div>
-                <div className="flex items-center gap-1 text-primary">
-                  {Array.from({ length: 5 }).map((_, i) => <Star key={i} size={14} className={i < r.rating ? "fill-primary" : "opacity-30"} />)}
-                </div>
-              </div>
-              <p className="text-sm text-muted-foreground mb-3">{r.body}</p>
-              <div className="flex items-center gap-3 text-xs">
-                <label className="flex items-center gap-2"><input type="checkbox" checked={r.is_approved} onChange={(e) => setApproved(r.id, e.target.checked)} /> Approved</label>
-                <button onClick={() => remove(r.id)} className="text-destructive uppercase tracking-[0.2em]">Delete</button>
-                <span className="text-muted-foreground ml-auto">{new Date(r.created_at).toLocaleString()}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </>
+    <SimpleCrud
+      table="reviews"
+      title="Product Reviews"
+      description="Moderate customer reviews."
+      readOnly
+      disableEdit
+      enableDuplicate={false}
+      orderBy={{ column: "created_at", ascending: false }}
+      searchColumns={["title", "body"]}
+      selectQuery="*, products(name, slug)"
+      fields={[]}
+      columns={[
+        { key: "created_at", label: "Date", render: (r) => new Date(r.created_at).toLocaleDateString() },
+        { key: "product", label: "Product", render: (r) => r.products?.name ?? "—", sortable: false },
+        { key: "rating", label: "Rating", render: (r) => (
+          <span className="inline-flex items-center gap-0.5">
+            {Array.from({ length: 5 }).map((_, i) => <Star key={i} size={12} className={i < r.rating ? "fill-primary text-primary" : "text-muted-foreground/40"} />)}
+          </span>
+        ) },
+        { key: "title", label: "Title" },
+        { key: "body", label: "Body", render: (r) => <span className="text-muted-foreground line-clamp-2 max-w-md inline-block">{r.body}</span>, sortable: false },
+        { key: "is_approved", label: "Approved", render: (r) => (r.is_approved ? "✓" : "—") },
+      ]}
+      customActions={[
+        { key: "approve", label: "Approve", icon: CheckCircle2, variant: "primary", show: (r) => !r.is_approved, onClick: (r) => setApproved(r.id, true) },
+        { key: "reject", label: "Reject", icon: XCircle, variant: "destructive", show: (r) => r.is_approved, onClick: (r) => setApproved(r.id, false) },
+      ]}
+    />
   );
 }

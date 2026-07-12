@@ -1,57 +1,43 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { AdminHeader, Empty } from "@/components/admin/admin-ui";
-import { useState } from "react";
+import { SimpleCrud } from "@/components/admin/simple-crud";
+import { CheckCircle2, XCircle } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin/qa")({ component: QaAdmin });
 
 function QaAdmin() {
-  const { data, refetch } = useQuery({
-    queryKey: ["admin-qa"],
-    queryFn: async () => (await supabase.from("product_questions").select("*, products(name, slug)").order("created_at", { ascending: false })).data ?? [],
-  });
-  const [answers, setAnswers] = useState<Record<string, string>>({});
-
-  const answer = async (id: string) => {
-    const a = answers[id];
-    if (!a) return;
-    const { data: user } = await supabase.auth.getUser();
-    const { error } = await supabase.from("product_questions").update({ answer: a, answered_by: user.user?.id, answered_at: new Date().toISOString(), is_approved: true }).eq("id", id);
-    if (error) return toast.error(error.message);
-    toast.success("Answer published"); refetch();
-  };
-
-  const approve = async (id: string, is_approved: boolean) => {
-    await supabase.from("product_questions").update({ is_approved }).eq("id", id); refetch();
+  const setPublished = async (id: string, is_published: boolean) => {
+    const { error } = await supabase.from("product_questions").update({ is_published }).eq("id", id);
+    if (error) toast.error(error.message);
+    else toast.success(is_published ? "Published" : "Unpublished");
   };
 
   return (
-    <>
-      <AdminHeader title="Questions & Answers" description="Answer product questions and moderate visibility." />
-      {!data?.length ? <Empty>No questions yet</Empty> : (
-        <div className="space-y-4">
-          {data.map((q: any) => (
-            <div key={q.id} className="border border-border p-5">
-              <div className="text-xs text-muted-foreground mb-1">on {q.products?.name}</div>
-              <div className="font-serif text-lg mb-2">{q.question}</div>
-              {q.answer ? (
-                <div className="text-sm border-l-2 border-primary pl-3 mb-3">{q.answer}</div>
-              ) : (
-                <div className="space-y-2 mb-3">
-                  <textarea rows={3} value={answers[q.id] ?? ""} onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })} placeholder="Type your answer…" className="w-full bg-transparent border border-border px-3 py-2 text-sm" />
-                  <button onClick={() => answer(q.id)} className="border border-primary bg-primary text-primary-foreground px-4 py-2 text-xs uppercase tracking-[0.2em]">Publish answer</button>
-                </div>
-              )}
-              <div className="flex items-center gap-3 text-xs">
-                <label className="flex items-center gap-2"><input type="checkbox" checked={q.is_approved} onChange={(e) => approve(q.id, e.target.checked)} /> Approved</label>
-                <span className="text-muted-foreground">{new Date(q.created_at).toLocaleString()}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </>
+    <SimpleCrud
+      table="product_questions"
+      title="Product Q&A"
+      description="Customer questions and answers."
+      enableDuplicate={false}
+      orderBy={{ column: "created_at", ascending: false }}
+      searchColumns={["question", "answer"]}
+      selectQuery="*, products(name, slug)"
+      columns={[
+        { key: "created_at", label: "Date", render: (r) => new Date(r.created_at).toLocaleDateString() },
+        { key: "product", label: "Product", render: (r) => r.products?.name ?? "—", sortable: false },
+        { key: "question", label: "Question" },
+        { key: "answer", label: "Answer", render: (r) => <span className="text-muted-foreground line-clamp-2 max-w-md inline-block">{r.answer ?? "—"}</span>, sortable: false },
+        { key: "is_published", label: "Live", render: (r) => (r.is_published ? "✓" : "—") },
+      ]}
+      fields={[
+        { key: "question", label: "Question", type: "textarea", colSpan: 2 },
+        { key: "answer", label: "Answer", type: "textarea", colSpan: 2 },
+        { key: "is_published", label: "Published", type: "checkbox" },
+      ]}
+      customActions={[
+        { key: "publish", label: "Publish", icon: CheckCircle2, variant: "primary", show: (r) => !r.is_published, onClick: (r) => setPublished(r.id, true) },
+        { key: "unpublish", label: "Unpublish", icon: XCircle, show: (r) => r.is_published, onClick: (r) => setPublished(r.id, false) },
+      ]}
+    />
   );
 }

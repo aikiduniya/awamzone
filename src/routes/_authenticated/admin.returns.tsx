@@ -1,53 +1,54 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { AdminHeader, Empty } from "@/components/admin/admin-ui";
+import { SimpleCrud } from "@/components/admin/simple-crud";
+import { CheckCircle2, XCircle, PackageCheck, RotateCcw } from "lucide-react";
 import { formatMoney } from "@/lib/format";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin/returns")({ component: ReturnsAdmin });
 
-const STATUSES = ["requested", "approved", "rejected", "received", "refunded"];
-
 function ReturnsAdmin() {
-  const { data, refetch } = useQuery({
-    queryKey: ["admin-returns"],
-    queryFn: async () => (await supabase.from("return_requests").select("*, orders(order_number, total)").order("created_at", { ascending: false })).data ?? [],
-  });
-
   const setStatus = async (id: string, status: string) => {
     const { error } = await supabase.from("return_requests").update({ status }).eq("id", id);
-    if (error) return toast.error(error.message);
-    toast.success("Updated"); refetch();
+    if (error) toast.error(error.message);
+    else toast.success(`Marked ${status}`);
   };
 
   return (
-    <>
-      <AdminHeader title="Returns & Refunds" description="Approve, reject, and process customer return requests." />
-      {!data?.length ? <Empty>No return requests</Empty> : (
-        <div className="border border-border">
-          <table className="w-full text-sm">
-            <thead className="bg-secondary"><tr className="text-left">
-              <th className="p-3">Order</th><th className="p-3">Reason</th><th className="p-3">Amount</th><th className="p-3">Status</th><th className="p-3">Requested</th>
-            </tr></thead>
-            <tbody>
-              {data.map((r: any) => (
-                <tr key={r.id} className="border-t border-border">
-                  <td className="p-3 font-mono text-xs">{r.orders?.order_number ?? r.order_id.slice(0, 8)}</td>
-                  <td className="p-3 max-w-xs truncate">{r.reason}</td>
-                  <td className="p-3">{r.refund_amount ? formatMoney(r.refund_amount) : "—"}</td>
-                  <td className="p-3">
-                    <select value={r.status} onChange={(e) => setStatus(r.id, e.target.value)} className="bg-transparent border border-border px-2 py-1 text-xs">
-                      {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
-                    </select>
-                  </td>
-                  <td className="p-3 text-xs text-muted-foreground">{new Date(r.created_at).toLocaleString()}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </>
+    <SimpleCrud
+      table="return_requests"
+      title="Returns"
+      description="Customer return requests and refunds."
+      enableDuplicate={false}
+      disableCreate
+      orderBy={{ column: "created_at", ascending: false }}
+      searchColumns={["reason"]}
+      selectQuery="*, orders(order_number, total)"
+      columns={[
+        { key: "created_at", label: "Requested", render: (r) => new Date(r.created_at).toLocaleDateString() },
+        { key: "order", label: "Order", render: (r) => <span className="font-mono text-primary">{r.orders?.order_number ?? "—"}</span>, sortable: false },
+        { key: "status", label: "Status" },
+        { key: "reason", label: "Reason", render: (r) => <span className="text-muted-foreground line-clamp-2 max-w-md inline-block">{r.reason}</span>, sortable: false },
+        { key: "refund_amount", label: "Refund", render: (r) => (r.refund_amount ? formatMoney(r.refund_amount) : "—") },
+      ]}
+      fields={[
+        { key: "status", label: "Status", type: "select", options: [
+          { value: "requested", label: "Requested" },
+          { value: "approved", label: "Approved" },
+          { value: "rejected", label: "Rejected" },
+          { value: "received", label: "Received" },
+          { value: "refunded", label: "Refunded" },
+        ] },
+        { key: "refund_amount", label: "Refund amount", type: "number" },
+        { key: "reason", label: "Reason", type: "textarea", colSpan: 2 },
+        { key: "admin_notes", label: "Internal notes", type: "textarea", colSpan: 2 },
+      ]}
+      customActions={[
+        { key: "approve", label: "Approve", icon: CheckCircle2, variant: "primary", show: (r) => r.status === "requested", onClick: (r) => setStatus(r.id, "approved") },
+        { key: "reject", label: "Reject", icon: XCircle, variant: "destructive", show: (r) => r.status === "requested", onClick: (r) => setStatus(r.id, "rejected") },
+        { key: "received", label: "Mark received", icon: PackageCheck, show: (r) => r.status === "approved", onClick: (r) => setStatus(r.id, "received") },
+        { key: "refunded", label: "Mark refunded", icon: RotateCcw, variant: "primary", show: (r) => r.status === "received", onClick: (r) => setStatus(r.id, "refunded") },
+      ]}
+    />
   );
 }
