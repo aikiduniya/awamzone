@@ -2151,6 +2151,7 @@ export type Database = {
         }[]
       }
       claim_first_admin: { Args: never; Returns: boolean }
+      decrement_stock: { Args: { _items: Json }; Returns: undefined }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -2159,6 +2160,7 @@ export type Database = {
         Returns: boolean
       }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
+      restock_items: { Args: { _items: Json }; Returns: undefined }
     }
     Enums: {
       app_role: "admin" | "staff" | "customer"

@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { SiteShell } from "@/components/site/site-header";
 import { useCart } from "@/hooks/use-cart";
 import { useSession } from "@/hooks/use-session";
@@ -11,6 +12,7 @@ import {
   type FlashSale, type TaxRate, type ShippingZone, type ShippingRate,
 } from "@/lib/pricing";
 import { getPaymentAdapter } from "@/lib/payments";
+import { placeOrder as placeOrderFn } from "@/lib/checkout.functions";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
@@ -88,6 +90,8 @@ function CheckoutPage() {
 
   const method = payments?.find((p: any) => p.id === paymentId);
 
+  const placeOrderCall = useServerFn(placeOrderFn);
+
   const placeOrder = async (e: React.FormEvent) => {
     e.preventDefault();
     if (items.length === 0) return;
@@ -95,84 +99,62 @@ function CheckoutPage() {
     if (!selectedRate) return toast.error("No shipping option for your country yet.");
     setPlacing(true);
     try {
-      const orderPayload: any = {
-        user_id: user?.id ?? null,
-        email: form.email,
-        subtotal: engineSubtotal,
-        discount,
-        shipping_cost: finalShipping,
-        tax,
-        total,
-        payment_method: method.code,
-        payment_status: "pending",
-        status: "pending",
-        currency: "USD",
-        coupon_code: coupon?.coupon.code ?? null,
-        shipping_address: {
-          full_name: form.full_name, phone: form.phone, line1: form.line1, line2: form.line2,
-          city: form.city, state: form.state, postal_code: form.postal_code, country: form.country,
+      const result = await placeOrderCall({
+        data: {
+          items: engineItems.map((it) => ({
+            product_id: it.product_id,
+            variant_id: it.variant_id ?? null,
+            quantity: it.quantity,
+          })),
+          email: form.email,
+          shipping_address: {
+            full_name: form.full_name, phone: form.phone, line1: form.line1, line2: form.line2,
+            city: form.city, state: form.state, postal_code: form.postal_code, country: form.country,
+          },
+          notes: form.notes,
+          payment_method_id: method.id,
+          shipping_rate_id: selectedRate.id,
+          coupon_code: coupon?.coupon?.code ?? null,
+          user_id: user?.id ?? null,
         },
-        notes: form.notes,
-        timeline: [{ status: "pending", at: new Date().toISOString(), note: "Order placed" }],
-      };
-      const { data: order, error } = await supabase.from("orders").insert(orderPayload).select().single();
-      if (error) throw error;
-
-      const orderItems = engineItems.map((it) => {
-        const price = engineEffectivePrice(it.product, flashSales ?? []);
-        return {
-          order_id: order.id, product_id: it.product.id,
-          product_name: (it as any).product.name ?? "",
-          product_image: (it as any).product.images?.[0] ?? null,
-          quantity: it.quantity, unit_price: price, total: price * it.quantity,
-          variant_id: it.variant_id ?? null,
-        };
       });
-      await supabase.from("order_items").insert(orderItems);
 
-      // Log coupon usage
-      if (coupon?.coupon) {
-        await supabase.from("coupon_usages").insert({
-          coupon_id: coupon.coupon.id, user_id: user?.id ?? null,
-          order_id: order.id, discount_amount: discount,
-        });
-        await supabase.from("coupons").update({ used_count: (coupon.coupon.used_count ?? 0) + 1 }).eq("id", coupon.coupon.id);
-      }
-
-      // Route payment via adapter
-      const adapter = getPaymentAdapter(method.provider);
-      const result = await adapter.initiate({
+      // Route payment via adapter using server-verified totals
+      const adapter = getPaymentAdapter(result.payment.provider);
+      const payRes = await adapter.initiate({
         supabase: supabase as any,
-        orderId: order.id, orderNumber: order.order_number, amount: total, currency: "USD",
+        orderId: result.order_id, orderNumber: result.order_number,
+        amount: result.total, currency: "USD",
         customerEmail: form.email,
-        returnUrl: `${window.location.origin}/order/${order.id}`,
+        returnUrl: `${window.location.origin}/order/${result.order_id}`,
         cancelUrl: `${window.location.origin}/checkout`,
         method: {
-          id: method.id, code: method.code, provider: method.provider,
-          config: (method.config as any) ?? {}, environment: method.environment, instructions: method.instructions,
+          id: result.payment.method_id, code: result.payment.code, provider: result.payment.provider,
+          config: (result.payment.config as any) ?? {},
+          environment: result.payment.environment, instructions: result.payment.instructions,
         },
       });
 
-      if (result.kind === "failed") {
-        toast.error(result.error);
-      } else if (result.kind === "redirect") {
-        window.location.href = result.url;
+      if (payRes.kind === "failed") {
+        toast.error(payRes.error);
+      } else if (payRes.kind === "redirect") {
+        window.location.href = payRes.url;
         return;
       } else {
-        if (result.reference) {
-          await supabase.from("orders").update({ payment_reference: result.reference }).eq("id", order.id);
+        if (payRes.reference) {
+          await supabase.from("orders").update({ payment_reference: payRes.reference }).eq("id", result.order_id);
         }
-        if (result.kind === "completed") {
-          await supabase.from("orders").update({ payment_status: "paid" }).eq("id", order.id);
+        if (payRes.kind === "completed") {
+          await supabase.from("orders").update({ payment_status: "paid" }).eq("id", result.order_id);
         }
-        if (result.kind === "pending" && result.message) toast.success(result.message);
+        if (payRes.kind === "pending" && payRes.message) toast.success(payRes.message);
       }
 
       await clear.mutateAsync();
       toast.success("Order placed!");
-      navigate({ to: "/order/$id", params: { id: order.id } });
+      navigate({ to: "/order/$id", params: { id: result.order_id } });
     } catch (err: any) {
-      toast.error(err.message || "Couldn't place order");
+      toast.error(err?.message || "Couldn't place order");
     } finally {
       setPlacing(false);
     }
