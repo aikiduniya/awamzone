@@ -114,3 +114,41 @@ export function SiteFooter() {
     </footer>
   );
 }
+
+// Icon set covering all supported platforms; lucide lacks some brand marks so
+// we fall back to generic glyphs for those.
+const SOCIAL_ICONS: Record<string, { label: string; Icon: any }> = {
+  instagram: { label: "Instagram", Icon: Instagram },
+  facebook: { label: "Facebook", Icon: Facebook },
+  twitter: { label: "X (Twitter)", Icon: Twitter },
+  linkedin: { label: "LinkedIn", Icon: Linkedin },
+  youtube: { label: "YouTube", Icon: Youtube },
+  tiktok: { label: "TikTok", Icon: MessageCircle },
+  pinterest: { label: "Pinterest", Icon: MessageCircle },
+  snapchat: { label: "Snapchat", Icon: MessageCircle },
+  threads: { label: "Threads", Icon: MessageCircle },
+  telegram: { label: "Telegram", Icon: SendIcon },
+  whatsapp: { label: "WhatsApp", Icon: MessageCircle },
+  discord: { label: "Discord", Icon: MessageCircle },
+  reddit: { label: "Reddit", Icon: Github },
+};
+
+function renderSocialIcons(social: any) {
+  if (!social) return null;
+  const entries = Object.entries(social)
+    .map(([key, v]: [string, any]) => {
+      // Support both legacy flat strings and new { url, enabled, order } shape.
+      if (typeof v === "string") return { key, url: v, enabled: !!v, order: 999 };
+      return { key, url: v?.url ?? "", enabled: !!v?.enabled && !!v?.url, order: Number(v?.order ?? 999) };
+    })
+    .filter((e) => e.enabled && e.url && SOCIAL_ICONS[e.key])
+    .sort((a, b) => a.order - b.order);
+  return entries.map((e) => {
+    const { Icon, label } = SOCIAL_ICONS[e.key];
+    return (
+      <a key={e.key} href={e.url} aria-label={label} target="_blank" rel="noopener noreferrer" className="hover:text-primary">
+        <Icon size={18} />
+      </a>
+    );
+  });
+}
