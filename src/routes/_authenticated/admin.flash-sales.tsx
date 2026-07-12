@@ -22,6 +22,7 @@ const BLANK = {
 
 function FlashSalesAdmin() {
   const qc = useQueryClient();
+  const { confirm, dialog: confirmDialog } = useConfirm();
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
 
@@ -60,10 +61,18 @@ function FlashSalesAdmin() {
     qc.invalidateQueries({ queryKey: ["admin-flash"] });
   };
 
-  const del = async (id: string) => {
-    if (!confirm("Delete?")) return;
-    await supabase.from("flash_sales").delete().eq("id", id);
-    qc.invalidateQueries({ queryKey: ["admin-flash"] });
+  const del = (r: any) => {
+    confirm({
+      title: "Delete flash sale?",
+      description: `“${r.name}” will be removed.`,
+      confirmLabel: "Delete",
+      destructive: true,
+      onConfirm: async () => {
+        await supabase.from("flash_sales").delete().eq("id", r.id);
+        qc.invalidateQueries({ queryKey: ["admin-flash"] });
+        toast.success("Deleted");
+      },
+    });
   };
 
   return (

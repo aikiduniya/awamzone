@@ -130,6 +130,7 @@ function MenusAdmin() {
 
   return (
     <>
+      {confirmDialog}
       <AdminHeader title="Menus" description="Manage header, footer, mobile & sidebar navigation. Supports nested dropdowns, icons, and visibility rules." />
 
       <div className="mb-6 flex flex-wrap gap-2">
