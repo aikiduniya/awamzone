@@ -87,6 +87,7 @@ export function SiteHeader() {
           </nav>
 
           <div className="flex items-center gap-5">
+            <ThemeToggle className="hidden sm:inline-flex" />
             <Link to="/shop" aria-label="Search" className="text-foreground/80 hover:text-primary">
               <Search size={18} />
             </Link>
