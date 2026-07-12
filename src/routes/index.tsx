@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { SiteShell } from "@/components/site/site-header";
 import { ProductCard } from "@/components/site/product-card";
 import { SectionHeading } from "@/components/site/section-heading";
+import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/")({
   component: HomePage,
