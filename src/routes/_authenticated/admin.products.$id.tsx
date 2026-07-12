@@ -3,9 +3,11 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { ArrowLeft, X } from "lucide-react";
+import { ArrowLeft, Play, X, ZoomIn } from "lucide-react";
 import { MediaPicker } from "@/components/admin/media-picker";
 import { ProductVariantsEditor } from "@/components/admin/product-variants";
+import { classifyMedia } from "@/lib/media";
+import { ProductGallery } from "@/components/site/product-gallery";
 
 
 export const Route = createFileRoute("/_authenticated/admin/products/$id")({
