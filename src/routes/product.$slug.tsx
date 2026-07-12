@@ -3,12 +3,16 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { SiteShell } from "@/components/site/site-header";
 import { ProductCard } from "@/components/site/product-card";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { effectivePrice, formatMoney, discountPct } from "@/lib/format";
 import { useCart } from "@/hooks/use-cart";
 import { useSession } from "@/hooks/use-session";
 import { toast } from "sonner";
-import { Heart, Minus, Plus, Truck, ShieldCheck, RotateCcw } from "lucide-react";
+import { Heart, Minus, Plus, Truck, ShieldCheck, RotateCcw, GitCompare } from "lucide-react";
+import { toggleCompare, useCompareIds } from "@/hooks/use-compare";
+import { ProductQA } from "@/components/site/product-qa";
+import { RecentlyViewed } from "@/components/site/recently-viewed";
+import { pushRecentlyViewed } from "@/hooks/use-recently-viewed";
 
 export const Route = createFileRoute("/product/$slug")({
   head: ({ params }) => ({
@@ -73,6 +77,9 @@ function ProductPage() {
   const price = effectivePrice(product);
   const off = discountPct(product);
   const images = product.images?.length ? product.images : ["https://images.unsplash.com/photo-1601924582970-9238bcb495d9?w=1000"];
+
+  useEffect(() => { if (product?.id) pushRecentlyViewed(product.id); }, [product?.id]);
+  const compareIds = useCompareIds();
 
   const addToWishlist = async () => {
     if (!user) { toast.error("Sign in to save."); return; }
@@ -151,6 +158,9 @@ function ProductPage() {
               <button onClick={addToWishlist} className="border border-border p-4 hover:border-primary hover:text-primary transition" aria-label="Wishlist">
                 <Heart size={16} />
               </button>
+              <button onClick={() => { toggleCompare(product.id); toast.success(compareIds.includes(product.id) ? "Removed from compare" : "Added to compare"); }} className={`border p-4 transition ${compareIds.includes(product.id) ? "border-primary text-primary" : "border-border hover:border-primary hover:text-primary"}`} aria-label="Compare">
+                <GitCompare size={16} />
+              </button>
             </div>
 
             <div className="mt-10 grid grid-cols-3 gap-4 text-xs">
@@ -208,6 +218,9 @@ function ProductPage() {
             </div>
           </section>
         )}
+
+        <ProductQA productId={product.id} />
+        <RecentlyViewed excludeId={product.id} />
       </div>
     </SiteShell>
   );

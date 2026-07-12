@@ -2,8 +2,9 @@ import { createFileRoute, Link, Outlet, redirect, useLocation, useNavigate } fro
 import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@/hooks/use-session";
 import { useEffect } from "react";
-import { LayoutDashboard, Package, ShoppingCart, Tag, FolderTree, Sparkles, FileText, Settings, LogOut, Home, ImageIcon, Boxes, Ticket, Zap, Truck, Receipt, CreditCard } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingCart, Tag, FolderTree, Sparkles, FileText, Settings, LogOut, Home, ImageIcon, Boxes, Ticket, Zap, Truck, Receipt, CreditCard, Star, MessageSquare, Undo2, Users, UsersRound, Building2, Warehouse, ClipboardList, Rss, HelpCircle, MegaphoneIcon, Mail, Inbox, Send, ShieldCheck, Webhook, KeyRound, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useState } from "react";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   beforeLoad: async () => {
@@ -17,22 +18,58 @@ export const Route = createFileRoute("/_authenticated/admin")({
   component: AdminLayout,
 });
 
-const NAV = [
-  { to: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
-  { to: "/admin/products", label: "Products", icon: Package },
-  { to: "/admin/inventory", label: "Inventory", icon: Boxes },
-  { to: "/admin/orders", label: "Orders", icon: ShoppingCart },
-  { to: "/admin/categories", label: "Categories", icon: FolderTree },
-  { to: "/admin/brands", label: "Brands", icon: Tag },
-  { to: "/admin/media", label: "Media", icon: ImageIcon },
-  { to: "/admin/coupons", label: "Coupons", icon: Ticket },
-  { to: "/admin/flash-sales", label: "Flash Sales", icon: Zap },
-  { to: "/admin/shipping", label: "Shipping", icon: Truck },
-  { to: "/admin/taxes", label: "Taxes", icon: Receipt },
-  { to: "/admin/payments", label: "Payments", icon: CreditCard },
-  { to: "/admin/home-sections", label: "Homepage", icon: Sparkles },
-  { to: "/admin/pages", label: "CMS Pages", icon: FileText },
-  { to: "/admin/settings", label: "Settings", icon: Settings },
+type NavItem = { to: string; label: string; icon: any; exact?: boolean };
+type NavGroup = { label: string; items: NavItem[] };
+
+const NAV_GROUPS: NavGroup[] = [
+  { label: "Overview", items: [
+    { to: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
+  ]},
+  { label: "Catalog", items: [
+    { to: "/admin/products", label: "Products", icon: Package },
+    { to: "/admin/inventory", label: "Inventory", icon: Boxes },
+    { to: "/admin/categories", label: "Categories", icon: FolderTree },
+    { to: "/admin/brands", label: "Brands", icon: Tag },
+    { to: "/admin/media", label: "Media", icon: ImageIcon },
+  ]},
+  { label: "Sales", items: [
+    { to: "/admin/orders", label: "Orders", icon: ShoppingCart },
+    { to: "/admin/returns", label: "Returns", icon: Undo2 },
+    { to: "/admin/coupons", label: "Coupons", icon: Ticket },
+    { to: "/admin/flash-sales", label: "Flash Sales", icon: Zap },
+    { to: "/admin/shipping", label: "Shipping", icon: Truck },
+    { to: "/admin/taxes", label: "Taxes", icon: Receipt },
+    { to: "/admin/payments", label: "Payments", icon: CreditCard },
+  ]},
+  { label: "Customers", items: [
+    { to: "/admin/customers", label: "Customers", icon: Users },
+    { to: "/admin/customer-groups", label: "Groups", icon: UsersRound },
+    { to: "/admin/reviews", label: "Reviews", icon: Star },
+    { to: "/admin/qa", label: "Q&A", icon: MessageSquare },
+  ]},
+  { label: "Operations", items: [
+    { to: "/admin/suppliers", label: "Suppliers", icon: Building2 },
+    { to: "/admin/warehouses", label: "Warehouses", icon: Warehouse },
+    { to: "/admin/purchase-orders", label: "Purchase Orders", icon: ClipboardList },
+  ]},
+  { label: "Content", items: [
+    { to: "/admin/home-sections", label: "Homepage", icon: Sparkles },
+    { to: "/admin/pages", label: "CMS Pages", icon: FileText },
+    { to: "/admin/blog", label: "Blog", icon: Rss },
+    { to: "/admin/faqs", label: "FAQs", icon: HelpCircle },
+    { to: "/admin/popups", label: "Popups", icon: MegaphoneIcon },
+  ]},
+  { label: "Marketing", items: [
+    { to: "/admin/newsletter", label: "Newsletter", icon: Send },
+    { to: "/admin/email-templates", label: "Email Templates", icon: Mail },
+    { to: "/admin/contact", label: "Contact Inbox", icon: Inbox },
+  ]},
+  { label: "Platform", items: [
+    { to: "/admin/webhooks", label: "Webhooks", icon: Webhook },
+    { to: "/admin/api-keys", label: "API Keys", icon: KeyRound },
+    { to: "/admin/audit-logs", label: "Audit Logs", icon: ShieldCheck },
+    { to: "/admin/settings", label: "Settings", icon: Settings },
+  ]},
 ];
 
 function AdminLayout() {
@@ -51,23 +88,28 @@ function AdminLayout() {
           <Link to="/" className="text-xl font-serif tracking-[0.3em] text-primary">AURELIA</Link>
           <div className="text-[10px] uppercase tracking-[0.28em] text-muted-foreground mt-1">Admin</div>
         </div>
-        <nav className="flex-1 py-4">
-          {NAV.map((item) => {
-            const active = item.exact ? location.pathname === item.to : location.pathname.startsWith(item.to);
-            const Icon = item.icon;
-            return (
-              <Link
-                key={item.to}
-                to={item.to as any}
-                className={cn(
-                  "flex items-center gap-3 px-6 py-3 text-sm border-l-2 transition-colors",
-                  active ? "border-primary text-primary bg-primary/5" : "border-transparent text-muted-foreground hover:text-foreground hover:bg-secondary"
-                )}
-              >
-                <Icon size={16} /> {item.label}
-              </Link>
-            );
-          })}
+        <nav className="flex-1 py-2 overflow-y-auto">
+          {NAV_GROUPS.map((group) => (
+            <div key={group.label} className="mb-2">
+              <div className="px-6 pt-3 pb-1 text-[9px] uppercase tracking-[0.28em] text-muted-foreground/60">{group.label}</div>
+              {group.items.map((item) => {
+                const active = item.exact ? location.pathname === item.to : location.pathname.startsWith(item.to);
+                const Icon = item.icon;
+                return (
+                  <Link
+                    key={item.to}
+                    to={item.to as any}
+                    className={cn(
+                      "flex items-center gap-3 px-6 py-2 text-sm border-l-2 transition-colors",
+                      active ? "border-primary text-primary bg-primary/5" : "border-transparent text-muted-foreground hover:text-foreground hover:bg-secondary"
+                    )}
+                  >
+                    <Icon size={14} /> {item.label}
+                  </Link>
+                );
+              })}
+            </div>
+          ))}
         </nav>
         <div className="p-4 border-t border-border space-y-2">
           <Link to="/" className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-muted-foreground hover:text-primary py-2"><Home size={14} /> View store</Link>
