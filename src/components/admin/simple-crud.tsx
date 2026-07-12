@@ -149,7 +149,7 @@ export function SimpleCrud({
     queryFn: async () => {
       const from = (page - 1) * pageSize;
       const to = from + pageSize - 1;
-      let query: any = supabase.from(table as any).select("*", { count: "exact" }).order(sortCol, { ascending: sortAsc });
+      let query: any = supabase.from(table as any).select(selectQuery ?? "*", { count: "exact" }).order(sortCol, { ascending: sortAsc });
       if (debouncedQ) {
         const usable = searchCols.filter((c) => fields.some((f) => f.key === c) || ["name", "title", "email", "slug"].includes(c));
         if (usable.length) {
@@ -160,7 +160,7 @@ export function SimpleCrud({
       query = query.range(from, to);
       const { data: rows, count, error } = await query;
       if (error) {
-        const { data: fallback, count: fallbackCount } = await supabase.from(table as any).select("*", { count: "exact" }).order(sortCol, { ascending: sortAsc }).range(from, to);
+        const { data: fallback, count: fallbackCount } = await supabase.from(table as any).select(selectQuery ?? "*", { count: "exact" }).order(sortCol, { ascending: sortAsc }).range(from, to);
         return { rows: fallback ?? [], count: fallbackCount ?? 0 };
       }
       return { rows: rows ?? [], count: count ?? 0 };
@@ -257,7 +257,7 @@ export function SimpleCrud({
   };
 
   const fetchAllForExport = async () => {
-    let query: any = supabase.from(table as any).select("*").order(sortCol, { ascending: sortAsc });
+    let query: any = supabase.from(table as any).select(selectQuery ?? "*").order(sortCol, { ascending: sortAsc });
     if (debouncedQ) {
       const usable = searchCols.filter((c) => fields.some((f) => f.key === c) || ["name", "title", "email", "slug"].includes(c));
       if (usable.length) query = query.or(usable.map((c) => `${c}.ilike.%${debouncedQ}%`).join(","));
