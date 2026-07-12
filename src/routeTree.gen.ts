@@ -55,6 +55,7 @@ import { Route as AuthenticatedAdminMenusRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAdminMediaRouteImport } from './routes/_authenticated/admin.media'
 import { Route as AuthenticatedAdminInventoryRouteImport } from './routes/_authenticated/admin.inventory'
 import { Route as AuthenticatedAdminHomeSectionsRouteImport } from './routes/_authenticated/admin.home-sections'
+import { Route as AuthenticatedAdminHeroSlidesRouteImport } from './routes/_authenticated/admin.hero-slides'
 import { Route as AuthenticatedAdminFlashSalesRouteImport } from './routes/_authenticated/admin.flash-sales'
 import { Route as AuthenticatedAdminFaqsRouteImport } from './routes/_authenticated/admin.faqs'
 import { Route as AuthenticatedAdminEmailTemplatesRouteImport } from './routes/_authenticated/admin.email-templates'
@@ -316,6 +317,12 @@ const AuthenticatedAdminHomeSectionsRoute =
     path: '/home-sections',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminHeroSlidesRoute =
+  AuthenticatedAdminHeroSlidesRouteImport.update({
+    id: '/hero-slides',
+    path: '/hero-slides',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminFlashSalesRoute =
   AuthenticatedAdminFlashSalesRouteImport.update({
     id: '/flash-sales',
@@ -425,6 +432,7 @@ export interface FileRoutesByFullPath {
   '/admin/email-templates': typeof AuthenticatedAdminEmailTemplatesRoute
   '/admin/faqs': typeof AuthenticatedAdminFaqsRoute
   '/admin/flash-sales': typeof AuthenticatedAdminFlashSalesRoute
+  '/admin/hero-slides': typeof AuthenticatedAdminHeroSlidesRoute
   '/admin/home-sections': typeof AuthenticatedAdminHomeSectionsRoute
   '/admin/inventory': typeof AuthenticatedAdminInventoryRoute
   '/admin/media': typeof AuthenticatedAdminMediaRoute
@@ -484,6 +492,7 @@ export interface FileRoutesByTo {
   '/admin/email-templates': typeof AuthenticatedAdminEmailTemplatesRoute
   '/admin/faqs': typeof AuthenticatedAdminFaqsRoute
   '/admin/flash-sales': typeof AuthenticatedAdminFlashSalesRoute
+  '/admin/hero-slides': typeof AuthenticatedAdminHeroSlidesRoute
   '/admin/home-sections': typeof AuthenticatedAdminHomeSectionsRoute
   '/admin/inventory': typeof AuthenticatedAdminInventoryRoute
   '/admin/media': typeof AuthenticatedAdminMediaRoute
@@ -546,6 +555,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/email-templates': typeof AuthenticatedAdminEmailTemplatesRoute
   '/_authenticated/admin/faqs': typeof AuthenticatedAdminFaqsRoute
   '/_authenticated/admin/flash-sales': typeof AuthenticatedAdminFlashSalesRoute
+  '/_authenticated/admin/hero-slides': typeof AuthenticatedAdminHeroSlidesRoute
   '/_authenticated/admin/home-sections': typeof AuthenticatedAdminHomeSectionsRoute
   '/_authenticated/admin/inventory': typeof AuthenticatedAdminInventoryRoute
   '/_authenticated/admin/media': typeof AuthenticatedAdminMediaRoute
@@ -608,6 +618,7 @@ export interface FileRouteTypes {
     | '/admin/email-templates'
     | '/admin/faqs'
     | '/admin/flash-sales'
+    | '/admin/hero-slides'
     | '/admin/home-sections'
     | '/admin/inventory'
     | '/admin/media'
@@ -667,6 +678,7 @@ export interface FileRouteTypes {
     | '/admin/email-templates'
     | '/admin/faqs'
     | '/admin/flash-sales'
+    | '/admin/hero-slides'
     | '/admin/home-sections'
     | '/admin/inventory'
     | '/admin/media'
@@ -728,6 +740,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/email-templates'
     | '/_authenticated/admin/faqs'
     | '/_authenticated/admin/flash-sales'
+    | '/_authenticated/admin/hero-slides'
     | '/_authenticated/admin/home-sections'
     | '/_authenticated/admin/inventory'
     | '/_authenticated/admin/media'
@@ -1101,6 +1114,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminHomeSectionsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/hero-slides': {
+      id: '/_authenticated/admin/hero-slides'
+      path: '/hero-slides'
+      fullPath: '/admin/hero-slides'
+      preLoaderRoute: typeof AuthenticatedAdminHeroSlidesRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/flash-sales': {
       id: '/_authenticated/admin/flash-sales'
       path: '/flash-sales'
@@ -1222,6 +1242,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminEmailTemplatesRoute: typeof AuthenticatedAdminEmailTemplatesRoute
   AuthenticatedAdminFaqsRoute: typeof AuthenticatedAdminFaqsRoute
   AuthenticatedAdminFlashSalesRoute: typeof AuthenticatedAdminFlashSalesRoute
+  AuthenticatedAdminHeroSlidesRoute: typeof AuthenticatedAdminHeroSlidesRoute
   AuthenticatedAdminHomeSectionsRoute: typeof AuthenticatedAdminHomeSectionsRoute
   AuthenticatedAdminInventoryRoute: typeof AuthenticatedAdminInventoryRoute
   AuthenticatedAdminMediaRoute: typeof AuthenticatedAdminMediaRoute
@@ -1263,6 +1284,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminEmailTemplatesRoute: AuthenticatedAdminEmailTemplatesRoute,
   AuthenticatedAdminFaqsRoute: AuthenticatedAdminFaqsRoute,
   AuthenticatedAdminFlashSalesRoute: AuthenticatedAdminFlashSalesRoute,
+  AuthenticatedAdminHeroSlidesRoute: AuthenticatedAdminHeroSlidesRoute,
   AuthenticatedAdminHomeSectionsRoute: AuthenticatedAdminHomeSectionsRoute,
   AuthenticatedAdminInventoryRoute: AuthenticatedAdminInventoryRoute,
   AuthenticatedAdminMediaRoute: AuthenticatedAdminMediaRoute,

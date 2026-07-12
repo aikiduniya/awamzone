@@ -224,10 +224,16 @@ function SlideEditor({ value, onSave, onCancel, saving }: { value: Partial<Slide
           }>
             <div className="grid md:grid-cols-2 gap-4">
               <Field label="Desktop image" hint="Recommended 1920×900+">
-                <MediaPicker value={form.desktop_image ?? ""} onChange={(v) => set("desktop_image", v)} />
+                <div className="flex gap-2">
+                  <input className="input flex-1" value={form.desktop_image ?? ""} onChange={(e) => set("desktop_image", e.target.value)} placeholder="https://…" />
+                  <MediaPicker onPick={(urls) => set("desktop_image", urls[0])} trigger={<button type="button" className="px-3 py-2 text-xs uppercase tracking-[0.2em] border border-border">Pick</button>} />
+                </div>
               </Field>
               <Field label="Mobile image" hint="Recommended 800×1000">
-                <MediaPicker value={form.mobile_image ?? ""} onChange={(v) => set("mobile_image", v)} />
+                <div className="flex gap-2">
+                  <input className="input flex-1" value={form.mobile_image ?? ""} onChange={(e) => set("mobile_image", e.target.value)} placeholder="https://…" />
+                  <MediaPicker onPick={(urls) => set("mobile_image", urls[0])} trigger={<button type="button" className="px-3 py-2 text-xs uppercase tracking-[0.2em] border border-border">Pick</button>} />
+                </div>
               </Field>
             </div>
             <Field label="Background video URL" hint="MP4 URL. If set, video replaces the image entirely.">
