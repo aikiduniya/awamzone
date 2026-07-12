@@ -68,6 +68,7 @@ const NAV_GROUPS: NavGroup[] = [
     { to: "/admin/contact", label: "Contact Inbox", icon: Inbox },
     { to: "/admin/social", label: "Social & WhatsApp", icon: Share2 },
     { to: "/admin/notifications", label: "Notifications", icon: Bell },
+    { to: "/admin/notification-sounds", label: "Notification Sounds", icon: Volume2 },
   ]},
   { label: "Platform", items: [
     { to: "/admin/webhooks", label: "Webhooks", icon: Webhook },
