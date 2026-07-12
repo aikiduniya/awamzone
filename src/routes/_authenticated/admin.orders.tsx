@@ -5,9 +5,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { formatMoney } from "@/lib/format";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { ArrowDown, ArrowUp, ArrowUpDown, Search, X } from "lucide-react";
+import { ArrowDown, ArrowUp, ArrowUpDown, Search, X, Eye } from "lucide-react";
 import { updateOrderStatus, createShipment, refundOrder } from "@/lib/orders.functions";
 import { PaginationBar } from "@/components/admin/pagination-bar";
+import { AdminHeader, IconButton, TableSkeleton, Empty, AdminModal } from "@/components/admin/admin-ui";
 
 const STATUSES = ["pending","confirmed","processing","packed","shipped","delivered","cancelled","returned","refunded"] as const;
 const PAYMENT_STATUSES = ["pending","paid","failed","refunded","partial_refund"] as const;
@@ -135,9 +136,7 @@ function OrdersAdmin() {
 
   return (
     <>
-      <div className="flex flex-wrap gap-4 items-end justify-between mb-6">
-        <div><div className="eyebrow mb-2">Sales</div><h1 className="text-4xl font-serif">Orders</h1></div>
-      </div>
+      <AdminHeader eyebrow="Sales" title="Orders" description="Search, filter, and manage every order in one place." />
 
       <div className="flex flex-wrap items-center gap-3 mb-4">
         <div className="flex items-center gap-2 border border-border rounded px-3 py-2 flex-1 min-w-[240px] max-w-md">
