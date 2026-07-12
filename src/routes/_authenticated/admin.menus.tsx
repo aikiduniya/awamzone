@@ -47,6 +47,7 @@ type Item = {
 
 function MenusAdmin() {
   const [location, setLocation] = useState("header");
+  const { confirm, dialog: confirmDialog } = useConfirm();
 
   const { data: items = [], refetch } = useQuery({
     queryKey: ["admin-menu-items", location],
@@ -98,10 +99,18 @@ function MenusAdmin() {
     refetch();
   };
 
-  const remove = async (id: string) => {
-    if (!confirm("Delete this item (and any children)?")) return;
-    await supabase.from("menu_items").delete().eq("id", id);
-    refetch();
+  const remove = (id: string, label: string) => {
+    confirm({
+      title: "Delete menu item?",
+      description: `“${label}” and any children will be permanently removed.`,
+      confirmLabel: "Delete",
+      destructive: true,
+      onConfirm: async () => {
+        await supabase.from("menu_items").delete().eq("id", id);
+        refetch();
+        toast.success("Deleted");
+      },
+    });
   };
 
   const move = async (item: Item, dir: -1 | 1) => {
