@@ -26,6 +26,28 @@ function AccountPage() {
     queryFn: async () => (await supabase.from("wishlists").select("product_id, products(id, name, slug, price, sale_price, images)").eq("user_id", user!.id)).data ?? [],
   });
 
+  const { data: adminInfo, refetch: refetchAdmin } = useQuery({
+    queryKey: ["admin-status"],
+    queryFn: async () => {
+      const [{ data: statusRows }, { data: myRoles }] = await Promise.all([
+        supabase.rpc("admin_status"),
+        user ? supabase.from("user_roles").select("role").eq("user_id", user.id) : Promise.resolve({ data: [] as any[] }),
+      ]);
+      return {
+        hasAdmin: !!statusRows?.[0]?.has_admin,
+        isAdmin: !!myRoles?.some((r: any) => r.role === "admin" || r.role === "staff"),
+      };
+    },
+    enabled: !!user,
+  });
+
+  const claimAdmin = async () => {
+    const { data, error } = await supabase.rpc("claim_first_admin");
+    if (error) return toast.error(error.message);
+    if (data) { toast.success("You're now the admin."); refetchAdmin(); }
+    else toast.error("Admin already assigned.");
+  };
+
   const signOut = async () => {
     await supabase.auth.signOut();
     toast.success("Signed out");
@@ -42,6 +64,20 @@ function AccountPage() {
           </div>
           <button onClick={signOut} className="text-xs uppercase tracking-[0.24em] text-muted-foreground hover:text-primary">Sign out</button>
         </div>
+
+        {adminInfo && !adminInfo.hasAdmin && !adminInfo.isAdmin && (
+          <div className="border border-primary/50 bg-primary/5 p-6 mb-10">
+            <div className="eyebrow mb-2 text-primary">Store setup</div>
+            <p className="text-sm mb-4">No admin exists yet. Claim admin access to manage this store.</p>
+            <button onClick={claimAdmin} className="border border-primary bg-primary text-primary-foreground px-6 py-3 text-xs uppercase tracking-[0.24em]">Claim admin</button>
+          </div>
+        )}
+        {adminInfo?.isAdmin && (
+          <div className="mb-10 flex items-center gap-3">
+            <span className="eyebrow text-primary">You are an admin</span>
+            <Link to="/admin" className="border border-primary text-primary px-4 py-2 text-xs uppercase tracking-[0.24em] hover:bg-primary hover:text-primary-foreground transition">Go to admin</Link>
+          </div>
+        )}
 
         <section className="mb-16">
           <h2 className="text-2xl font-serif mb-6">Recent Orders</h2>
