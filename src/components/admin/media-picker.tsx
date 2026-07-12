@@ -134,16 +134,22 @@ export function MediaLibrary({ onPick, multi = false, folder }: { onPick?: (urls
           {filtered.map((a) => (
             <div key={a.id} className={cn("group relative border rounded overflow-hidden cursor-pointer", selected[a.id] && "ring-2 ring-primary")} onClick={() => toggle(a.id)}>
               {a.mime_type?.startsWith("image/") ? (
-                <img src={a.url} alt={a.alt_text ?? a.filename} className="aspect-square object-cover w-full" loading="lazy" />
+                <img src={a.url} alt={a.alt_text ?? a.filename} title={a.title ?? undefined} className="aspect-square object-cover w-full" loading="lazy" />
               ) : (
                 <div className="aspect-square grid place-items-center bg-muted"><ImageIcon size={24} /></div>
               )}
               <div className="p-1.5 text-[10px] truncate bg-background/80">{a.filename}</div>
-              <button type="button" onClick={(e) => { e.stopPropagation(); del(a); }} className="absolute top-1 right-1 p-1 rounded bg-destructive text-destructive-foreground opacity-0 group-hover:opacity-100 transition"><Trash2 size={12} /></button>
+              <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition">
+                <button type="button" onClick={(e) => { e.stopPropagation(); setEditing(a); }} className="p-1 rounded bg-background/90 border border-border" aria-label="Edit"><Pencil size={12} /></button>
+                <button type="button" onClick={(e) => { e.stopPropagation(); del(a); }} className="p-1 rounded bg-destructive text-destructive-foreground" aria-label="Delete"><Trash2 size={12} /></button>
+              </div>
             </div>
           ))}
         </div>
       )}
+
+      <MediaEditDialog asset={editing} onClose={() => setEditing(null)} onSaved={load} />
+
 
       {onPick && (
         <div className="flex justify-end pt-2 border-t">
