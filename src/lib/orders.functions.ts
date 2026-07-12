@@ -217,6 +217,10 @@ export const refundOrder = createServerFn({ method: "POST" })
         });
       }
     }
+    try {
+      const { sendOrderEmail } = await import("@/lib/order-emails.server");
+      await sendOrderEmail("refunded", order as any, { amount: data.amount });
+    } catch (e) { console.warn("[order-email] refund hook failed:", (e as Error).message); }
     return { ok: true, refunded_amount: newRefunded, full: isFull };
   });
 
