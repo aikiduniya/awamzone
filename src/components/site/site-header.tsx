@@ -48,7 +48,7 @@ export function CategoriesMenu() {
               return (
                 <div key={r.id} className="space-y-2">
                   <Link
-                    to={"/shop/" + r.slug as any}
+                    to={"/category/" + r.slug as any}
                     className="text-xs uppercase tracking-[0.2em] text-primary font-medium hover:underline"
                     onClick={() => setOpen(false)}
                   >
@@ -58,7 +58,7 @@ export function CategoriesMenu() {
                     {kids.slice(0, 6).map((k) => (
                       <li key={k.id}>
                         <Link
-                          to={"/shop/" + k.slug as any}
+                          to={"/category/" + k.slug as any}
                           className="text-xs text-foreground/70 hover:text-primary normal-case tracking-normal"
                           onClick={() => setOpen(false)}
                         >
