@@ -25,8 +25,96 @@ function HomePage() {
 
   return (
     <SiteShell>
+      <HeroBanner />
       {sections?.map((s) => <SectionRenderer key={s.id} section={s} />)}
     </SiteShell>
+  );
+}
+
+type HeroSlide = {
+  id: string;
+  title: string | null; subtitle: string | null; kicker: string | null;
+  desktop_image: string | null; mobile_image: string | null; video_url: string | null;
+  background_color: string | null; overlay_opacity: number | null;
+  text_align: string | null; text_position: string | null;
+  primary_label: string | null; primary_link: string | null;
+  secondary_label: string | null; secondary_link: string | null;
+};
+
+function HeroBanner() {
+  const { data: slides = [] } = useQuery({
+    queryKey: ["public-hero-slides"],
+    queryFn: async () => {
+      const { data } = await supabase.from("hero_slides").select("*").order("sort_order");
+      return (data ?? []) as HeroSlide[];
+    },
+  });
+  const [i, setI] = useState(0);
+  useEffect(() => {
+    if (slides.length < 2) return;
+    const t = setInterval(() => setI((n) => (n + 1) % slides.length), 6500);
+    return () => clearInterval(t);
+  }, [slides.length]);
+
+  if (!slides.length) return null;
+  const active = slides[Math.min(i, slides.length - 1)];
+  const isVideo = !!active.video_url;
+  const alignCls = active.text_align === "center" ? "mx-auto text-center items-center" : active.text_align === "right" ? "ml-auto text-right items-end" : "text-left items-start";
+  const posCls = active.text_position === "top" ? "items-start pt-24" : active.text_position === "bottom" ? "items-end pb-24" : "items-center";
+
+  return (
+    <section className="relative h-[85vh] min-h-[560px] w-full overflow-hidden" style={active.background_color ? { backgroundColor: active.background_color } : undefined}>
+      {isVideo ? (
+        <video
+          key={active.id}
+          src={active.video_url!}
+          autoPlay muted loop playsInline
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+      ) : (
+        <picture>
+          {active.mobile_image && <source media="(max-width: 640px)" srcSet={active.mobile_image} />}
+          <img
+            key={active.id}
+            src={active.desktop_image || active.mobile_image || ""}
+            alt={active.title ?? ""}
+            className="absolute inset-0 h-full w-full object-cover animate-in fade-in duration-700"
+          />
+        </picture>
+      )}
+      <div className="absolute inset-0 bg-black" style={{ opacity: active.overlay_opacity ?? 0.4 }} />
+      <div className={`container-luxe relative z-10 flex h-full ${posCls}`}>
+        <div className={`flex flex-col gap-4 max-w-xl ${alignCls}`}>
+          {active.kicker && <div className="eyebrow text-primary">{active.kicker}</div>}
+          {active.title && <h1 className="text-5xl md:text-7xl font-serif leading-[1.05] text-white drop-shadow">{active.title}</h1>}
+          {active.subtitle && <p className="text-white/90 max-w-md leading-relaxed drop-shadow">{active.subtitle}</p>}
+          <div className="mt-4 flex flex-wrap gap-3">
+            {active.primary_label && (
+              <Link to={active.primary_link || "/shop"} className="inline-flex items-center border border-primary bg-primary text-primary-foreground px-8 py-4 text-xs uppercase tracking-[0.28em] hover:opacity-90 transition">
+                {active.primary_label}
+              </Link>
+            )}
+            {active.secondary_label && (
+              <Link to={active.secondary_link || "/shop"} className="inline-flex items-center border border-white text-white px-8 py-4 text-xs uppercase tracking-[0.28em] hover:bg-white hover:text-foreground transition">
+                {active.secondary_label}
+              </Link>
+            )}
+          </div>
+        </div>
+      </div>
+      {slides.length > 1 && (
+        <div className="absolute inset-x-0 bottom-6 z-10 flex justify-center gap-2">
+          {slides.map((s, idx) => (
+            <button
+              key={s.id}
+              onClick={() => setI(idx)}
+              aria-label={`Slide ${idx + 1}`}
+              className={`h-1.5 rounded-full transition-all ${idx === i ? "w-10 bg-primary" : "w-4 bg-white/50 hover:bg-white/80"}`}
+            />
+          ))}
+        </div>
+      )}
+    </section>
   );
 }
 
