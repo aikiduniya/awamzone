@@ -143,17 +143,17 @@ function Dashboard() {
   });
 
   const cards: StatCard[] = useMemo(() => [
-    { label: "Today's Sales", value: formatMoney(data?.todaySales ?? 0), icon: DollarSign, tint: "bg-emerald-500", hint: "Since midnight" },
-    { label: "Monthly Revenue", value: formatMoney(data?.monthRevenue ?? 0), icon: TrendingUp, tint: "bg-blue-500", hint: "This month" },
-    { label: "Orders", value: data?.counts.orders ?? 0, icon: ShoppingCart, tint: "bg-indigo-500" },
-    { label: "Customers", value: data?.counts.customers ?? 0, icon: Users, tint: "bg-fuchsia-500" },
-    { label: "Products", value: data?.counts.products ?? 0, icon: Package, tint: "bg-violet-500" },
-    { label: "Pending Orders", value: data?.counts.pending ?? 0, icon: Clock, tint: "bg-amber-500" },
-    { label: "Low Stock", value: data?.counts.low ?? 0, icon: AlertTriangle, tint: "bg-orange-500" },
-    { label: "Out of Stock", value: data?.counts.out ?? 0, icon: PackageX, tint: "bg-rose-500" },
-    { label: "Returns", value: data?.counts.returns ?? 0, icon: Undo2, tint: "bg-red-500" },
-    { label: "Refunds", value: 0, icon: RefreshCcw, tint: "bg-pink-500" },
-    { label: "Revenue (6mo)", value: formatMoney(data?.totalRevenue ?? 0), icon: CalendarDays, tint: "bg-teal-500" },
+    { label: "Today's Sales", value: formatMoney(data?.todaySales ?? 0), icon: DollarSign, tint: "bg-emerald-500", hint: "Since midnight", to: "/admin/orders" },
+    { label: "Monthly Revenue", value: formatMoney(data?.monthRevenue ?? 0), icon: TrendingUp, tint: "bg-blue-500", hint: "This month", to: "/admin/orders" },
+    { label: "Orders", value: data?.counts.orders ?? 0, icon: ShoppingCart, tint: "bg-indigo-500", to: "/admin/orders" },
+    { label: "Customers", value: data?.counts.customers ?? 0, icon: Users, tint: "bg-fuchsia-500", to: "/admin/customers" },
+    { label: "Products", value: data?.counts.products ?? 0, icon: Package, tint: "bg-violet-500", to: "/admin/products" },
+    { label: "Pending Orders", value: data?.counts.pending ?? 0, icon: Clock, tint: "bg-amber-500", to: "/admin/orders" },
+    { label: "Low Stock", value: data?.counts.low ?? 0, icon: AlertTriangle, tint: "bg-orange-500", to: "/admin/inventory" },
+    { label: "Out of Stock", value: data?.counts.out ?? 0, icon: PackageX, tint: "bg-rose-500", to: "/admin/inventory" },
+    { label: "Returns", value: data?.counts.returns ?? 0, icon: Undo2, tint: "bg-red-500", to: "/admin/returns" },
+    { label: "Refunds", value: 0, icon: RefreshCcw, tint: "bg-pink-500", to: "/admin/returns" },
+    { label: "Revenue (6mo)", value: formatMoney(data?.totalRevenue ?? 0), icon: CalendarDays, tint: "bg-teal-500", to: "/admin/orders" },
     { label: "Conversion", value: `${(data?.conv ?? 0).toFixed(1)}%`, icon: Target, tint: "bg-cyan-500", hint: "Orders / Customers" },
   ], [data]);
 
