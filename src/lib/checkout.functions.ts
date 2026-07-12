@@ -5,6 +5,7 @@
 // from database rows, so the client cannot forge totals, prices or discounts.
 
 import { createServerFn } from "@tanstack/react-start";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 
 const CheckoutItem = z.object({
