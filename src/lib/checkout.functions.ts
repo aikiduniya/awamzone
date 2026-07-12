@@ -201,6 +201,12 @@ export const placeOrder = createServerFn({ method: "POST" })
         await supabaseAdmin.from("coupons").update({ used_count: (couponRow.used_count ?? 0) + 1 }).eq("id", couponRow.id);
       }
 
+      // Order confirmation email (fire-and-forget)
+      try {
+        const { sendOrderEmail } = await import("@/lib/order-emails.server");
+        await sendOrderEmail("placed", order as any);
+      } catch (e) { console.warn("[order-email] placed hook failed:", (e as Error).message); }
+
       return {
         order_id: order.id as string,
         order_number: order.order_number as string,

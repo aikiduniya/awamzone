@@ -123,6 +123,16 @@ export const updateOrderStatus = createServerFn({ method: "POST" })
         message: data.note, actor_id: context.userId,
       } as any);
     }
+    // Fire order status email (fire-and-forget)
+    try {
+      const { sendOrderEmail } = await import("@/lib/order-emails.server");
+      const eventMap: Record<string, string> = {
+        confirmed: "confirmed", shipped: "shipped", delivered: "delivered",
+        cancelled: "cancelled", refunded: "refunded", returned: "returned",
+      };
+      const ev = eventMap[data.status];
+      if (ev) await sendOrderEmail(ev as any, { ...(order as any), status: data.status } as any);
+    } catch (e) { console.warn("[order-email] status hook failed:", (e as Error).message); }
     return { ok: true };
   });
 
@@ -157,6 +167,11 @@ export const createShipment = createServerFn({ method: "POST" })
         status: "shipped" as any,
         tracking_number: data.tracking_number || null,
       }).eq("id", data.order_id);
+      try {
+        const { sendOrderEmail } = await import("@/lib/order-emails.server");
+        const { data: order } = await supabaseAdmin.from("orders").select("*").eq("id", data.order_id).maybeSingle();
+        if (order) await sendOrderEmail("shipped", order as any, { tracking_number: data.tracking_number, tracking_url: data.tracking_url });
+      } catch (e) { console.warn("[order-email] shipment hook failed:", (e as Error).message); }
     }
     return { shipment };
   });
@@ -202,6 +217,10 @@ export const refundOrder = createServerFn({ method: "POST" })
         });
       }
     }
+    try {
+      const { sendOrderEmail } = await import("@/lib/order-emails.server");
+      await sendOrderEmail("refunded", order as any, { amount: data.amount });
+    } catch (e) { console.warn("[order-email] refund hook failed:", (e as Error).message); }
     return { ok: true, refunded_amount: newRefunded, full: isFull };
   });
 
