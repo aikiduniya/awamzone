@@ -1078,6 +1078,7 @@ export type Database = {
           payment_method: string | null
           payment_reference: string | null
           payment_status: Database["public"]["Enums"]["payment_status"]
+          refunded_amount: number
           shipping_address: Json | null
           shipping_carrier: string | null
           shipping_cost: number
@@ -1103,6 +1104,7 @@ export type Database = {
           payment_method?: string | null
           payment_reference?: string | null
           payment_status?: Database["public"]["Enums"]["payment_status"]
+          refunded_amount?: number
           shipping_address?: Json | null
           shipping_carrier?: string | null
           shipping_cost?: number
@@ -1128,6 +1130,7 @@ export type Database = {
           payment_method?: string | null
           payment_reference?: string | null
           payment_status?: Database["public"]["Enums"]["payment_status"]
+          refunded_amount?: number
           shipping_address?: Json | null
           shipping_carrier?: string | null
           shipping_cost?: number
@@ -1608,6 +1611,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      rate_limits: {
+        Row: {
+          bucket: string
+          count: number
+          id: string
+          key: string
+          window_start: string
+        }
+        Insert: {
+          bucket: string
+          count?: number
+          id?: string
+          key: string
+          window_start?: string
+        }
+        Update: {
+          bucket?: string
+          count?: number
+          id?: string
+          key?: string
+          window_start?: string
+        }
+        Relationships: []
       }
       return_requests: {
         Row: {
@@ -2159,6 +2186,15 @@ export type Database = {
         }
         Returns: boolean
       }
+      hit_rate_limit: {
+        Args: {
+          _bucket: string
+          _key: string
+          _limit: number
+          _window_seconds: number
+        }
+        Returns: boolean
+      }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
       restock_items: { Args: { _items: Json }; Returns: undefined }
     }
@@ -2175,7 +2211,12 @@ export type Database = {
         | "cancelled"
         | "returned"
         | "refunded"
-      payment_status: "pending" | "paid" | "failed" | "refunded"
+      payment_status:
+        | "pending"
+        | "paid"
+        | "failed"
+        | "refunded"
+        | "partially_refunded"
       product_status: "draft" | "active" | "archived"
     }
     CompositeTypes: {
@@ -2317,7 +2358,13 @@ export const Constants = {
         "returned",
         "refunded",
       ],
-      payment_status: ["pending", "paid", "failed", "refunded"],
+      payment_status: [
+        "pending",
+        "paid",
+        "failed",
+        "refunded",
+        "partially_refunded",
+      ],
       product_status: ["draft", "active", "archived"],
     },
   },

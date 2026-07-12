@@ -1,6 +1,9 @@
-export function formatMoney(amount: number | string | null | undefined, currency = "$") {
+// Money & price helpers. Prefer `useFormatMoney()` from '@/lib/site-settings'
+// which reads currency from the admin panel. This synchronous helper accepts
+// a currency symbol override (defaults to '$') for places without React context.
+export function formatMoney(amount: number | string | null | undefined, currencySymbol = "$") {
   const n = Number(amount ?? 0);
-  return `${currency}${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  return `${currencySymbol}${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
 export function effectivePrice(p: { price: number | string; sale_price?: number | string | null }) {

@@ -1,15 +1,35 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { SiteShell } from "@/components/site/site-header";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useSession } from "@/hooks/use-session";
 import { useEffect } from "react";
+import { mergeGuestState } from "@/lib/orders.functions";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({ meta: [{ title: "Sign in | AURELIA" }] }),
   component: AuthPage,
 });
+
+const GUEST_CART_KEY = "aurelia_cart_v1";
+const GUEST_WISHLIST_KEY = "aurelia_wishlist_v1";
+
+async function pullAndClearGuestState(mergeFn: (args: any) => Promise<any>) {
+  if (typeof window === "undefined") return;
+  let cart: any[] = [];
+  let wishlist_ids: string[] = [];
+  try { cart = JSON.parse(localStorage.getItem(GUEST_CART_KEY) ?? "[]"); } catch {}
+  try { wishlist_ids = JSON.parse(localStorage.getItem(GUEST_WISHLIST_KEY) ?? "[]"); } catch {}
+  if (cart.length === 0 && wishlist_ids.length === 0) return;
+  try {
+    await mergeFn({ data: { cart, wishlist_ids } });
+    localStorage.removeItem(GUEST_CART_KEY);
+    localStorage.removeItem(GUEST_WISHLIST_KEY);
+    window.dispatchEvent(new Event("cart:update"));
+  } catch (e) { console.warn("guest merge failed", e); }
+}
 
 function AuthPage() {
   const [mode, setMode] = useState<"signin" | "signup">("signin");
@@ -19,6 +39,7 @@ function AuthPage() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { user } = useSession();
+  const mergeFn = useServerFn(mergeGuestState);
 
   useEffect(() => {
     if (user) navigate({ to: "/account" });
@@ -43,6 +64,7 @@ function AuthPage() {
         if (error) throw error;
         toast.success("Welcome back.");
       }
+      await pullAndClearGuestState(mergeFn);
       navigate({ to: "/account" });
     } catch (e: any) {
       toast.error(e.message || "Auth failed");
