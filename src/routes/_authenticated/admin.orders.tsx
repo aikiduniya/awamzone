@@ -33,7 +33,7 @@ function OrdersAdmin() {
 
   const updateStatus = async (newStatus: string) => {
     const timeline = [...(selected.timeline ?? []), { status: newStatus, at: new Date().toISOString() }];
-    const { error } = await supabase.from("orders").update({ status: newStatus, timeline }).eq("id", selected.id);
+    const { error } = await supabase.from("orders").update({ status: newStatus as any, timeline }).eq("id", selected.id);
     if (error) return toast.error(error.message);
     toast.success("Order updated"); setSelected({ ...selected, status: newStatus, timeline }); refetch();
   };
