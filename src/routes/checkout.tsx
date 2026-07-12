@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { SiteShell } from "@/components/site/site-header";
 import { useCart } from "@/hooks/use-cart";
 import { useSession } from "@/hooks/use-session";
@@ -11,6 +12,7 @@ import {
   type FlashSale, type TaxRate, type ShippingZone, type ShippingRate,
 } from "@/lib/pricing";
 import { getPaymentAdapter } from "@/lib/payments";
+import { placeOrder as placeOrderFn } from "@/lib/checkout.functions";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
