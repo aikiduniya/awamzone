@@ -103,7 +103,7 @@ function FlashSalesAdmin() {
                   <td className="p-3">{r.is_active ? "Yes" : "No"}</td>
                   <td className="p-3 text-right">
                     <Button size="icon" variant="ghost" onClick={() => openEdit(r)}><Edit size={14} /></Button>
-                    <Button size="icon" variant="ghost" onClick={() => del(r.id)}><Trash2 size={14} /></Button>
+                    <Button size="icon" variant="ghost" onClick={() => del(r)}><Trash2 size={14} /></Button>
                   </td>
                 </tr>
               ))}
