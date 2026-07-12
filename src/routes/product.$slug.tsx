@@ -14,6 +14,7 @@ import { ProductQA } from "@/components/site/product-qa";
 import { RecentlyViewed } from "@/components/site/recently-viewed";
 import { pushRecentlyViewed } from "@/hooks/use-recently-viewed";
 import { buildSeoHead } from "@/lib/seo";
+import { ProductGallery } from "@/components/site/product-gallery";
 
 export const Route = createFileRoute("/product/$slug")({
   loader: async ({ params }) => {
@@ -125,18 +126,7 @@ function ProductPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           <div>
-            <div className="aspect-[4/5] overflow-hidden bg-surface">
-              <img src={images[activeImg]} alt={product.name} className="h-full w-full object-cover" />
-            </div>
-            {images.length > 1 && (
-              <div className="mt-4 grid grid-cols-5 gap-3">
-                {images.map((img: string, i: number) => (
-                  <button key={i} onClick={() => setActiveImg(i)} className={`aspect-square overflow-hidden bg-surface ${i === activeImg ? "ring-2 ring-primary" : ""}`}>
-                    <img src={img} alt="" className="h-full w-full object-cover" />
-                  </button>
-                ))}
-              </div>
-            )}
+            <ProductGallery urls={images} alt={product.name} />
           </div>
 
           <div>
