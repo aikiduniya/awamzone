@@ -149,7 +149,7 @@ function CheckoutPage() {
         cancelUrl: `${window.location.origin}/checkout`,
         method: {
           id: method.id, code: method.code, provider: method.provider,
-          config: method.config ?? {}, environment: method.environment, instructions: method.instructions,
+          config: (method.config as any) ?? {}, environment: method.environment, instructions: method.instructions,
         },
       });
 
@@ -165,7 +165,7 @@ function CheckoutPage() {
         if (result.kind === "completed") {
           await supabase.from("orders").update({ payment_status: "paid" }).eq("id", order.id);
         }
-        if (result.message) toast.success(result.message);
+        if (result.kind === "pending" && result.message) toast.success(result.message);
       }
 
       await clear.mutateAsync();
