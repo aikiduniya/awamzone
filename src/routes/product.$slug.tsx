@@ -45,7 +45,6 @@ function ProductPage() {
   const { add } = useCart();
   const { user } = useSession();
   const [qty, setQty] = useState(1);
-  const [activeImg, setActiveImg] = useState(0);
 
   const { data: product, isLoading } = useQuery({
     queryKey: ["product", slug],
