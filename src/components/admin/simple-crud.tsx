@@ -1,9 +1,10 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { ReactNode, useState } from "react";
+import { ReactNode, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Plus, X } from "lucide-react";
+import { ArrowDown, ArrowUp, ArrowUpDown, Plus, Search, X } from "lucide-react";
 import { AdminHeader, Empty } from "./admin-ui";
+import { PaginationBar } from "./pagination-bar";
 
 export type CrudField = {
   key: string;
@@ -15,27 +16,76 @@ export type CrudField = {
   colSpan?: 1 | 2;
 };
 
+type Column = {
+  key: string;
+  label: string;
+  render?: (row: any) => ReactNode;
+  sortable?: boolean;
+};
+
 type Props = {
   table: string;
   title: string;
   description?: string;
   fields: CrudField[];
-  columns: { key: string; label: string; render?: (row: any) => ReactNode }[];
+  columns: Column[];
   orderBy?: { column: string; ascending?: boolean };
   defaults?: Record<string, any>;
   transform?: (v: any) => any;
+  searchColumns?: string[]; // columns to search (ilike). Defaults to ['name','title','email']
+  pageSizeDefault?: number;
 };
 
 function slugify(s: string) { return String(s || "").toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""); }
 
-export function SimpleCrud({ table, title, description, fields, columns, orderBy, defaults = {}, transform }: Props) {
-  const orderCol = orderBy?.column ?? "created_at";
-  const orderAsc = orderBy?.ascending ?? false;
-  const { data, refetch, isLoading } = useQuery({
-    queryKey: ["crud", table],
-    queryFn: async () => (await (supabase.from(table as any) as any).select("*").order(orderCol, { ascending: orderAsc })).data ?? [],
-  });
+export function SimpleCrud({ table, title, description, fields, columns, orderBy, defaults = {}, transform, searchColumns, pageSizeDefault = 25 }: Props) {
+  const defaultSort = orderBy?.column ?? "created_at";
+  const defaultAsc = orderBy?.ascending ?? false;
+
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(pageSizeDefault);
+  const [q, setQ] = useState("");
+  const [debouncedQ, setDebouncedQ] = useState("");
+  const [sortCol, setSortCol] = useState(defaultSort);
+  const [sortAsc, setSortAsc] = useState(defaultAsc);
   const [editing, setEditing] = useState<any>(null);
+
+  // debounce search
+  useMemo(() => {
+    const t = setTimeout(() => { setDebouncedQ(q); setPage(1); }, 300);
+    return () => clearTimeout(t);
+  }, [q]);
+
+  const searchCols = searchColumns ?? ["name", "title", "email", "slug"];
+
+  const { data, isLoading, refetch, isFetching } = useQuery({
+    queryKey: ["crud", table, page, pageSize, debouncedQ, sortCol, sortAsc],
+    placeholderData: keepPreviousData,
+    queryFn: async () => {
+      const from = (page - 1) * pageSize;
+      const to = from + pageSize - 1;
+      let query: any = supabase.from(table as any).select("*", { count: "exact" }).order(sortCol, { ascending: sortAsc });
+      if (debouncedQ) {
+        // Filter using OR ilike across allowed columns present in the fields list
+        const usable = searchCols.filter((c) => fields.some((f) => f.key === c) || c === "name" || c === "title" || c === "email" || c === "slug");
+        if (usable.length) {
+          const clause = usable.map((c) => `${c}.ilike.%${debouncedQ}%`).join(",");
+          query = query.or(clause);
+        }
+      }
+      query = query.range(from, to);
+      const { data: rows, count, error } = await query;
+      if (error) {
+        // Fallback if any search column doesn't exist on the table
+        const { data: fallback, count: fallbackCount } = await supabase.from(table as any).select("*", { count: "exact" }).order(sortCol, { ascending: sortAsc }).range(from, to);
+        return { rows: fallback ?? [], count: fallbackCount ?? 0 };
+      }
+      return { rows: rows ?? [], count: count ?? 0 };
+    },
+  });
+
+  const rows = data?.rows ?? [];
+  const total = data?.count ?? 0;
 
   const blank = () => {
     const o: any = { ...defaults };
@@ -50,10 +100,8 @@ export function SimpleCrud({ table, title, description, fields, columns, orderBy
   const save = async () => {
     if (!editing) return;
     let payload: any = { ...editing };
-    // Auto-slug
     if ("slug" in payload && "name" in payload && !payload.slug) payload.slug = slugify(payload.name);
     if ("slug" in payload && "title" in payload && !payload.slug) payload.slug = slugify(payload.title);
-    // Datetime empty → null
     fields.forEach((f) => {
       if (f.type === "datetime" && payload[f.key] === "") payload[f.key] = null;
       if (f.type === "number") payload[f.key] = Number(payload[f.key]) || 0;
@@ -77,30 +125,79 @@ export function SimpleCrud({ table, title, description, fields, columns, orderBy
     toast.success("Deleted"); refetch();
   };
 
+  const toggleSort = (key: string) => {
+    if (sortCol === key) setSortAsc((v) => !v);
+    else { setSortCol(key); setSortAsc(true); }
+    setPage(1);
+  };
+
   return (
     <>
       <AdminHeader title={title} description={description} actions={
         <button onClick={() => setEditing(blank())} className="inline-flex items-center gap-2 border border-primary bg-primary text-primary-foreground px-4 py-2 text-xs uppercase tracking-[0.2em]"><Plus size={14} /> New</button>
       } />
-      {isLoading ? <div className="text-sm text-muted-foreground">Loading…</div> : !data?.length ? <Empty>No records yet</Empty> : (
-        <div className="border border-border overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-secondary"><tr className="text-left">
-              {columns.map((c) => <th key={c.key} className="p-3 text-xs uppercase tracking-[0.18em] text-muted-foreground">{c.label}</th>)}
-              <th />
-            </tr></thead>
-            <tbody>
-              {data.map((row: any) => (
-                <tr key={row.id} className="border-t border-border">
-                  {columns.map((c) => <td key={c.key} className="p-3 align-top">{c.render ? c.render(row) : String(row[c.key] ?? "—")}</td>)}
-                  <td className="p-3 text-right whitespace-nowrap">
-                    <button onClick={() => setEditing({ ...row })} className="text-primary text-xs uppercase tracking-[0.2em] mr-3">Edit</button>
-                    <button onClick={() => remove(row.id)} className="text-destructive text-xs uppercase tracking-[0.2em]">Delete</button>
-                  </td>
+
+      <div className="flex flex-wrap items-center gap-3 mb-4">
+        <div className="flex items-center gap-2 border border-border rounded px-3 py-2 flex-1 max-w-md">
+          <Search size={14} className="text-muted-foreground" />
+          <input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder={`Search ${title.toLowerCase()}…`}
+            className="flex-1 bg-transparent text-sm focus:outline-none"
+          />
+          {q && (
+            <button onClick={() => setQ("")} className="text-muted-foreground hover:text-foreground" aria-label="Clear">
+              <X size={12} />
+            </button>
+          )}
+        </div>
+        {isFetching && <span className="text-xs text-muted-foreground">Loading…</span>}
+      </div>
+
+      {isLoading ? (
+        <div className="text-sm text-muted-foreground">Loading…</div>
+      ) : rows.length === 0 && !debouncedQ ? (
+        <Empty>No records yet</Empty>
+      ) : (
+        <div className="border border-border rounded">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-secondary">
+                <tr className="text-left">
+                  {columns.map((c) => {
+                    const canSort = c.sortable !== false && !c.render;
+                    const active = sortCol === c.key;
+                    return (
+                      <th key={c.key} className="p-3 text-xs uppercase tracking-[0.18em] text-muted-foreground">
+                        {canSort ? (
+                          <button onClick={() => toggleSort(c.key)} className="inline-flex items-center gap-1 hover:text-foreground">
+                            {c.label}
+                            {active ? (sortAsc ? <ArrowUp size={11} /> : <ArrowDown size={11} />) : <ArrowUpDown size={11} className="opacity-40" />}
+                          </button>
+                        ) : c.label}
+                      </th>
+                    );
+                  })}
+                  <th />
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {rows.length === 0 ? (
+                  <tr><td colSpan={columns.length + 1} className="p-6 text-center text-muted-foreground">No results for “{debouncedQ}”.</td></tr>
+                ) : rows.map((row: any) => (
+                  <tr key={row.id} className="border-t border-border hover:bg-secondary/40">
+                    {columns.map((c) => <td key={c.key} className="p-3 align-top">{c.render ? c.render(row) : String(row[c.key] ?? "—")}</td>)}
+                    <td className="p-3 text-right whitespace-nowrap">
+                      <button onClick={() => setEditing({ ...row })} className="text-primary text-xs uppercase tracking-[0.2em] mr-3">Edit</button>
+                      <button onClick={() => remove(row.id)} className="text-destructive text-xs uppercase tracking-[0.2em]">Delete</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <PaginationBar page={page} pageSize={pageSize} total={total} onPage={setPage} onPageSize={(n) => { setPageSize(n); setPage(1); }} />
         </div>
       )}
 
