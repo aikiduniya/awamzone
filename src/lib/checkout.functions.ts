@@ -5,6 +5,7 @@
 // from database rows, so the client cannot forge totals, prices or discounts.
 
 import { createServerFn } from "@tanstack/react-start";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 
 const CheckoutItem = z.object({
@@ -224,14 +225,29 @@ export const placeOrder = createServerFn({ method: "POST" })
   });
 
 // Cancel or restock server function — restocks items and marks order cancelled.
+// Auth-guarded: caller must own the order (or be an admin). Guest orders
+// cannot be self-cancelled through this endpoint.
 const CancelInput = z.object({ order_id: z.string().uuid() });
 export const cancelOrder = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((raw: unknown) => CancelInput.parse(raw))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: order } = await supabaseAdmin.from("orders").select("*").eq("id", data.order_id).maybeSingle();
     if (!order) throw new Error("Order not found");
-    if ((order as any).status === "cancelled") return { ok: true };
+
+    const { data: isAdmin } = await context.supabase.rpc("is_admin", { _user_id: context.userId });
+    const ownerId = (order as any).user_id as string | null;
+    if (!isAdmin && (!ownerId || ownerId !== context.userId)) {
+      throw new Error("Forbidden");
+    }
+    // Only allow cancelling orders that haven't shipped yet
+    const status = (order as any).status as string;
+    if (!isAdmin && !["pending", "confirmed", "processing"].includes(status)) {
+      throw new Error("This order can no longer be cancelled");
+    }
+    if (status === "cancelled") return { ok: true };
+
     const { data: items } = await supabaseAdmin.from("order_items").select("product_id,variant_id,quantity").eq("order_id", data.order_id);
     if (items?.length) {
       await supabaseAdmin.rpc("restock_items", {
@@ -239,7 +255,7 @@ export const cancelOrder = createServerFn({ method: "POST" })
       });
     }
     const timeline = Array.isArray((order as any).timeline) ? (order as any).timeline : [];
-    timeline.push({ status: "cancelled", at: new Date().toISOString(), note: "Order cancelled" });
+    timeline.push({ status: "cancelled", at: new Date().toISOString(), note: "Order cancelled by user" });
     await supabaseAdmin.from("orders").update({ status: "cancelled", timeline }).eq("id", data.order_id);
     return { ok: true };
   });
