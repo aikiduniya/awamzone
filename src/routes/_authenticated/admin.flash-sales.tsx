@@ -77,6 +77,7 @@ function FlashSalesAdmin() {
 
   return (
     <div>
+      {confirmDialog}
       <AdminHeader title="Flash Sales & Deal of the Day" description="Schedule limited-time discounts on products or categories." actions={
         <Button onClick={openNew}><Plus size={14} className="mr-1" /> New sale</Button>
       } />
