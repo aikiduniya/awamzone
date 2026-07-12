@@ -1,4 +1,4 @@
-// Admin notification bell: badge, dropdown list, mark-read, realtime + sound.
+// Admin notification bell: badge, dropdown list, mark-read, realtime + per-type sound.
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
@@ -16,6 +16,12 @@ type N = {
   created_at: string;
 };
 
+type SoundConfig = {
+  enabled?: boolean;
+  volume?: number;
+  sounds?: Record<string, string>;
+};
+
 const SOUND_KEY = "aurelia-notif-sound";
 
 export function NotificationBell() {
@@ -25,14 +31,19 @@ export function NotificationBell() {
     typeof window === "undefined" ? true : localStorage.getItem(SOUND_KEY) !== "off",
   );
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const configRef = useRef<SoundConfig | null>(null);
 
-  const { data: settings } = useQuery({
-    queryKey: ["settings", "notifications_settings"],
+  const { data: config } = useQuery({
+    queryKey: ["settings", "notification_sounds"],
     queryFn: async () => {
-      const { data } = await supabase.from("site_settings").select("value").eq("key", "notifications_settings").maybeSingle();
-      return (data?.value ?? null) as { sound_url?: string; sound_enabled?: boolean } | null;
+      const { data } = await supabase.from("site_settings").select("value").eq("key", "notification_sounds").maybeSingle();
+      return (data?.value ?? null) as SoundConfig | null;
     },
   });
+
+  useEffect(() => {
+    configRef.current = config ?? null;
+  }, [config]);
 
   const { data: rows = [] } = useQuery({
     queryKey: ["admin-notifications"],
@@ -49,23 +60,36 @@ export function NotificationBell() {
 
   const unread = useMemo(() => rows.filter((r) => !r.is_read).length, [rows]);
 
+  const playForType = (type: string | null | undefined) => {
+    if (!soundOn) return;
+    const cfg = configRef.current;
+    if (cfg?.enabled === false) return;
+    const url = (type && cfg?.sounds?.[type]) || cfg?.sounds?.default;
+    if (!url) return;
+    const el = audioRef.current;
+    if (!el) return;
+    try {
+      el.src = url;
+      el.volume = typeof cfg?.volume === "number" ? Math.max(0, Math.min(1, cfg.volume)) : 0.7;
+      el.play().catch(() => {});
+    } catch {}
+  };
+
   // Realtime subscription
   useEffect(() => {
     const channel = supabase
       .channel("admin-notifications")
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "notifications" }, () => {
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "notifications" }, (payload) => {
         qc.invalidateQueries({ queryKey: ["admin-notifications"] });
-        if (soundOn && settings?.sound_enabled !== false) {
-          try {
-            audioRef.current?.play().catch(() => {});
-          } catch {}
-        }
+        const type = (payload.new as any)?.type as string | null | undefined;
+        playForType(type);
       })
       .subscribe();
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [qc, soundOn, settings?.sound_enabled]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [qc, soundOn]);
 
   const markRead = async (id: string) => {
     await supabase.from("notifications").update({ is_read: true }).eq("id", id);
@@ -85,14 +109,9 @@ export function NotificationBell() {
     if (typeof window !== "undefined") localStorage.setItem(SOUND_KEY, next ? "on" : "off");
   };
 
-  const soundUrl =
-    settings?.sound_url ||
-    // A short, free notification chime encoded as data URI (silent fallback if blocked)
-    "data:audio/mpeg;base64,";
-
   return (
     <div className="relative">
-      <audio ref={audioRef} src={soundUrl} preload="auto" />
+      <audio ref={audioRef} preload="none" />
       <button
         onClick={() => setOpen((v) => !v)}
         className="relative h-9 w-9 inline-flex items-center justify-center rounded-full hover:bg-secondary text-foreground/80 hover:text-primary transition"
@@ -116,6 +135,9 @@ export function NotificationBell() {
                 <button onClick={toggleSound} className="text-muted-foreground hover:text-primary" title={soundOn ? "Mute" : "Unmute"}>
                   {soundOn ? <Volume2 size={14} /> : <VolumeX size={14} />}
                 </button>
+                <Link to="/admin/notification-sounds" onClick={() => setOpen(false)} className="text-xs text-muted-foreground hover:text-primary" title="Configure sounds">
+                  Configure
+                </Link>
                 <button onClick={markAll} className="text-xs text-muted-foreground hover:text-primary inline-flex items-center gap-1" title="Mark all as read">
                   <CheckCheck size={12} /> Mark all
                 </button>
