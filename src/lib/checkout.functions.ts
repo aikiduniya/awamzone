@@ -198,9 +198,7 @@ export const placeOrder = createServerFn({ method: "POST" })
           order_id: order.id,
           discount_amount: discount,
         } as any);
-        await supabaseAdmin.rpc("increment_coupon_usage" as any, { _id: couponRow.id }).catch(async () => {
-          await supabaseAdmin.from("coupons").update({ used_count: (couponRow.used_count ?? 0) + 1 }).eq("id", couponRow.id);
-        });
+        await supabaseAdmin.from("coupons").update({ used_count: (couponRow.used_count ?? 0) + 1 }).eq("id", couponRow.id);
       }
 
       return {
