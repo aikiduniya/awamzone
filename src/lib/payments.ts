@@ -56,27 +56,60 @@ const bankTransferAdapter: PaymentAdapter = {
   },
 };
 
+// Mock card gateway — production-shaped Payment Intent flow with no real
+// network calls. Accepts card-shaped input (Luhn-validated), simulates a
+// short auth delay, and returns a `completed` result with a fake txn ref.
+// Swap for real Stripe by re-implementing this adapter.
+function luhnValid(num: string) {
+  const digits = num.replace(/\D/g, "").split("").reverse().map(Number);
+  if (digits.length < 12) return false;
+  let sum = 0;
+  digits.forEach((d, i) => {
+    if (i % 2 === 1) { d *= 2; if (d > 9) d -= 9; }
+    sum += d;
+  });
+  return sum % 10 === 0;
+}
+
+const mockCardAdapter: PaymentAdapter = {
+  provider: "mock_card",
+  async initiate({ orderNumber, amount, currency, method }) {
+    const card = (method.config?.__runtime_card ?? {}) as { number?: string; exp?: string; cvc?: string };
+    // Well-known Stripe test triggers, so QA can simulate failures too.
+    const num = (card.number ?? "").replace(/\s+/g, "");
+    if (!num || !luhnValid(num)) {
+      return { kind: "failed", error: "Invalid card number" };
+    }
+    if (num === "4000000000000002") return { kind: "failed", error: "Card declined (test)" };
+    if (num === "4000000000009995") return { kind: "failed", error: "Insufficient funds (test)" };
+    // Simulate provider auth latency
+    await new Promise((r) => setTimeout(r, 400));
+    const ref = `mock_${orderNumber}_${Date.now().toString(36)}`;
+    console.info(`[mock_card] Authorized ${amount} ${currency} → ${ref}`);
+    return { kind: "completed", reference: ref };
+  },
+};
+
 const stripeAdapter: PaymentAdapter = {
   provider: "stripe",
   async initiate({ method }) {
-    // The Lovable-managed Stripe checkout integration is enabled separately
-    // through the payments--enable_stripe_payments tool. When active, the
-    // frontend calls the generated /api/checkout endpoint. Until then we
-    // gracefully fall back to pending so orders still capture.
     const hasKey = !!method.config?.publishable_key;
     if (!hasKey) {
       return {
-        kind: "pending",
-        message: "Stripe not fully configured yet — the order is recorded and can be captured manually.",
+        kind: "failed",
+        error: "Stripe isn't configured yet. Add publishable + secret keys in Admin → Payments, or use the Test Card gateway.",
       };
     }
-    return { kind: "pending", message: "Stripe checkout will be initiated from the order summary." };
+    return { kind: "pending", message: "Stripe hosted checkout will be initiated." };
   },
 };
 
 const paypalAdapter: PaymentAdapter = {
   provider: "paypal",
-  async initiate() {
+  async initiate({ method }) {
+    if (!method.config?.client_id) {
+      return { kind: "failed", error: "PayPal isn't configured yet. Add the client ID in Admin → Payments." };
+    }
     return { kind: "pending", message: "PayPal checkout coming soon — the order is recorded." };
   },
 };
@@ -89,9 +122,10 @@ const manualAdapter: PaymentAdapter = {
 };
 
 const registry = new Map<string, PaymentAdapter>();
-[codAdapter, bankTransferAdapter, stripeAdapter, paypalAdapter, manualAdapter].forEach((a) => registry.set(a.provider, a));
+[codAdapter, bankTransferAdapter, mockCardAdapter, stripeAdapter, paypalAdapter, manualAdapter].forEach((a) => registry.set(a.provider, a));
 
 export function registerPaymentAdapter(a: PaymentAdapter) { registry.set(a.provider, a); }
 export function getPaymentAdapter(provider: string): PaymentAdapter {
   return registry.get(provider) ?? manualAdapter;
 }
+

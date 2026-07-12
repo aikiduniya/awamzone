@@ -20,9 +20,10 @@ const BLANK = {
 };
 
 const PROVIDERS = [
+  { value: "mock_card", label: "Test Card (Mock)", note: "Simulated card checkout for development & QA. Any Luhn-valid number succeeds; 4000000000000002 = declined, 4000000000009995 = insufficient funds. No real charges. Swap for Stripe/PayPal later without changing checkout code." },
   { value: "cod", label: "Cash on Delivery", note: "Customer pays cash on delivery. No API keys needed." },
   { value: "bank_transfer", label: "Bank Transfer", note: "Show your bank details in the instructions box." },
-  { value: "stripe", label: "Stripe", note: "Use the Stripe integration; secret keys are stored securely as backend secrets." },
+  { value: "stripe", label: "Stripe", note: "Configure once you have a Stripe account. Publishable key goes here; server-side secret is stored as STRIPE_SECRET_KEY backend secret." },
   { value: "paypal", label: "PayPal", note: "PayPal REST checkout (client id / secret stored as backend secrets)." },
   { value: "manual", label: "Manual / Custom", note: "Order marked pending; admin follows up." },
 ];

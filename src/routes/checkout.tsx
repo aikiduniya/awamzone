@@ -37,6 +37,7 @@ function CheckoutPage() {
   const [paymentId, setPaymentId] = useState<string>("");
   const [couponCode, setCouponCode] = useState("");
   const [coupon, setCoupon] = useState<any>(null);
+  const [card, setCard] = useState({ number: "", exp: "", cvc: "" });
 
   const { data: zones } = useQuery({
     queryKey: ["site-zones"],
@@ -130,7 +131,7 @@ function CheckoutPage() {
         cancelUrl: `${window.location.origin}/checkout`,
         method: {
           id: result.payment.method_id, code: result.payment.code, provider: result.payment.provider,
-          config: (result.payment.config as any) ?? {},
+          config: { ...((result.payment.config as any) ?? {}), __runtime_card: card },
           environment: result.payment.environment, instructions: result.payment.instructions,
         },
       });
@@ -226,6 +227,22 @@ function CheckoutPage() {
                         <div className="text-xs text-muted-foreground">{p.description}</div>
                         {paymentId === p.id && p.instructions && (
                           <div className="mt-2 text-xs text-muted-foreground bg-surface p-3 whitespace-pre-line">{p.instructions}</div>
+                        )}
+                        {paymentId === p.id && (p.provider === "mock_card" || p.provider === "stripe") && (
+                          <div className="mt-3 grid grid-cols-3 gap-2">
+                            <input required value={card.number} onChange={(e) => setCard({ ...card, number: e.target.value })}
+                                   placeholder="Card number (try 4242 4242 4242 4242)" inputMode="numeric" autoComplete="cc-number"
+                                   className="col-span-3 bg-transparent border border-border px-3 py-2 text-sm" />
+                            <input required value={card.exp} onChange={(e) => setCard({ ...card, exp: e.target.value })}
+                                   placeholder="MM/YY" autoComplete="cc-exp"
+                                   className="bg-transparent border border-border px-3 py-2 text-sm" />
+                            <input required value={card.cvc} onChange={(e) => setCard({ ...card, cvc: e.target.value })}
+                                   placeholder="CVC" autoComplete="cc-csc" inputMode="numeric"
+                                   className="bg-transparent border border-border px-3 py-2 text-sm" />
+                            {p.provider === "mock_card" && (
+                              <div className="col-span-3 text-[10px] text-muted-foreground">Test mode — no real charges. Declined: <code>4000 0000 0000 0002</code>. Insufficient funds: <code>4000 0000 0000 9995</code>.</div>
+                            )}
+                          </div>
                         )}
                       </div>
                     </div>
