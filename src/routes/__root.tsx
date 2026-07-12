@@ -123,8 +123,13 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <AnalyticsInjector />
       <Outlet />
+      <PopupRenderer />
       <Toaster theme="dark" position="top-right" />
     </QueryClientProvider>
   );
 }
+
+import { PopupRenderer } from "@/components/site/popup-renderer";
+import { AnalyticsInjector } from "@/components/site/analytics-injector";
