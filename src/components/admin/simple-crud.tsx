@@ -540,7 +540,6 @@ export function SimpleCrud({
         </div>
       )}
 
-      <MoreHorizontal className="hidden" aria-hidden="true" />
     </TooltipProvider>
   );
 }
