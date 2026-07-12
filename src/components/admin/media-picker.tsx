@@ -18,6 +18,9 @@ export type MediaAsset = {
   mime_type: string | null;
   size_bytes: number | null;
   alt_text: string | null;
+  title?: string | null;
+  caption?: string | null;
+  description?: string | null;
   created_at: string;
   url?: string;
 };
