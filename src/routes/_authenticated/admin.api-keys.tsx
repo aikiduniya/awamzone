@@ -46,22 +46,6 @@ function ApiKeysAdmin() {
 
   return (
     <>
-      <AdminHeader title="API Keys" description="Grant programmatic access to your storefront and admin APIs." actions={
-        <button onClick={() => setCreating(true)} className="inline-flex items-center gap-2 border border-primary bg-primary text-primary-foreground px-4 py-2 text-xs uppercase tracking-[0.2em]"><Plus size={14} /> New Key</button>
-      } />
-      {!data?.length ? <Empty>No API keys yet.</Empty> : (
-        <div className="border border-border">
-          <table className="w-full text-sm">
-            <thead className="bg-secondary"><tr className="text-left"><th className="p-3">Name</th><th className="p-3">Prefix</th><th className="p-3">Scopes</th><th className="p-3">Last used</th><th /></tr></thead>
-            <tbody>
-              {data.map((k) => (
-                <tr key={k.id} className="border-t border-border">
-                  <td className="p-3">{k.name}</td>
-                  <td className="p-3 font-mono text-xs">{k.key_prefix}…</td>
-                  <td className="p-3 text-xs text-muted-foreground">{(k.scopes || []).join(", ")}</td>
-                  <td className="p-3 text-xs">{k.last_used_at ? new Date(k.last_used_at).toLocaleString() : "Never"}</td>
-                  <td className="p-3 text-right">
-    <>
       {confirmDialog}
       <AdminHeader title="API Keys" description="Grant programmatic access to your storefront and admin APIs." actions={
         <button onClick={() => setCreating(true)} className="inline-flex items-center gap-2 border border-primary bg-primary text-primary-foreground px-4 py-2 text-xs uppercase tracking-[0.2em]"><Plus size={14} /> New Key</button>
