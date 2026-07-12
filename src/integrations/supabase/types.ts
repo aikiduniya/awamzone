@@ -1609,6 +1609,30 @@ export type Database = {
           },
         ]
       }
+      rate_limits: {
+        Row: {
+          bucket: string
+          count: number
+          id: string
+          key: string
+          window_start: string
+        }
+        Insert: {
+          bucket: string
+          count?: number
+          id?: string
+          key: string
+          window_start?: string
+        }
+        Update: {
+          bucket?: string
+          count?: number
+          id?: string
+          key?: string
+          window_start?: string
+        }
+        Relationships: []
+      }
       return_requests: {
         Row: {
           admin_notes: string | null
@@ -2156,6 +2180,15 @@ export type Database = {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
+        }
+        Returns: boolean
+      }
+      hit_rate_limit: {
+        Args: {
+          _bucket: string
+          _key: string
+          _limit: number
+          _window_seconds: number
         }
         Returns: boolean
       }
