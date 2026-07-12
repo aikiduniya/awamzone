@@ -203,7 +203,7 @@ function SlideEditor({ value, onSave, onCancel, saving }: { value: Partial<Slide
 
   return (
     <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm-sm grid place-items-center p-4 overflow-auto">
-      <div className="w-full max-w-3xl bg-card border border-border rounded-lg my-8">
+      <div className="w-full max-w-3xl bg-background border border-border rounded shadow-xl my-8 animate-in zoom-in-95 duration-150">
         <div className="p-6 border-b border-border flex items-center justify-between">
           <h2 className="font-serif text-xl">{form.id ? "Edit slide" : "New slide"}</h2>
           <button onClick={onCancel} className="text-muted-foreground hover:text-foreground">✕</button>
