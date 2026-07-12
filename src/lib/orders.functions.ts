@@ -123,6 +123,16 @@ export const updateOrderStatus = createServerFn({ method: "POST" })
         message: data.note, actor_id: context.userId,
       } as any);
     }
+    // Fire order status email (fire-and-forget)
+    try {
+      const { sendOrderEmail } = await import("@/lib/order-emails.server");
+      const eventMap: Record<string, string> = {
+        confirmed: "confirmed", shipped: "shipped", delivered: "delivered",
+        cancelled: "cancelled", refunded: "refunded", returned: "returned",
+      };
+      const ev = eventMap[data.status];
+      if (ev) await sendOrderEmail(ev as any, { ...(order as any), status: data.status } as any);
+    } catch (e) { console.warn("[order-email] status hook failed:", (e as Error).message); }
     return { ok: true };
   });
 
