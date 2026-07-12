@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Instagram, Facebook, Twitter, Youtube } from "lucide-react";
+import { Instagram, Facebook, Twitter, Youtube, Linkedin, Github, MessageCircle, Send as SendIcon } from "lucide-react";
 import { useSession } from "@/hooks/use-session";
 import { filterMenu, MenuLink } from "./site-header";
 
@@ -62,11 +62,8 @@ export function SiteFooter() {
           <p className="mt-4 text-sm text-muted-foreground max-w-sm leading-relaxed">
             {footer.about ?? "A curated luxury marketplace for modern essentials."}
           </p>
-          <div className="mt-6 flex gap-4 text-muted-foreground">
-            {social.instagram && <a href={social.instagram} aria-label="Instagram" className="hover:text-primary"><Instagram size={18} /></a>}
-            {social.facebook && <a href={social.facebook} aria-label="Facebook" className="hover:text-primary"><Facebook size={18} /></a>}
-            {social.twitter && <a href={social.twitter} aria-label="Twitter" className="hover:text-primary"><Twitter size={18} /></a>}
-            {social.youtube && <a href={social.youtube} aria-label="YouTube" className="hover:text-primary"><Youtube size={18} /></a>}
+          <div className="mt-6 flex flex-wrap gap-4 text-muted-foreground">
+            {renderSocialIcons(social)}
           </div>
         </div>
 
