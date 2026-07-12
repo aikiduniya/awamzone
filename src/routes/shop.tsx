@@ -67,7 +67,7 @@ function Shop() {
     },
   });
 
-  const update = (patch: Partial<Search>) => navigate({ search: (p) => ({ ...p, ...patch }) as any });
+  const update = (patch: Partial<Search>) => navigate({ search: (p: Search) => ({ ...p, ...patch }) as any });
 
   return (
     <SiteShell>
