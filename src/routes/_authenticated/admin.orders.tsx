@@ -158,15 +158,15 @@ function OrdersAdmin() {
         {isFetching && <span className="text-xs text-muted-foreground">Loading…</span>}
       </div>
 
-      <div className="border border-border rounded">
+      <div className="border border-border rounded bg-background">
         <div className="overflow-x-auto">
           {isLoading ? (
-            <div className="p-8 text-center text-sm text-muted-foreground">Loading…</div>
+            <TableSkeleton cols={7} />
           ) : rows.length === 0 ? (
-            <div className="p-12 text-center text-sm text-muted-foreground">No orders match this filter.</div>
+            <Empty>No orders match this filter.</Empty>
           ) : (
             <table className="w-full text-sm min-w-[720px]">
-              <thead className="bg-surface">
+              <thead className="bg-secondary sticky top-0 z-10">
                 <tr className="text-left">
                   {th("Order", "order_number")}
                   {th("Date", "created_at")}
@@ -174,7 +174,7 @@ function OrdersAdmin() {
                   {th("Status", "status")}
                   {th("Payment", "payment_status")}
                   {th("Total", "total")}
-                  <th />
+                  <th className="p-4 text-right sticky right-0 bg-secondary" />
                 </tr>
               </thead>
               <tbody>
@@ -186,7 +186,9 @@ function OrdersAdmin() {
                     <td className="p-4 text-xs uppercase tracking-[0.2em]">{o.status}</td>
                     <td className="p-4 text-xs uppercase tracking-[0.2em]">{o.payment_status}</td>
                     <td className="p-4 text-right">{formatMoney(o.total)}</td>
-                    <td className="p-4 text-right"><button onClick={() => openOrder(o.id)} className="text-primary text-xs uppercase tracking-[0.2em]">View</button></td>
+                    <td className="p-4 text-right sticky right-0 bg-background">
+                      <IconButton label="View order" icon={Eye} variant="primary" onClick={() => openOrder(o.id)} />
+                    </td>
                   </tr>
                 ))}
               </tbody>
