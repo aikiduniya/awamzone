@@ -199,7 +199,7 @@ function OrdersAdmin() {
       </div>
 
       {selected && (
-        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 overflow-auto p-4 animate-in fade-in duration-150" onClick={() => setSelected(null)}>
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm-sm z-50 overflow-auto p-4 animate-in fade-in duration-150" onClick={() => setSelected(null)}>
           <div className="bg-background border border-border rounded shadow-xl max-w-4xl mx-auto my-8 p-6 md:p-8 animate-in zoom-in-95 duration-150" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-start justify-between mb-6">
               <div>

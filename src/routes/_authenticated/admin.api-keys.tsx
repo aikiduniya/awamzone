@@ -58,7 +58,7 @@ function ApiKeysAdmin() {
       )}
 
       {creating && (
-        <div className="fixed inset-0 bg-background/80 backdrop-blur flex items-center justify-center p-4 z-50" onClick={() => setCreating(false)}>
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center p-4 z-50" onClick={() => setCreating(false)}>
           <div className="bg-surface border border-border w-full max-w-lg p-6" onClick={(e) => e.stopPropagation()}>
             <div className="flex justify-between items-center mb-6"><h3 className="font-serif text-2xl">New API Key</h3><button onClick={() => setCreating(false)}><X /></button></div>
             <input placeholder="Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="w-full bg-transparent border border-border px-3 py-2 mb-4" />
@@ -77,7 +77,7 @@ function ApiKeysAdmin() {
       )}
 
       {newKey && (
-        <div className="fixed inset-0 bg-background/80 backdrop-blur flex items-center justify-center p-4 z-50">
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-surface border border-primary w-full max-w-lg p-6">
             <h3 className="font-serif text-2xl mb-2">Your API key</h3>
             <p className="text-sm text-muted-foreground mb-4">Copy this key now. It will not be shown again.</p>
