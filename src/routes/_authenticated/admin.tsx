@@ -2,9 +2,11 @@ import { createFileRoute, Link, Outlet, redirect, useLocation, useNavigate } fro
 import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@/hooks/use-session";
 import { useEffect } from "react";
-import { LayoutDashboard, Package, ShoppingCart, Tag, FolderTree, Sparkles, FileText, Settings, LogOut, Home, ImageIcon, Boxes, Ticket, Zap, Truck, Receipt, CreditCard, Star, MessageSquare, Undo2, Users, UsersRound, Building2, Warehouse, ClipboardList, Rss, HelpCircle, MegaphoneIcon, Mail, Inbox, Send, ShieldCheck, Webhook, KeyRound, ChevronDown, Menu as MenuIcon } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingCart, Tag, FolderTree, Sparkles, FileText, Settings, LogOut, Home, ImageIcon, Boxes, Ticket, Zap, Truck, Receipt, CreditCard, Star, MessageSquare, Undo2, Users, UsersRound, Building2, Warehouse, ClipboardList, Rss, HelpCircle, MegaphoneIcon, Mail, Inbox, Send, ShieldCheck, Webhook, KeyRound, ChevronDown, Menu as MenuIcon, Share2, Bell } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
+import { NotificationBell } from "@/components/admin/notification-bell";
+import { ThemeToggle } from "@/components/site/theme-toggle";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   beforeLoad: async () => {
@@ -64,6 +66,8 @@ const NAV_GROUPS: NavGroup[] = [
     { to: "/admin/newsletter", label: "Newsletter", icon: Send },
     { to: "/admin/email-templates", label: "Email Templates", icon: Mail },
     { to: "/admin/contact", label: "Contact Inbox", icon: Inbox },
+    { to: "/admin/social", label: "Social & WhatsApp", icon: Share2 },
+    { to: "/admin/notifications", label: "Notifications", icon: Bell },
   ]},
   { label: "Platform", items: [
     { to: "/admin/webhooks", label: "Webhooks", icon: Webhook },
@@ -120,6 +124,10 @@ function AdminLayout() {
         </div>
       </aside>
       <main className="flex-1 overflow-auto">
+        <div className="sticky top-0 z-30 flex items-center justify-end gap-3 border-b border-border bg-background/85 backdrop-blur px-6 h-14">
+          <ThemeToggle />
+          <NotificationBell />
+        </div>
         <div className="p-8 max-w-7xl mx-auto">
           <Outlet />
         </div>

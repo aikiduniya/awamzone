@@ -131,6 +131,7 @@ function RootComponent() {
         <AnalyticsInjector />
         <Outlet />
         <PopupRenderer />
+        <WhatsAppWidget />
         <Toaster theme="dark" position="top-right" />
       </ThemeProvider>
     </QueryClientProvider>
@@ -140,3 +141,4 @@ function RootComponent() {
 import { PopupRenderer } from "@/components/site/popup-renderer";
 import { AnalyticsInjector } from "@/components/site/analytics-injector";
 import { ThemeProvider } from "@/components/site/theme-provider";
+import { WhatsAppWidget } from "@/components/site/whatsapp-widget";

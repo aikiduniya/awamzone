@@ -24,6 +24,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProductSlugRouteImport } from './routes/product.$slug'
 import { Route as PagesSlugRouteImport } from './routes/pages.$slug'
 import { Route as OrderIdRouteImport } from './routes/order.$id'
+import { Route as InvoiceOrderIdRouteImport } from './routes/invoice.$orderId'
 import { Route as CategorySlugRouteImport } from './routes/category.$slug'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
@@ -34,6 +35,7 @@ import { Route as AuthenticatedAdminWarehousesRouteImport } from './routes/_auth
 import { Route as AuthenticatedAdminThemeRouteImport } from './routes/_authenticated/admin.theme'
 import { Route as AuthenticatedAdminTaxesRouteImport } from './routes/_authenticated/admin.taxes'
 import { Route as AuthenticatedAdminSuppliersRouteImport } from './routes/_authenticated/admin.suppliers'
+import { Route as AuthenticatedAdminSocialRouteImport } from './routes/_authenticated/admin.social'
 import { Route as AuthenticatedAdminSmtpRouteImport } from './routes/_authenticated/admin.smtp'
 import { Route as AuthenticatedAdminShippingRouteImport } from './routes/_authenticated/admin.shipping'
 import { Route as AuthenticatedAdminSettingsRouteImport } from './routes/_authenticated/admin.settings'
@@ -46,6 +48,7 @@ import { Route as AuthenticatedAdminPopupsRouteImport } from './routes/_authenti
 import { Route as AuthenticatedAdminPaymentsRouteImport } from './routes/_authenticated/admin.payments'
 import { Route as AuthenticatedAdminPagesRouteImport } from './routes/_authenticated/admin.pages'
 import { Route as AuthenticatedAdminOrdersRouteImport } from './routes/_authenticated/admin.orders'
+import { Route as AuthenticatedAdminNotificationsRouteImport } from './routes/_authenticated/admin.notifications'
 import { Route as AuthenticatedAdminNewsletterRouteImport } from './routes/_authenticated/admin.newsletter'
 import { Route as AuthenticatedAdminMenusRouteImport } from './routes/_authenticated/admin.menus'
 import { Route as AuthenticatedAdminMediaRouteImport } from './routes/_authenticated/admin.media'
@@ -139,6 +142,11 @@ const OrderIdRoute = OrderIdRouteImport.update({
   path: '/order/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const InvoiceOrderIdRoute = InvoiceOrderIdRouteImport.update({
+  id: '/invoice/$orderId',
+  path: '/invoice/$orderId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CategorySlugRoute = CategorySlugRouteImport.update({
   id: '/category/$slug',
   path: '/category/$slug',
@@ -190,6 +198,12 @@ const AuthenticatedAdminSuppliersRoute =
   AuthenticatedAdminSuppliersRouteImport.update({
     id: '/suppliers',
     path: '/suppliers',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminSocialRoute =
+  AuthenticatedAdminSocialRouteImport.update({
+    id: '/social',
+    path: '/social',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const AuthenticatedAdminSmtpRoute = AuthenticatedAdminSmtpRouteImport.update({
@@ -259,6 +273,12 @@ const AuthenticatedAdminOrdersRoute =
   AuthenticatedAdminOrdersRouteImport.update({
     id: '/orders',
     path: '/orders',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminNotificationsRoute =
+  AuthenticatedAdminNotificationsRouteImport.update({
+    id: '/notifications',
+    path: '/notifications',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const AuthenticatedAdminNewsletterRoute =
@@ -382,6 +402,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/blog/$slug': typeof BlogSlugRoute
   '/category/$slug': typeof CategorySlugRoute
+  '/invoice/$orderId': typeof InvoiceOrderIdRoute
   '/order/$id': typeof OrderIdRoute
   '/pages/$slug': typeof PagesSlugRoute
   '/product/$slug': typeof ProductSlugRoute
@@ -402,6 +423,7 @@ export interface FileRoutesByFullPath {
   '/admin/media': typeof AuthenticatedAdminMediaRoute
   '/admin/menus': typeof AuthenticatedAdminMenusRoute
   '/admin/newsletter': typeof AuthenticatedAdminNewsletterRoute
+  '/admin/notifications': typeof AuthenticatedAdminNotificationsRoute
   '/admin/orders': typeof AuthenticatedAdminOrdersRoute
   '/admin/pages': typeof AuthenticatedAdminPagesRoute
   '/admin/payments': typeof AuthenticatedAdminPaymentsRoute
@@ -414,6 +436,7 @@ export interface FileRoutesByFullPath {
   '/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/admin/shipping': typeof AuthenticatedAdminShippingRoute
   '/admin/smtp': typeof AuthenticatedAdminSmtpRoute
+  '/admin/social': typeof AuthenticatedAdminSocialRoute
   '/admin/suppliers': typeof AuthenticatedAdminSuppliersRoute
   '/admin/taxes': typeof AuthenticatedAdminTaxesRoute
   '/admin/theme': typeof AuthenticatedAdminThemeRoute
@@ -437,6 +460,7 @@ export interface FileRoutesByTo {
   '/account': typeof AuthenticatedAccountRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/category/$slug': typeof CategorySlugRoute
+  '/invoice/$orderId': typeof InvoiceOrderIdRoute
   '/order/$id': typeof OrderIdRoute
   '/pages/$slug': typeof PagesSlugRoute
   '/product/$slug': typeof ProductSlugRoute
@@ -457,6 +481,7 @@ export interface FileRoutesByTo {
   '/admin/media': typeof AuthenticatedAdminMediaRoute
   '/admin/menus': typeof AuthenticatedAdminMenusRoute
   '/admin/newsletter': typeof AuthenticatedAdminNewsletterRoute
+  '/admin/notifications': typeof AuthenticatedAdminNotificationsRoute
   '/admin/orders': typeof AuthenticatedAdminOrdersRoute
   '/admin/pages': typeof AuthenticatedAdminPagesRoute
   '/admin/payments': typeof AuthenticatedAdminPaymentsRoute
@@ -469,6 +494,7 @@ export interface FileRoutesByTo {
   '/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/admin/shipping': typeof AuthenticatedAdminShippingRoute
   '/admin/smtp': typeof AuthenticatedAdminSmtpRoute
+  '/admin/social': typeof AuthenticatedAdminSocialRoute
   '/admin/suppliers': typeof AuthenticatedAdminSuppliersRoute
   '/admin/taxes': typeof AuthenticatedAdminTaxesRoute
   '/admin/theme': typeof AuthenticatedAdminThemeRoute
@@ -495,6 +521,7 @@ export interface FileRoutesById {
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/blog/$slug': typeof BlogSlugRoute
   '/category/$slug': typeof CategorySlugRoute
+  '/invoice/$orderId': typeof InvoiceOrderIdRoute
   '/order/$id': typeof OrderIdRoute
   '/pages/$slug': typeof PagesSlugRoute
   '/product/$slug': typeof ProductSlugRoute
@@ -515,6 +542,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/media': typeof AuthenticatedAdminMediaRoute
   '/_authenticated/admin/menus': typeof AuthenticatedAdminMenusRoute
   '/_authenticated/admin/newsletter': typeof AuthenticatedAdminNewsletterRoute
+  '/_authenticated/admin/notifications': typeof AuthenticatedAdminNotificationsRoute
   '/_authenticated/admin/orders': typeof AuthenticatedAdminOrdersRoute
   '/_authenticated/admin/pages': typeof AuthenticatedAdminPagesRoute
   '/_authenticated/admin/payments': typeof AuthenticatedAdminPaymentsRoute
@@ -527,6 +555,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/_authenticated/admin/shipping': typeof AuthenticatedAdminShippingRoute
   '/_authenticated/admin/smtp': typeof AuthenticatedAdminSmtpRoute
+  '/_authenticated/admin/social': typeof AuthenticatedAdminSocialRoute
   '/_authenticated/admin/suppliers': typeof AuthenticatedAdminSuppliersRoute
   '/_authenticated/admin/taxes': typeof AuthenticatedAdminTaxesRoute
   '/_authenticated/admin/theme': typeof AuthenticatedAdminThemeRoute
@@ -553,6 +582,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/blog/$slug'
     | '/category/$slug'
+    | '/invoice/$orderId'
     | '/order/$id'
     | '/pages/$slug'
     | '/product/$slug'
@@ -573,6 +603,7 @@ export interface FileRouteTypes {
     | '/admin/media'
     | '/admin/menus'
     | '/admin/newsletter'
+    | '/admin/notifications'
     | '/admin/orders'
     | '/admin/pages'
     | '/admin/payments'
@@ -585,6 +616,7 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/shipping'
     | '/admin/smtp'
+    | '/admin/social'
     | '/admin/suppliers'
     | '/admin/taxes'
     | '/admin/theme'
@@ -608,6 +640,7 @@ export interface FileRouteTypes {
     | '/account'
     | '/blog/$slug'
     | '/category/$slug'
+    | '/invoice/$orderId'
     | '/order/$id'
     | '/pages/$slug'
     | '/product/$slug'
@@ -628,6 +661,7 @@ export interface FileRouteTypes {
     | '/admin/media'
     | '/admin/menus'
     | '/admin/newsletter'
+    | '/admin/notifications'
     | '/admin/orders'
     | '/admin/pages'
     | '/admin/payments'
@@ -640,6 +674,7 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/shipping'
     | '/admin/smtp'
+    | '/admin/social'
     | '/admin/suppliers'
     | '/admin/taxes'
     | '/admin/theme'
@@ -665,6 +700,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin'
     | '/blog/$slug'
     | '/category/$slug'
+    | '/invoice/$orderId'
     | '/order/$id'
     | '/pages/$slug'
     | '/product/$slug'
@@ -685,6 +721,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/media'
     | '/_authenticated/admin/menus'
     | '/_authenticated/admin/newsletter'
+    | '/_authenticated/admin/notifications'
     | '/_authenticated/admin/orders'
     | '/_authenticated/admin/pages'
     | '/_authenticated/admin/payments'
@@ -697,6 +734,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/settings'
     | '/_authenticated/admin/shipping'
     | '/_authenticated/admin/smtp'
+    | '/_authenticated/admin/social'
     | '/_authenticated/admin/suppliers'
     | '/_authenticated/admin/taxes'
     | '/_authenticated/admin/theme'
@@ -720,6 +758,7 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   WishlistRoute: typeof WishlistRoute
   CategorySlugRoute: typeof CategorySlugRoute
+  InvoiceOrderIdRoute: typeof InvoiceOrderIdRoute
   OrderIdRoute: typeof OrderIdRoute
   PagesSlugRoute: typeof PagesSlugRoute
   ProductSlugRoute: typeof ProductSlugRoute
@@ -832,6 +871,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OrderIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/invoice/$orderId': {
+      id: '/invoice/$orderId'
+      path: '/invoice/$orderId'
+      fullPath: '/invoice/$orderId'
+      preLoaderRoute: typeof InvoiceOrderIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/category/$slug': {
       id: '/category/$slug'
       path: '/category/$slug'
@@ -900,6 +946,13 @@ declare module '@tanstack/react-router' {
       path: '/suppliers'
       fullPath: '/admin/suppliers'
       preLoaderRoute: typeof AuthenticatedAdminSuppliersRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/social': {
+      id: '/_authenticated/admin/social'
+      path: '/social'
+      fullPath: '/admin/social'
+      preLoaderRoute: typeof AuthenticatedAdminSocialRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/admin/smtp': {
@@ -984,6 +1037,13 @@ declare module '@tanstack/react-router' {
       path: '/orders'
       fullPath: '/admin/orders'
       preLoaderRoute: typeof AuthenticatedAdminOrdersRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/notifications': {
+      id: '/_authenticated/admin/notifications'
+      path: '/notifications'
+      fullPath: '/admin/notifications'
+      preLoaderRoute: typeof AuthenticatedAdminNotificationsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/admin/newsletter': {
@@ -1147,6 +1207,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminMediaRoute: typeof AuthenticatedAdminMediaRoute
   AuthenticatedAdminMenusRoute: typeof AuthenticatedAdminMenusRoute
   AuthenticatedAdminNewsletterRoute: typeof AuthenticatedAdminNewsletterRoute
+  AuthenticatedAdminNotificationsRoute: typeof AuthenticatedAdminNotificationsRoute
   AuthenticatedAdminOrdersRoute: typeof AuthenticatedAdminOrdersRoute
   AuthenticatedAdminPagesRoute: typeof AuthenticatedAdminPagesRoute
   AuthenticatedAdminPaymentsRoute: typeof AuthenticatedAdminPaymentsRoute
@@ -1159,6 +1220,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminSettingsRoute: typeof AuthenticatedAdminSettingsRoute
   AuthenticatedAdminShippingRoute: typeof AuthenticatedAdminShippingRoute
   AuthenticatedAdminSmtpRoute: typeof AuthenticatedAdminSmtpRoute
+  AuthenticatedAdminSocialRoute: typeof AuthenticatedAdminSocialRoute
   AuthenticatedAdminSuppliersRoute: typeof AuthenticatedAdminSuppliersRoute
   AuthenticatedAdminTaxesRoute: typeof AuthenticatedAdminTaxesRoute
   AuthenticatedAdminThemeRoute: typeof AuthenticatedAdminThemeRoute
@@ -1185,6 +1247,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminMediaRoute: AuthenticatedAdminMediaRoute,
   AuthenticatedAdminMenusRoute: AuthenticatedAdminMenusRoute,
   AuthenticatedAdminNewsletterRoute: AuthenticatedAdminNewsletterRoute,
+  AuthenticatedAdminNotificationsRoute: AuthenticatedAdminNotificationsRoute,
   AuthenticatedAdminOrdersRoute: AuthenticatedAdminOrdersRoute,
   AuthenticatedAdminPagesRoute: AuthenticatedAdminPagesRoute,
   AuthenticatedAdminPaymentsRoute: AuthenticatedAdminPaymentsRoute,
@@ -1197,6 +1260,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminSettingsRoute: AuthenticatedAdminSettingsRoute,
   AuthenticatedAdminShippingRoute: AuthenticatedAdminShippingRoute,
   AuthenticatedAdminSmtpRoute: AuthenticatedAdminSmtpRoute,
+  AuthenticatedAdminSocialRoute: AuthenticatedAdminSocialRoute,
   AuthenticatedAdminSuppliersRoute: AuthenticatedAdminSuppliersRoute,
   AuthenticatedAdminTaxesRoute: AuthenticatedAdminTaxesRoute,
   AuthenticatedAdminThemeRoute: AuthenticatedAdminThemeRoute,
@@ -1245,6 +1309,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   WishlistRoute: WishlistRoute,
   CategorySlugRoute: CategorySlugRoute,
+  InvoiceOrderIdRoute: InvoiceOrderIdRoute,
   OrderIdRoute: OrderIdRoute,
   PagesSlugRoute: PagesSlugRoute,
   ProductSlugRoute: ProductSlugRoute,
