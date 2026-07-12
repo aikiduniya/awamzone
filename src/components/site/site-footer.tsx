@@ -74,7 +74,7 @@ export function SiteFooter() {
           <div className="eyebrow mb-4">House</div>
           <ul className="space-y-2 text-sm">
             {col("footer_1").map((m) => (
-              <li key={m.id}><Link to={m.url as any} className="text-muted-foreground hover:text-primary">{m.label}</Link></li>
+              <li key={m.id}><MenuLink item={m} className="text-muted-foreground hover:text-primary">{m.label}</MenuLink></li>
             ))}
           </ul>
         </div>
@@ -82,7 +82,7 @@ export function SiteFooter() {
           <div className="eyebrow mb-4">Service</div>
           <ul className="space-y-2 text-sm">
             {col("footer_2").map((m) => (
-              <li key={m.id}><Link to={m.url as any} className="text-muted-foreground hover:text-primary">{m.label}</Link></li>
+              <li key={m.id}><MenuLink item={m} className="text-muted-foreground hover:text-primary">{m.label}</MenuLink></li>
             ))}
           </ul>
         </div>
@@ -110,7 +110,7 @@ export function SiteFooter() {
         <div>{footer.copyright ?? "© AURELIA. All rights reserved."}</div>
         <div className="flex gap-6">
           {col("footer_3").map((m) => (
-            <Link key={m.id} to={m.url as any} className="hover:text-primary">{m.label}</Link>
+            <MenuLink key={m.id} item={m} className="hover:text-primary">{m.label}</MenuLink>
           ))}
         </div>
       </div>
