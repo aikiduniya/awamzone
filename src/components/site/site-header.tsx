@@ -26,6 +26,70 @@ export function AnnouncementBar() {
   );
 }
 
+type MenuItem = {
+  id: string;
+  label: string;
+  url: string;
+  target: string | null;
+  visibility: string | null;
+  role_required: string | null;
+  css_class: string | null;
+  location: string;
+};
+
+// Client-side filter mirroring `visibility` semantics from admin.menus.
+export function filterMenu(items: MenuItem[] | undefined, ctx: { authenticated: boolean; isAdmin: boolean }) {
+  return (items ?? []).filter((m) => {
+    switch (m.visibility) {
+      case "guests":
+        return !ctx.authenticated;
+      case "authenticated":
+        return ctx.authenticated;
+      case "admin":
+        return ctx.isAdmin;
+      case "everyone":
+      case null:
+      case undefined:
+      default:
+        return true;
+    }
+  });
+}
+
+// Renders either a same-origin <Link> or an external <a> depending on target.
+export function MenuLink({
+  item,
+  className,
+  onClick,
+  children,
+}: {
+  item: MenuItem;
+  className?: string;
+  onClick?: () => void;
+  children: React.ReactNode;
+}) {
+  const external = item.target === "_blank" || /^https?:\/\//i.test(item.url);
+  const merged = cn(className, item.css_class);
+  if (external) {
+    return (
+      <a
+        href={item.url}
+        target={item.target ?? "_blank"}
+        rel={item.target === "_blank" ? "noopener noreferrer" : undefined}
+        className={merged}
+        onClick={onClick}
+      >
+        {children}
+      </a>
+    );
+  }
+  return (
+    <Link to={item.url as any} className={merged} onClick={onClick}>
+      {children}
+    </Link>
+  );
+}
+
 export function SiteHeader() {
   const { count } = useCart();
   const { user, isAdmin } = useSession();
@@ -36,11 +100,11 @@ export function SiteHeader() {
     queryFn: async () => {
       const { data } = await supabase
         .from("menu_items")
-        .select("*")
+        .select("id,label,url,target,visibility,role_required,css_class,location")
         .eq("location", "header")
         .eq("is_active", true)
         .order("sort_order");
-      return data ?? [];
+      return (data ?? []) as MenuItem[];
     },
   });
 
@@ -53,6 +117,7 @@ export function SiteHeader() {
   });
 
   const siteName = branding?.site_name ?? "AURELIA";
+  const items = filterMenu(menu, { authenticated: !!user, isAdmin });
 
   return (
     <>
@@ -76,14 +141,10 @@ export function SiteHeader() {
           </Link>
 
           <nav className="hidden md:flex items-center gap-8 text-xs uppercase tracking-[0.24em]">
-            {menu?.map((m) => (
-              <Link
-                key={m.id}
-                to={m.url as any}
-                className="text-foreground/80 hover:text-primary transition-colors"
-              >
+            {items.map((m) => (
+              <MenuLink key={m.id} item={m} className="text-foreground/80 hover:text-primary transition-colors">
                 {m.label}
-              </Link>
+              </MenuLink>
             ))}
           </nav>
 
@@ -123,10 +184,10 @@ export function SiteHeader() {
         {mobileOpen && (
           <nav className="md:hidden border-t border-border bg-background">
             <div className="container-luxe flex flex-col py-4 gap-3 text-sm uppercase tracking-[0.2em]">
-              {menu?.map((m) => (
-                <Link key={m.id} to={m.url as any} onClick={() => setMobileOpen(false)} className="py-2">
+              {items.map((m) => (
+                <MenuLink key={m.id} item={m} onClick={() => setMobileOpen(false)} className="py-2">
                   {m.label}
-                </Link>
+                </MenuLink>
               ))}
               {isAdmin && <Link to="/admin" onClick={() => setMobileOpen(false)} className="text-primary py-2">Admin</Link>}
             </div>
