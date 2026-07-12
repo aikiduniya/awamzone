@@ -136,6 +136,8 @@ export function MediaLibrary({ onPick, multi = false, folder }: { onPick?: (urls
             <div key={a.id} className={cn("group relative border rounded overflow-hidden cursor-pointer", selected[a.id] && "ring-2 ring-primary")} onClick={() => toggle(a.id)}>
               {a.mime_type?.startsWith("image/") ? (
                 <img src={a.url} alt={a.alt_text ?? a.filename} title={a.title ?? undefined} className="aspect-square object-cover w-full" loading="lazy" />
+              ) : a.mime_type?.startsWith("video/") ? (
+                <video src={a.url} className="aspect-square object-cover w-full bg-black" muted playsInline preload="metadata" />
               ) : (
                 <div className="aspect-square grid place-items-center bg-muted"><ImageIcon size={24} /></div>
               )}
