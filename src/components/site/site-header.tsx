@@ -1,12 +1,81 @@
 import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Search, ShoppingBag, User as UserIcon, Menu, X } from "lucide-react";
+import { Search, ShoppingBag, User as UserIcon, Menu, X, ChevronDown } from "lucide-react";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useCart } from "@/hooks/use-cart";
 import { useSession } from "@/hooks/use-session";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/site/theme-toggle";
+
+type Category = { id: string; name: string; slug: string; parent_id: string | null; image_url: string | null };
+
+export function CategoriesMenu() {
+  const [open, setOpen] = useState(false);
+  const { data: cats } = useQuery({
+    queryKey: ["header", "categories"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("categories")
+        .select("id,name,slug,parent_id,image_url")
+        .eq("is_active", true)
+        .order("sort_order")
+        .order("name");
+      return (data ?? []) as Category[];
+    },
+  });
+  const roots = (cats ?? []).filter((c) => !c.parent_id);
+  const childrenOf = (id: string) => (cats ?? []).filter((c) => c.parent_id === id);
+  if (roots.length === 0) return null;
+
+  return (
+    <div
+      className="relative"
+      onMouseEnter={() => setOpen(true)}
+      onMouseLeave={() => setOpen(false)}
+    >
+      <button
+        className="flex items-center gap-1 text-foreground/80 hover:text-primary transition-colors"
+        onClick={() => setOpen((v) => !v)}
+      >
+        Shop <ChevronDown size={12} />
+      </button>
+      {open && (
+        <div className="absolute left-1/2 top-full -translate-x-1/2 pt-4 z-50">
+          <div className="bg-background border border-border shadow-xl rounded-md p-6 grid grid-cols-3 gap-6 min-w-[560px]">
+            {roots.slice(0, 6).map((r) => {
+              const kids = childrenOf(r.id);
+              return (
+                <div key={r.id} className="space-y-2">
+                  <Link
+                    to={"/category/" + r.slug as any}
+                    className="text-xs uppercase tracking-[0.2em] text-primary font-medium hover:underline"
+                    onClick={() => setOpen(false)}
+                  >
+                    {r.name}
+                  </Link>
+                  <ul className="space-y-1">
+                    {kids.slice(0, 6).map((k) => (
+                      <li key={k.id}>
+                        <Link
+                          to={"/category/" + k.slug as any}
+                          className="text-xs text-foreground/70 hover:text-primary normal-case tracking-normal"
+                          onClick={() => setOpen(false)}
+                        >
+                          {k.name}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function AnnouncementBar() {
   const { data } = useQuery({
@@ -141,6 +210,7 @@ export function SiteHeader() {
           </Link>
 
           <nav className="hidden md:flex items-center gap-8 text-xs uppercase tracking-[0.24em]">
+            <CategoriesMenu />
             {items.map((m) => (
               <MenuLink key={m.id} item={m} className="text-foreground/80 hover:text-primary transition-colors">
                 {m.label}

@@ -6,6 +6,7 @@ import { useSession } from "@/hooks/use-session";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { formatMoney } from "@/lib/format";
+import { useSiteSettings } from "@/lib/site-settings";
 import {
   effectivePrice as engineEffectivePrice, findZoneForCountry,
   calculateShipping, rateApplies, calculateTax, validateCoupon,
@@ -26,6 +27,7 @@ function CheckoutPage() {
   const { user } = useSession();
   const navigate = useNavigate();
   const [placing, setPlacing] = useState(false);
+  const settings = useSiteSettings();
 
   const [form, setForm] = useState({
     email: user?.email ?? "",
@@ -125,7 +127,7 @@ function CheckoutPage() {
       const payRes = await adapter.initiate({
         supabase: supabase as any,
         orderId: result.order_id, orderNumber: result.order_number,
-        amount: result.total, currency: "USD",
+        amount: result.total, currency: settings.currency,
         customerEmail: form.email,
         returnUrl: `${window.location.origin}/order/${result.order_id}`,
         cancelUrl: `${window.location.origin}/checkout`,

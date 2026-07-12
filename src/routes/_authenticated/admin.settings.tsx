@@ -58,7 +58,21 @@ function SettingsAdmin() {
           {renderField("branding", "tagline")}
           {renderField("branding", "logo_url", "Logo URL")}
           {renderField("branding", "favicon_url", "Favicon URL")}
-          {renderField("branding", "currency", "Currency (e.g. USD)")}
+          <label className="block">
+            <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground mb-1">Currency</div>
+            <select
+              value={values.branding?.currency ?? "USD"}
+              onChange={(e) => {
+                const map: Record<string, string> = { USD: "$", EUR: "€", GBP: "£", INR: "₹", PKR: "Rs", AED: "AED ", SAR: "SAR ", JPY: "¥", CAD: "$", AUD: "$", CNY: "¥", TRY: "₺", BRL: "R$", ZAR: "R", NGN: "₦", KRW: "₩", RUB: "₽", MXN: "$" };
+                setValues({ ...values, branding: { ...(values.branding ?? {}), currency: e.target.value, currency_symbol: map[e.target.value] ?? "$" } });
+              }}
+              className="w-full bg-transparent border border-border px-3 py-2"
+            >
+              {["USD","EUR","GBP","INR","PKR","AED","SAR","JPY","CAD","AUD","CNY","TRY","BRL","ZAR","NGN","KRW","RUB","MXN"].map((c) => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
+          </label>
           {renderField("branding", "currency_symbol", "Currency symbol")}
           <button onClick={() => save("branding")} className="border border-primary bg-primary text-primary-foreground px-4 py-2 text-xs uppercase tracking-[0.2em]">Save</button>
         </section>
