@@ -441,15 +441,17 @@ export function SimpleCrud({
                           <TooltipContent>View</TooltipContent>
                         </Tooltip>
                       )}
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <button onClick={() => setEditing({ ...row })} className="h-8 w-8 grid place-items-center rounded hover:bg-secondary text-foreground/80 hover:text-primary" aria-label="Edit">
-                            <Pencil size={14} />
-                          </button>
-                        </TooltipTrigger>
-                        <TooltipContent>Edit</TooltipContent>
-                      </Tooltip>
-                      {enableDuplicate && (
+                      {canEdit && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <button onClick={() => setEditing({ ...row })} className="h-8 w-8 grid place-items-center rounded hover:bg-secondary text-foreground/80 hover:text-primary" aria-label="Edit">
+                              <Pencil size={14} />
+                            </button>
+                          </TooltipTrigger>
+                          <TooltipContent>Edit</TooltipContent>
+                        </Tooltip>
+                      )}
+                      {canDuplicate && (
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <button onClick={() => duplicateRow(row)} className="h-8 w-8 grid place-items-center rounded hover:bg-secondary text-foreground/80 hover:text-foreground" aria-label="Duplicate">
@@ -459,14 +461,30 @@ export function SimpleCrud({
                           <TooltipContent>Duplicate</TooltipContent>
                         </Tooltip>
                       )}
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <button onClick={() => setPendingDelete(row)} className="h-8 w-8 grid place-items-center rounded hover:bg-destructive/10 text-foreground/80 hover:text-destructive" aria-label="Delete">
-                            <Trash2 size={14} />
-                          </button>
-                        </TooltipTrigger>
-                        <TooltipContent>Delete</TooltipContent>
-                      </Tooltip>
+                      {customActions?.filter((a) => !a.show || a.show(row)).map((a) => {
+                        const Icon = a.icon;
+                        const variantCls = a.variant === "destructive" ? "hover:bg-destructive/10 hover:text-destructive" : a.variant === "primary" ? "hover:bg-primary/10 hover:text-primary" : "hover:bg-secondary hover:text-foreground";
+                        return (
+                          <Tooltip key={a.key}>
+                            <TooltipTrigger asChild>
+                              <button onClick={() => a.onClick(row)} className={cn("h-8 w-8 grid place-items-center rounded text-foreground/80", variantCls)} aria-label={a.label}>
+                                {Icon ? <Icon size={14} /> : <span className="text-xs">{a.label.slice(0, 1)}</span>}
+                              </button>
+                            </TooltipTrigger>
+                            <TooltipContent>{a.label}</TooltipContent>
+                          </Tooltip>
+                        );
+                      })}
+                      {canDelete && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <button onClick={() => setPendingDelete(row)} className="h-8 w-8 grid place-items-center rounded hover:bg-destructive/10 text-foreground/80 hover:text-destructive" aria-label="Delete">
+                              <Trash2 size={14} />
+                            </button>
+                          </TooltipTrigger>
+                          <TooltipContent>Delete</TooltipContent>
+                        </Tooltip>
+                      )}
                     </div>
                   </td>
                 </tr>
