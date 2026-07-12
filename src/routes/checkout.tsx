@@ -27,6 +27,7 @@ function CheckoutPage() {
   const { user } = useSession();
   const navigate = useNavigate();
   const [placing, setPlacing] = useState(false);
+  const settings = useSiteSettings();
 
   const [form, setForm] = useState({
     email: user?.email ?? "",
