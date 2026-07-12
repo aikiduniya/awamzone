@@ -1,43 +1,41 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { AdminHeader, Empty } from "@/components/admin/admin-ui";
+import { SimpleCrud } from "@/components/admin/simple-crud";
+import { Check, MailOpen } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin/contact")({ component: ContactAdmin });
 
 function ContactAdmin() {
-  const { data, refetch } = useQuery({
-    queryKey: ["contact-submissions"],
-    queryFn: async () => (await supabase.from("contact_submissions").select("*").order("created_at", { ascending: false })).data ?? [],
-  });
-  const markRead = async (id: string, is_read: boolean) => { await supabase.from("contact_submissions").update({ is_read }).eq("id", id); refetch(); };
-  const remove = async (id: string) => { if (!confirm("Delete?")) return; await supabase.from("contact_submissions").delete().eq("id", id); refetch(); toast.success("Deleted"); };
+  const setRead = async (id: string, is_read: boolean) => {
+    const { error } = await supabase.from("contact_submissions").update({ is_read }).eq("id", id);
+    if (error) toast.error(error.message);
+    else toast.success(is_read ? "Marked as read" : "Marked as unread");
+  };
 
   return (
-    <>
-      <AdminHeader title="Contact Submissions" description="Messages from your contact form." />
-      {!data?.length ? <Empty>No messages</Empty> : (
-        <div className="space-y-3">
-          {data.map((m) => (
-            <div key={m.id} className={`border p-5 ${m.is_read ? "border-border" : "border-primary"}`}>
-              <div className="flex items-start justify-between mb-2">
-                <div>
-                  <div className="font-serif text-lg">{m.name}</div>
-                  <div className="text-xs text-muted-foreground">{m.email}{m.subject ? ` • ${m.subject}` : ""}</div>
-                </div>
-                <span className="text-xs text-muted-foreground">{new Date(m.created_at).toLocaleString()}</span>
-              </div>
-              <p className="text-sm whitespace-pre-wrap mb-3">{m.message}</p>
-              <div className="flex gap-3 text-xs">
-                <button onClick={() => markRead(m.id, !m.is_read)} className="uppercase tracking-[0.2em] text-primary">{m.is_read ? "Mark unread" : "Mark read"}</button>
-                <button onClick={() => remove(m.id)} className="uppercase tracking-[0.2em] text-destructive">Delete</button>
-                <a href={`mailto:${m.email}`} className="uppercase tracking-[0.2em] ml-auto">Reply →</a>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </>
+    <SimpleCrud
+      table="contact_submissions"
+      title="Contact Messages"
+      description="Messages submitted from the contact form."
+      readOnly
+      disableEdit
+      enableDuplicate={false}
+      orderBy={{ column: "created_at", ascending: false }}
+      searchColumns={["name", "email", "subject"]}
+      fields={[]}
+      columns={[
+        { key: "created_at", label: "Received", render: (r) => new Date(r.created_at).toLocaleString() },
+        { key: "name", label: "Name", render: (r) => <span className={r.is_read ? "" : "font-semibold"}>{r.name}</span> },
+        { key: "email", label: "Email" },
+        { key: "subject", label: "Subject" },
+        { key: "message", label: "Message", render: (r) => <span className="text-muted-foreground line-clamp-2 max-w-md inline-block">{r.message}</span>, sortable: false },
+        { key: "is_read", label: "Read", render: (r) => (r.is_read ? "✓" : "—") },
+      ]}
+      customActions={[
+        { key: "read", label: "Mark read", icon: Check, variant: "primary", show: (r) => !r.is_read, onClick: (r) => setRead(r.id, true) },
+        { key: "unread", label: "Mark unread", icon: MailOpen, show: (r) => r.is_read, onClick: (r) => setRead(r.id, false) },
+      ]}
+    />
   );
 }

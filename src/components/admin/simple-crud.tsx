@@ -39,6 +39,15 @@ type Column = {
   hideable?: boolean;
 };
 
+export type CrudAction = {
+  key: string;
+  label: string;
+  icon?: React.ComponentType<{ size?: number }>;
+  variant?: "default" | "primary" | "destructive";
+  show?: (row: any) => boolean;
+  onClick: (row: any) => void | Promise<void>;
+};
+
 type Props = {
   table: string;
   title: string;
@@ -53,7 +62,13 @@ type Props = {
   onView?: (row: any) => void;
   enableDuplicate?: boolean;
   enableBulk?: boolean;
-  bulkToggleField?: string; // e.g. "is_active"
+  bulkToggleField?: string;
+  readOnly?: boolean;
+  disableCreate?: boolean;
+  disableEdit?: boolean;
+  disableDelete?: boolean;
+  customActions?: CrudAction[];
+  selectQuery?: string;
 };
 
 function slugify(s: string) { return String(s || "").toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""); }
@@ -99,8 +114,13 @@ function printTable(title: string, rows: any[], cols: Column[]) {
 export function SimpleCrud({
   table, title, description, fields, columns, orderBy, defaults = {}, transform,
   searchColumns, pageSizeDefault = 25, onView, enableDuplicate = true, enableBulk = true,
-  bulkToggleField,
+  bulkToggleField, readOnly = false, disableCreate = false, disableEdit = false,
+  disableDelete = false, customActions, selectQuery,
 }: Props) {
+  const canCreate = !readOnly && !disableCreate;
+  const canEdit = !readOnly && !disableEdit;
+  const canDelete = !readOnly && !disableDelete;
+  const canDuplicate = !readOnly && enableDuplicate;
   const defaultSort = orderBy?.column ?? "created_at";
   const defaultAsc = orderBy?.ascending ?? false;
 
@@ -129,7 +149,7 @@ export function SimpleCrud({
     queryFn: async () => {
       const from = (page - 1) * pageSize;
       const to = from + pageSize - 1;
-      let query: any = supabase.from(table as any).select("*", { count: "exact" }).order(sortCol, { ascending: sortAsc });
+      let query: any = supabase.from(table as any).select(selectQuery ?? "*", { count: "exact" }).order(sortCol, { ascending: sortAsc });
       if (debouncedQ) {
         const usable = searchCols.filter((c) => fields.some((f) => f.key === c) || ["name", "title", "email", "slug"].includes(c));
         if (usable.length) {
@@ -140,7 +160,7 @@ export function SimpleCrud({
       query = query.range(from, to);
       const { data: rows, count, error } = await query;
       if (error) {
-        const { data: fallback, count: fallbackCount } = await supabase.from(table as any).select("*", { count: "exact" }).order(sortCol, { ascending: sortAsc }).range(from, to);
+        const { data: fallback, count: fallbackCount } = await supabase.from(table as any).select(selectQuery ?? "*", { count: "exact" }).order(sortCol, { ascending: sortAsc }).range(from, to);
         return { rows: fallback ?? [], count: fallbackCount ?? 0 };
       }
       return { rows: rows ?? [], count: count ?? 0 };
@@ -237,7 +257,7 @@ export function SimpleCrud({
   };
 
   const fetchAllForExport = async () => {
-    let query: any = supabase.from(table as any).select("*").order(sortCol, { ascending: sortAsc });
+    let query: any = supabase.from(table as any).select(selectQuery ?? "*").order(sortCol, { ascending: sortAsc });
     if (debouncedQ) {
       const usable = searchCols.filter((c) => fields.some((f) => f.key === c) || ["name", "title", "email", "slug"].includes(c));
       if (usable.length) query = query.or(usable.map((c) => `${c}.ilike.%${debouncedQ}%`).join(","));
@@ -262,7 +282,7 @@ export function SimpleCrud({
   return (
     <TooltipProvider delayDuration={200}>
       <AdminHeader title={title} description={description} actions={
-        <button onClick={() => setEditing(blank())} className="inline-flex items-center gap-2 border border-primary bg-primary text-primary-foreground px-4 py-2 text-xs uppercase tracking-[0.2em]"><Plus size={14} /> New</button>
+        canCreate ? <button onClick={() => setEditing(blank())} className="inline-flex items-center gap-2 border border-primary bg-primary text-primary-foreground px-4 py-2 text-xs uppercase tracking-[0.2em]"><Plus size={14} /> New</button> : null
       } />
 
       <div className="flex flex-wrap items-center gap-2 mb-3">
@@ -421,15 +441,17 @@ export function SimpleCrud({
                           <TooltipContent>View</TooltipContent>
                         </Tooltip>
                       )}
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <button onClick={() => setEditing({ ...row })} className="h-8 w-8 grid place-items-center rounded hover:bg-secondary text-foreground/80 hover:text-primary" aria-label="Edit">
-                            <Pencil size={14} />
-                          </button>
-                        </TooltipTrigger>
-                        <TooltipContent>Edit</TooltipContent>
-                      </Tooltip>
-                      {enableDuplicate && (
+                      {canEdit && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <button onClick={() => setEditing({ ...row })} className="h-8 w-8 grid place-items-center rounded hover:bg-secondary text-foreground/80 hover:text-primary" aria-label="Edit">
+                              <Pencil size={14} />
+                            </button>
+                          </TooltipTrigger>
+                          <TooltipContent>Edit</TooltipContent>
+                        </Tooltip>
+                      )}
+                      {canDuplicate && (
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <button onClick={() => duplicateRow(row)} className="h-8 w-8 grid place-items-center rounded hover:bg-secondary text-foreground/80 hover:text-foreground" aria-label="Duplicate">
@@ -439,14 +461,30 @@ export function SimpleCrud({
                           <TooltipContent>Duplicate</TooltipContent>
                         </Tooltip>
                       )}
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <button onClick={() => setPendingDelete(row)} className="h-8 w-8 grid place-items-center rounded hover:bg-destructive/10 text-foreground/80 hover:text-destructive" aria-label="Delete">
-                            <Trash2 size={14} />
-                          </button>
-                        </TooltipTrigger>
-                        <TooltipContent>Delete</TooltipContent>
-                      </Tooltip>
+                      {customActions?.filter((a) => !a.show || a.show(row)).map((a) => {
+                        const Icon = a.icon;
+                        const variantCls = a.variant === "destructive" ? "hover:bg-destructive/10 hover:text-destructive" : a.variant === "primary" ? "hover:bg-primary/10 hover:text-primary" : "hover:bg-secondary hover:text-foreground";
+                        return (
+                          <Tooltip key={a.key}>
+                            <TooltipTrigger asChild>
+                              <button onClick={() => a.onClick(row)} className={cn("h-8 w-8 grid place-items-center rounded text-foreground/80", variantCls)} aria-label={a.label}>
+                                {Icon ? <Icon size={14} /> : <span className="text-xs">{a.label.slice(0, 1)}</span>}
+                              </button>
+                            </TooltipTrigger>
+                            <TooltipContent>{a.label}</TooltipContent>
+                          </Tooltip>
+                        );
+                      })}
+                      {canDelete && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <button onClick={() => setPendingDelete(row)} className="h-8 w-8 grid place-items-center rounded hover:bg-destructive/10 text-foreground/80 hover:text-destructive" aria-label="Delete">
+                              <Trash2 size={14} />
+                            </button>
+                          </TooltipTrigger>
+                          <TooltipContent>Delete</TooltipContent>
+                        </Tooltip>
+                      )}
                     </div>
                   </td>
                 </tr>
