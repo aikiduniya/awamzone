@@ -282,7 +282,7 @@ export function SimpleCrud({
   return (
     <TooltipProvider delayDuration={200}>
       <AdminHeader title={title} description={description} actions={
-        <button onClick={() => setEditing(blank())} className="inline-flex items-center gap-2 border border-primary bg-primary text-primary-foreground px-4 py-2 text-xs uppercase tracking-[0.2em]"><Plus size={14} /> New</button>
+        canCreate ? <button onClick={() => setEditing(blank())} className="inline-flex items-center gap-2 border border-primary bg-primary text-primary-foreground px-4 py-2 text-xs uppercase tracking-[0.2em]"><Plus size={14} /> New</button> : null
       } />
 
       <div className="flex flex-wrap items-center gap-2 mb-3">
