@@ -114,8 +114,13 @@ function printTable(title: string, rows: any[], cols: Column[]) {
 export function SimpleCrud({
   table, title, description, fields, columns, orderBy, defaults = {}, transform,
   searchColumns, pageSizeDefault = 25, onView, enableDuplicate = true, enableBulk = true,
-  bulkToggleField,
+  bulkToggleField, readOnly = false, disableCreate = false, disableEdit = false,
+  disableDelete = false, customActions, selectQuery,
 }: Props) {
+  const canCreate = !readOnly && !disableCreate;
+  const canEdit = !readOnly && !disableEdit;
+  const canDelete = !readOnly && !disableDelete;
+  const canDuplicate = !readOnly && enableDuplicate;
   const defaultSort = orderBy?.column ?? "created_at";
   const defaultAsc = orderBy?.ascending ?? false;
 
