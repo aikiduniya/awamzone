@@ -4,7 +4,13 @@ import { useCart } from "@/hooks/use-cart";
 import { useSession } from "@/hooks/use-session";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { effectivePrice, formatMoney } from "@/lib/format";
+import { formatMoney } from "@/lib/format";
+import {
+  effectivePrice as engineEffectivePrice, findZoneForCountry,
+  calculateShipping, rateApplies, calculateTax, validateCoupon,
+  type FlashSale, type TaxRate, type ShippingZone, type ShippingRate,
+} from "@/lib/pricing";
+import { getPaymentAdapter } from "@/lib/payments";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
@@ -21,79 +27,90 @@ function CheckoutPage() {
 
   const [form, setForm] = useState({
     email: user?.email ?? "",
-    full_name: "",
-    phone: "",
-    line1: "",
-    line2: "",
-    city: "",
-    state: "",
-    postal_code: "",
-    country: "USA",
-    notes: "",
+    full_name: "", phone: "", line1: "", line2: "",
+    city: "", state: "", postal_code: "", country: "US", notes: "",
   });
 
-  const [shippingId, setShippingId] = useState<string>("");
-  const [paymentCode, setPaymentCode] = useState<string>("");
+  const [rateId, setRateId] = useState<string>("");
+  const [paymentId, setPaymentId] = useState<string>("");
   const [couponCode, setCouponCode] = useState("");
   const [coupon, setCoupon] = useState<any>(null);
 
-  const { data: shipping } = useQuery({
-    queryKey: ["shipping-methods"],
-    queryFn: async () => (await supabase.from("shipping_methods").select("*").eq("is_active", true).order("sort_order")).data ?? [],
+  const { data: zones } = useQuery({
+    queryKey: ["site-zones"],
+    queryFn: async () => ((await supabase.from("shipping_zones").select("*").eq("is_active", true)).data ?? []) as ShippingZone[],
+  });
+  const { data: rates } = useQuery({
+    queryKey: ["site-rates"],
+    queryFn: async () => ((await supabase.from("shipping_rates").select("*").eq("is_active", true).order("sort_order")).data ?? []) as ShippingRate[],
   });
   const { data: payments } = useQuery({
-    queryKey: ["payment-methods"],
+    queryKey: ["site-payments"],
     queryFn: async () => (await supabase.from("payment_methods").select("*").eq("is_active", true).order("sort_order")).data ?? [],
   });
+  const { data: flashSales } = useQuery({
+    queryKey: ["site-flash-active"],
+    queryFn: async () => {
+      const now = new Date().toISOString();
+      const { data } = await supabase.from("flash_sales").select("*").eq("is_active", true).lte("starts_at", now).gte("ends_at", now);
+      return (data ?? []) as FlashSale[];
+    },
+  });
+  const { data: taxRates } = useQuery({
+    queryKey: ["site-taxes"],
+    queryFn: async () => ((await supabase.from("tax_rates").select("*").eq("is_active", true)).data ?? []) as TaxRate[],
+  });
 
-  const shippingMethod = shipping?.find((s) => s.id === shippingId) ?? shipping?.[0];
-  const shippingCost = useMemo(() => {
-    if (!shippingMethod) return 0;
-    if (shippingMethod.free_over && subtotal >= Number(shippingMethod.free_over)) return 0;
-    return Number(shippingMethod.cost);
-  }, [shippingMethod, subtotal]);
+  const zone = useMemo(() => zones ? findZoneForCountry(zones, form.country) : null, [zones, form.country]);
+  const totalWeight = useMemo(() => items.reduce((s, it: any) => s + Number(it.product?.weight ?? 0) * it.quantity, 0), [items]);
 
-  const discount = useMemo(() => {
-    if (!coupon) return 0;
-    if (coupon.type === "percent") return (subtotal * Number(coupon.value)) / 100;
-    if (coupon.type === "fixed") return Number(coupon.value);
-    if (coupon.type === "free_shipping") return shippingCost;
-    return 0;
-  }, [coupon, subtotal, shippingCost]);
+  const zoneRates = useMemo(() => (rates ?? []).filter((r) => r.zone_id === zone?.id && rateApplies(r, subtotal)), [rates, zone, subtotal]);
+  const selectedRate = zoneRates.find((r) => r.id === rateId) ?? zoneRates[0];
+  const shippingCost = useMemo(() => selectedRate ? calculateShipping(selectedRate, subtotal, totalWeight) : 0, [selectedRate, subtotal, totalWeight]);
 
-  const total = Math.max(0, subtotal + shippingCost - discount);
+  const engineItems = useMemo(() => items.filter((it: any) => it.product).map((it: any) => ({
+    product_id: it.product.id, variant_id: it.variant_id ?? null, quantity: it.quantity, product: it.product,
+  })), [items]);
+
+  const engineSubtotal = useMemo(() => engineItems.reduce((s, it) => s + engineEffectivePrice(it.product, flashSales ?? []) * it.quantity, 0), [engineItems, flashSales]);
+  const tax = useMemo(() => calculateTax(engineItems, flashSales ?? [], taxRates ?? [], form.country), [engineItems, flashSales, taxRates, form.country]);
+  const discount = coupon?.discount ?? 0;
+  const finalShipping = coupon?.freeShipping ? 0 : shippingCost;
+  const total = Math.max(0, engineSubtotal + finalShipping + tax - discount);
 
   const applyCoupon = async () => {
     if (!couponCode) return;
-    const { data } = await supabase.from("coupons").select("*").eq("code", couponCode.toUpperCase()).eq("is_active", true).maybeSingle();
-    if (!data) { toast.error("Invalid coupon."); return; }
-    if (data.min_purchase && subtotal < Number(data.min_purchase)) { toast.error(`Minimum ${formatMoney(data.min_purchase)}`); return; }
-    setCoupon(data);
+    const res = await validateCoupon(supabase as any, couponCode, engineItems, flashSales ?? [], user?.id ?? null, shippingCost);
+    if (!res.ok) return toast.error(res.reason);
+    setCoupon(res);
     toast.success("Coupon applied");
   };
+
+  const method = payments?.find((p: any) => p.id === paymentId);
 
   const placeOrder = async (e: React.FormEvent) => {
     e.preventDefault();
     if (items.length === 0) return;
-    if (!paymentCode) { toast.error("Choose a payment method"); return; }
+    if (!method) return toast.error("Choose a payment method");
+    if (!selectedRate) return toast.error("No shipping option for your country yet.");
     setPlacing(true);
     try {
       const orderPayload: any = {
         user_id: user?.id ?? null,
         email: form.email,
-        subtotal,
+        subtotal: engineSubtotal,
         discount,
-        shipping_cost: shippingCost,
-        tax: 0,
+        shipping_cost: finalShipping,
+        tax,
         total,
-        payment_method: paymentCode,
-        payment_status: paymentCode === "cod" ? "pending" : "pending",
+        payment_method: method.code,
+        payment_status: "pending",
         status: "pending",
         currency: "USD",
-        coupon_code: coupon?.code ?? null,
+        coupon_code: coupon?.coupon.code ?? null,
         shipping_address: {
-          full_name: form.full_name, phone: form.phone,
-          line1: form.line1, line2: form.line2, city: form.city, state: form.state, postal_code: form.postal_code, country: form.country
+          full_name: form.full_name, phone: form.phone, line1: form.line1, line2: form.line2,
+          city: form.city, state: form.state, postal_code: form.postal_code, country: form.country,
         },
         notes: form.notes,
         timeline: [{ status: "pending", at: new Date().toISOString(), note: "Order placed" }],
@@ -101,19 +118,56 @@ function CheckoutPage() {
       const { data: order, error } = await supabase.from("orders").insert(orderPayload).select().single();
       if (error) throw error;
 
-      const orderItems = items.filter((it: any) => it.product).map((it: any) => {
-        const price = effectivePrice(it.product);
+      const orderItems = engineItems.map((it) => {
+        const price = engineEffectivePrice(it.product, flashSales ?? []);
         return {
-          order_id: order.id,
-          product_id: it.product.id,
-          product_name: it.product.name,
-          product_image: it.product.images?.[0] ?? null,
-          quantity: it.quantity,
-          unit_price: price,
-          total: price * it.quantity,
+          order_id: order.id, product_id: it.product.id,
+          product_name: (it as any).product.name ?? "",
+          product_image: (it as any).product.images?.[0] ?? null,
+          quantity: it.quantity, unit_price: price, total: price * it.quantity,
+          variant_id: it.variant_id ?? null,
         };
       });
       await supabase.from("order_items").insert(orderItems);
+
+      // Log coupon usage
+      if (coupon?.coupon) {
+        await supabase.from("coupon_usages").insert({
+          coupon_id: coupon.coupon.id, user_id: user?.id ?? null,
+          order_id: order.id, discount_amount: discount,
+        });
+        await supabase.from("coupons").update({ used_count: (coupon.coupon.used_count ?? 0) + 1 }).eq("id", coupon.coupon.id);
+      }
+
+      // Route payment via adapter
+      const adapter = getPaymentAdapter(method.provider);
+      const result = await adapter.initiate({
+        supabase: supabase as any,
+        orderId: order.id, orderNumber: order.order_number, amount: total, currency: "USD",
+        customerEmail: form.email,
+        returnUrl: `${window.location.origin}/order/${order.id}`,
+        cancelUrl: `${window.location.origin}/checkout`,
+        method: {
+          id: method.id, code: method.code, provider: method.provider,
+          config: method.config ?? {}, environment: method.environment, instructions: method.instructions,
+        },
+      });
+
+      if (result.kind === "failed") {
+        toast.error(result.error);
+      } else if (result.kind === "redirect") {
+        window.location.href = result.url;
+        return;
+      } else {
+        if (result.reference) {
+          await supabase.from("orders").update({ payment_reference: result.reference }).eq("id", order.id);
+        }
+        if (result.kind === "completed") {
+          await supabase.from("orders").update({ payment_status: "paid" }).eq("id", order.id);
+        }
+        if (result.message) toast.success(result.message);
+      }
+
       await clear.mutateAsync();
       toast.success("Order placed!");
       navigate({ to: "/order/$id", params: { id: order.id } });
@@ -145,51 +199,57 @@ function CheckoutPage() {
                 <input required placeholder="Address line 1" value={form.line1} onChange={(e) => setForm({ ...form, line1: e.target.value })} className="col-span-2 bg-transparent border border-border px-4 py-3" />
                 <input placeholder="Address line 2" value={form.line2} onChange={(e) => setForm({ ...form, line2: e.target.value })} className="col-span-2 bg-transparent border border-border px-4 py-3" />
                 <input required placeholder="City" value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} className="bg-transparent border border-border px-4 py-3" />
-                <input placeholder="State" value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value })} className="bg-transparent border border-border px-4 py-3" />
+                <input placeholder="State/Region" value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value })} className="bg-transparent border border-border px-4 py-3" />
                 <input placeholder="Postal code" value={form.postal_code} onChange={(e) => setForm({ ...form, postal_code: e.target.value })} className="bg-transparent border border-border px-4 py-3" />
-                <input required placeholder="Country" value={form.country} onChange={(e) => setForm({ ...form, country: e.target.value })} className="bg-transparent border border-border px-4 py-3" />
+                <input required placeholder="Country (ISO code, e.g. US)" value={form.country} onChange={(e) => setForm({ ...form, country: e.target.value.toUpperCase() })} className="bg-transparent border border-border px-4 py-3" />
               </div>
+              {!zone && form.country && <p className="text-xs text-destructive mt-2">No shipping zone covers this country yet.</p>}
             </section>
 
             <section>
               <h2 className="text-2xl font-serif mb-4">Shipping Method</h2>
-              <div className="space-y-2">
-                {shipping?.map((s) => (
-                  <label key={s.id} className={`flex items-center justify-between border p-4 cursor-pointer ${(shippingId || shipping[0]?.id) === s.id ? "border-primary" : "border-border"}`}>
-                    <div className="flex items-center gap-3">
-                      <input type="radio" name="shipping" checked={(shippingId || shipping[0]?.id) === s.id} onChange={() => setShippingId(s.id)} className="accent-primary" />
-                      <div>
-                        <div>{s.name}</div>
-                        <div className="text-xs text-muted-foreground">{s.description}</div>
+              {zoneRates.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No shipping rates available for your address.</p>
+              ) : (
+                <div className="space-y-2">
+                  {zoneRates.map((s) => (
+                    <label key={s.id} className={`flex items-center justify-between border p-4 cursor-pointer ${(rateId || zoneRates[0]?.id) === s.id ? "border-primary" : "border-border"}`}>
+                      <div className="flex items-center gap-3">
+                        <input type="radio" name="shipping" checked={(rateId || zoneRates[0]?.id) === s.id} onChange={() => setRateId(s.id)} className="accent-primary" />
+                        <div>
+                          <div>{s.name}{s.estimated_days && <span className="text-xs text-muted-foreground ml-2">({s.estimated_days} days)</span>}</div>
+                          {s.description && <div className="text-xs text-muted-foreground">{s.description}</div>}
+                        </div>
                       </div>
-                    </div>
-                    <div>{Number(s.cost) === 0 || (s.free_over && subtotal >= Number(s.free_over)) ? "Free" : formatMoney(s.cost)}</div>
-                  </label>
-                ))}
-              </div>
+                      <div>{calculateShipping(s, subtotal, totalWeight) === 0 ? "Free" : formatMoney(calculateShipping(s, subtotal, totalWeight))}</div>
+                    </label>
+                  ))}
+                </div>
+              )}
             </section>
 
             <section>
               <h2 className="text-2xl font-serif mb-4">Payment</h2>
               <div className="space-y-2">
-                {payments?.map((p) => (
-                  <label key={p.id} className={`block border p-4 cursor-pointer ${paymentCode === p.code ? "border-primary" : "border-border"}`}>
+                {payments?.map((p: any) => (
+                  <label key={p.id} className={`block border p-4 cursor-pointer ${paymentId === p.id ? "border-primary" : "border-border"}`}>
                     <div className="flex items-center gap-3">
-                      <input type="radio" name="payment" checked={paymentCode === p.code} onChange={() => setPaymentCode(p.code)} className="accent-primary" />
+                      <input type="radio" name="payment" checked={paymentId === p.id} onChange={() => setPaymentId(p.id)} className="accent-primary" />
                       <div className="flex-1">
-                        <div>{p.name}</div>
+                        <div className="flex items-center gap-2">
+                          {p.icon_url && <img src={p.icon_url} alt="" className="h-5" />}
+                          <span>{p.name}</span>
+                          {p.environment === "test" && <span className="text-[10px] text-muted-foreground bg-secondary px-1.5 py-0.5 rounded">TEST</span>}
+                        </div>
                         <div className="text-xs text-muted-foreground">{p.description}</div>
-                        {paymentCode === p.code && p.instructions && (
-                          <div className="mt-2 text-xs text-muted-foreground bg-surface p-3">{p.instructions}</div>
+                        {paymentId === p.id && p.instructions && (
+                          <div className="mt-2 text-xs text-muted-foreground bg-surface p-3 whitespace-pre-line">{p.instructions}</div>
                         )}
                       </div>
                     </div>
                   </label>
                 ))}
               </div>
-              {paymentCode === "stripe" && (
-                <p className="mt-3 text-xs text-muted-foreground">Stripe test mode — no real payment will be charged. Live payments can be enabled from the admin panel.</p>
-              )}
             </section>
 
             <section>
@@ -208,7 +268,7 @@ function CheckoutPage() {
                     <div className="font-serif">{it.product.name}</div>
                     <div className="text-xs text-muted-foreground">Qty {it.quantity}</div>
                   </div>
-                  <div>{formatMoney(effectivePrice(it.product) * it.quantity)}</div>
+                  <div>{formatMoney(engineEffectivePrice(it.product, flashSales ?? []) * it.quantity)}</div>
                 </div>
               ))}
             </div>
@@ -219,8 +279,9 @@ function CheckoutPage() {
             </div>
 
             <div className="mt-6 border-t border-border pt-4 space-y-2 text-sm">
-              <div className="flex justify-between"><span className="text-muted-foreground">Subtotal</span><span>{formatMoney(subtotal)}</span></div>
-              <div className="flex justify-between"><span className="text-muted-foreground">Shipping</span><span>{shippingCost === 0 ? "Free" : formatMoney(shippingCost)}</span></div>
+              <div className="flex justify-between"><span className="text-muted-foreground">Subtotal</span><span>{formatMoney(engineSubtotal)}</span></div>
+              <div className="flex justify-between"><span className="text-muted-foreground">Shipping</span><span>{finalShipping === 0 ? "Free" : formatMoney(finalShipping)}</span></div>
+              {tax > 0 && <div className="flex justify-between"><span className="text-muted-foreground">Tax</span><span>{formatMoney(tax)}</span></div>}
               {discount > 0 && <div className="flex justify-between text-primary"><span>Discount</span><span>−{formatMoney(discount)}</span></div>}
             </div>
             <div className="border-t border-border mt-4 pt-4 flex justify-between text-lg">
