@@ -17,13 +17,13 @@ export const Route = createFileRoute("/_authenticated/admin/")({
 });
 
 type StatCard = {
-  label: string; value: string | number; icon: any; tint: string; hint?: string;
+  label: string; value: string | number; icon: any; tint: string; hint?: string; to?: string;
 };
 
 function Card({ c }: { c: StatCard }) {
   const Icon = c.icon;
-  return (
-    <div className="group relative overflow-hidden rounded-xl border border-border bg-card p-5 transition hover:shadow-lg hover:-translate-y-0.5">
+  const body = (
+    <div className="group relative overflow-hidden rounded-xl border border-border bg-card p-5 transition hover:shadow-lg hover:-translate-y-0.5 h-full">
       <div className={`absolute -right-6 -top-6 h-24 w-24 rounded-full opacity-20 blur-2xl ${c.tint}`} />
       <div className="flex items-center justify-between mb-3">
         <div className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">{c.label}</div>
@@ -35,6 +35,8 @@ function Card({ c }: { c: StatCard }) {
       {c.hint && <div className="mt-1 text-xs text-muted-foreground">{c.hint}</div>}
     </div>
   );
+  if (c.to) return <Link to={c.to as any} className="block">{body}</Link>;
+  return body;
 }
 
 function Dashboard() {
