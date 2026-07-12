@@ -13,6 +13,7 @@ export const Route = createFileRoute("/_authenticated/admin/shipping")({ compone
 
 function ShippingAdmin() {
   const qc = useQueryClient();
+  const { confirm, dialog: confirmDialog } = useConfirm();
   const [zoneOpen, setZoneOpen] = useState(false);
   const [rateOpen, setRateOpen] = useState(false);
   const [zone, setZone] = useState<any>(null);
@@ -53,8 +54,29 @@ function ShippingAdmin() {
     if (error) return toast.error(error.message);
     setRateOpen(false); qc.invalidateQueries({ queryKey: ["admin-rates"] });
   };
-  const delZone = async (id: string) => { if (confirm("Delete zone and its rates?")) { await supabase.from("shipping_zones").delete().eq("id", id); qc.invalidateQueries({ queryKey: ["admin-zones"] }); qc.invalidateQueries({ queryKey: ["admin-rates"] }); } };
-  const delRate = async (id: string) => { if (confirm("Delete rate?")) { await supabase.from("shipping_rates").delete().eq("id", id); qc.invalidateQueries({ queryKey: ["admin-rates"] }); } };
+  const delZone = (z: any) => confirm({
+    title: "Delete this shipping zone?",
+    description: `“${z.name}” and all rates inside it will be removed.`,
+    confirmLabel: "Delete",
+    destructive: true,
+    onConfirm: async () => {
+      await supabase.from("shipping_zones").delete().eq("id", z.id);
+      qc.invalidateQueries({ queryKey: ["admin-zones"] });
+      qc.invalidateQueries({ queryKey: ["admin-rates"] });
+      toast.success("Deleted");
+    },
+  });
+  const delRate = (r: any) => confirm({
+    title: "Delete this rate?",
+    description: `“${r.name}” will be removed.`,
+    confirmLabel: "Delete",
+    destructive: true,
+    onConfirm: async () => {
+      await supabase.from("shipping_rates").delete().eq("id", r.id);
+      qc.invalidateQueries({ queryKey: ["admin-rates"] });
+      toast.success("Deleted");
+    },
+  });
 
   return (
     <div>
