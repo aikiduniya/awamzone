@@ -18,6 +18,15 @@ export const Route = createFileRoute("/_authenticated/admin/orders")({
 
 function OrdersAdmin() {
   const [status, setStatus] = useState<string>("all");
+  const [paymentStatus, setPaymentStatus] = useState<string>("all");
+  const [q, setQ] = useState("");
+  const [debouncedQ, setDebouncedQ] = useState("");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
+  const [sortCol, setSortCol] = useState("created_at");
+  const [sortAsc, setSortAsc] = useState(false);
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
   const [selected, setSelected] = useState<any>(null);
   const [busy, setBusy] = useState(false);
 
@@ -25,14 +34,36 @@ function OrdersAdmin() {
   const createShipmentFn = useServerFn(createShipment);
   const refundFn = useServerFn(refundOrder);
 
-  const { data, refetch, isLoading } = useQuery({
-    queryKey: ["admin-orders", status],
+  useEffect(() => {
+    const t = setTimeout(() => { setDebouncedQ(q); setPage(1); }, 300);
+    return () => clearTimeout(t);
+  }, [q]);
+
+  const { data, refetch, isLoading, isFetching } = useQuery({
+    queryKey: ["admin-orders", status, paymentStatus, debouncedQ, page, pageSize, sortCol, sortAsc, dateFrom, dateTo],
+    placeholderData: keepPreviousData,
     queryFn: async () => {
-      let q = supabase.from("orders").select("*").order("created_at", { ascending: false });
-      if (status !== "all") q = q.eq("status", status as any);
-      return (await q).data ?? [];
+      const from = (page - 1) * pageSize;
+      const to = from + pageSize - 1;
+      let q2 = supabase.from("orders").select("*", { count: "exact" }).order(sortCol, { ascending: sortAsc }).range(from, to);
+      if (status !== "all") q2 = q2.eq("status", status as any);
+      if (paymentStatus !== "all") q2 = q2.eq("payment_status", paymentStatus as any);
+      if (debouncedQ) q2 = q2.or(`order_number.ilike.%${debouncedQ}%,email.ilike.%${debouncedQ}%`);
+      if (dateFrom) q2 = q2.gte("created_at", `${dateFrom}T00:00:00`);
+      if (dateTo) q2 = q2.lte("created_at", `${dateTo}T23:59:59`);
+      const { data: rows, count } = await q2;
+      return { rows: rows ?? [], count: count ?? 0 };
     },
   });
+
+  const rows = data?.rows ?? [];
+  const total = data?.count ?? 0;
+
+  const toggleSort = (key: string) => {
+    if (sortCol === key) setSortAsc((v) => !v);
+    else { setSortCol(key); setSortAsc(true); }
+    setPage(1);
+  };
 
   const openOrder = async (id: string) => {
     const [orderRes, itemsRes, eventsRes, shipmentsRes] = await Promise.all([
