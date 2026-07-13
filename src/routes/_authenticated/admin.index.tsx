@@ -115,8 +115,8 @@ function Dashboard() {
         const key = it.product_id ?? it.product_name;
         if (!productTotals[key]) productTotals[key] = { name: it.product_name ?? "Unknown", total: 0 };
         productTotals[key].total += Number(it.total || 0);
-        if (it.category_id) catTotals[it.category_id] = (catTotals[it.category_id] || 0) + Number(it.total || 0);
       });
+
       const topProducts = Object.values(productTotals).sort((a, b) => b.total - a.total).slice(0, 6);
 
       return {
