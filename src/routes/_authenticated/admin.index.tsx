@@ -67,7 +67,7 @@ function Dashboard() {
         supabase.from("return_requests").select("*", { count: "exact", head: true }),
         supabase.from("orders").select("id,order_number,email,total,status,created_at").order("created_at", { ascending: false }).limit(6),
         supabase.from("profiles").select("id,full_name,created_at").order("created_at", { ascending: false }).limit(6),
-        supabase.from("order_items").select("product_id,product_name,quantity,total,category_id").limit(500),
+        supabase.from("order_items").select("product_id,product_name,quantity,total").limit(500),
       ]);
 
       const sum = (rows?: any[]) => (rows ?? []).filter((o) => o.status !== "cancelled").reduce((s, o) => s + Number(o.total || 0), 0);
@@ -110,13 +110,13 @@ function Dashboard() {
 
       // Top products & categories from order_items
       const productTotals: Record<string, { name: string; total: number }> = {};
-      const catTotals: Record<string, number> = {};
+      
       (orderItems.data ?? []).forEach((it: any) => {
         const key = it.product_id ?? it.product_name;
         if (!productTotals[key]) productTotals[key] = { name: it.product_name ?? "Unknown", total: 0 };
         productTotals[key].total += Number(it.total || 0);
-        if (it.category_id) catTotals[it.category_id] = (catTotals[it.category_id] || 0) + Number(it.total || 0);
       });
+
       const topProducts = Object.values(productTotals).sort((a, b) => b.total - a.total).slice(0, 6);
 
       return {
