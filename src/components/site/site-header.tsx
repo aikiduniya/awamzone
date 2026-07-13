@@ -39,7 +39,7 @@ export function CategoriesMenu() {
         className="flex items-center gap-1 text-foreground/80 hover:text-primary transition-colors"
         onClick={() => setOpen((v) => !v)}
       >
-        Shop <ChevronDown size={12} />
+        Categories <ChevronDown size={12} />
       </button>
       {open && (
         <div className="absolute left-1/2 top-full -translate-x-1/2 pt-4 z-50">
@@ -261,23 +261,27 @@ export function SiteHeader() {
           <nav className="hidden md:flex items-center gap-8 text-xs uppercase tracking-[0.24em]">
             <Link to="/" className="text-foreground/80 hover:text-primary transition-colors">Home</Link>
             <CategoriesMenu />
+            <Link to="/shop" className="text-foreground/80 hover:text-primary transition-colors">Shop</Link>
             <Link to="/about" className="text-foreground/80 hover:text-primary transition-colors">About</Link>
-            <Link to="/contact" className="text-foreground/80 hover:text-primary transition-colors">Contact</Link>
             <Link to="/blog" className="text-foreground/80 hover:text-primary transition-colors">Blog</Link>
             <Link to="/faq" className="text-foreground/80 hover:text-primary transition-colors">FAQ</Link>
+            <Link to="/contact" className="text-foreground/80 hover:text-primary transition-colors">Contact</Link>
             {(headerPages ?? [])
-              .filter((p) => !["about", "contact", "blog", "faq", "shop", ""].includes(p.slug))
+              .filter((p) => !["about", "contact", "blog", "faq", "shop", "home", "categories", ""].includes(p.slug))
               .map((p) => (
                 <Link key={p.id} to={"/" + p.slug as any} className="text-foreground/80 hover:text-primary transition-colors">
                   {p.title}
                 </Link>
               ))}
-            {items.map((m) => (
-              <MenuLink key={m.id} item={m} className="text-foreground/80 hover:text-primary transition-colors">
-                {m.label}
-              </MenuLink>
-            ))}
+            {items
+              .filter((m) => !["home","shop","about","blog","faq","contact","categories"].includes(m.label.trim().toLowerCase()))
+              .map((m) => (
+                <MenuLink key={m.id} item={m} className="text-foreground/80 hover:text-primary transition-colors">
+                  {m.label}
+                </MenuLink>
+              ))}
           </nav>
+
 
           <div className="flex items-center gap-5">
             <ThemeToggle className="hidden sm:inline-flex" />
@@ -322,17 +326,19 @@ export function SiteHeader() {
               <Link to="/blog" onClick={() => setMobileOpen(false)} className="py-2">Blog</Link>
               <Link to="/faq" onClick={() => setMobileOpen(false)} className="py-2">FAQ</Link>
               {(headerPages ?? [])
-                .filter((p) => !["about", "contact", "blog", "faq", "shop", ""].includes(p.slug))
+                .filter((p) => !["about", "contact", "blog", "faq", "shop", "home", "categories", ""].includes(p.slug))
                 .map((p) => (
                   <Link key={p.id} to={"/" + p.slug as any} onClick={() => setMobileOpen(false)} className="py-2">
                     {p.title}
                   </Link>
                 ))}
-              {items.map((m) => (
-                <MenuLink key={m.id} item={m} onClick={() => setMobileOpen(false)} className="py-2">
-                  {m.label}
-                </MenuLink>
-              ))}
+              {items
+                .filter((m) => !["home","shop","about","blog","faq","contact","categories"].includes(m.label.trim().toLowerCase()))
+                .map((m) => (
+                  <MenuLink key={m.id} item={m} onClick={() => setMobileOpen(false)} className="py-2">
+                    {m.label}
+                  </MenuLink>
+                ))}
               {isAdmin && <Link to="/admin" onClick={() => setMobileOpen(false)} className="text-primary py-2">Admin</Link>}
             </div>
           </nav>
