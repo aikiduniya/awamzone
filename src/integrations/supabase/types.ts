@@ -466,6 +466,7 @@ export type Database = {
           parent_id: string | null
           robots: string
           schema_markup: Json | null
+          show_in_header: boolean
           slug: string
           sort_order: number
           twitter_description: string | null
@@ -493,6 +494,7 @@ export type Database = {
           parent_id?: string | null
           robots?: string
           schema_markup?: Json | null
+          show_in_header?: boolean
           slug: string
           sort_order?: number
           twitter_description?: string | null
@@ -520,6 +522,7 @@ export type Database = {
           parent_id?: string | null
           robots?: string
           schema_markup?: Json | null
+          show_in_header?: boolean
           slug?: string
           sort_order?: number
           twitter_description?: string | null
@@ -1365,6 +1368,7 @@ export type Database = {
           created_at: string
           id: string
           is_published: boolean
+          menu_order: number
           meta_description: string | null
           meta_keywords: string | null
           meta_title: string | null
@@ -1373,6 +1377,8 @@ export type Database = {
           og_title: string | null
           robots: string
           schema_markup: Json | null
+          show_in_footer: boolean
+          show_in_header: boolean
           slug: string
           title: string
           twitter_description: string | null
@@ -1386,6 +1392,7 @@ export type Database = {
           created_at?: string
           id?: string
           is_published?: boolean
+          menu_order?: number
           meta_description?: string | null
           meta_keywords?: string | null
           meta_title?: string | null
@@ -1394,6 +1401,8 @@ export type Database = {
           og_title?: string | null
           robots?: string
           schema_markup?: Json | null
+          show_in_footer?: boolean
+          show_in_header?: boolean
           slug: string
           title: string
           twitter_description?: string | null
@@ -1407,6 +1416,7 @@ export type Database = {
           created_at?: string
           id?: string
           is_published?: boolean
+          menu_order?: number
           meta_description?: string | null
           meta_keywords?: string | null
           meta_title?: string | null
@@ -1415,6 +1425,8 @@ export type Database = {
           og_title?: string | null
           robots?: string
           schema_markup?: Json | null
+          show_in_footer?: boolean
+          show_in_header?: boolean
           slug?: string
           title?: string
           twitter_description?: string | null
