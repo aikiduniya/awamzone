@@ -12,7 +12,7 @@ function CategoriesAdmin() {
       title="Categories"
       description="Catalog categories with image, ordering, and visibility."
       orderBy={{ column: "sort_order", ascending: true }}
-      defaults={{ is_active: true, is_featured: false, sort_order: 0 }}
+      defaults={{ is_active: true, is_featured: false, show_in_header: true, sort_order: 0 }}
       bulkToggleField="is_active"
       searchColumns={["name", "slug"]}
       fields={[
