@@ -89,6 +89,9 @@ function ProductPage() {
     },
   });
 
+  useEffect(() => { if (product?.id) pushRecentlyViewed(product.id); }, [product?.id]);
+  const compareIds = useCompareIds();
+
   if (isLoading) return <SiteShell><div className="container-luxe py-24 text-muted-foreground">Loading…</div></SiteShell>;
   if (!product) return <SiteShell><div className="container-luxe py-24">Not found.</div></SiteShell>;
 
@@ -96,8 +99,6 @@ function ProductPage() {
   const off = discountPct(product);
   const images = product.images?.length ? product.images : ["https://images.unsplash.com/photo-1601924582970-9238bcb495d9?w=1000"];
 
-  useEffect(() => { if (product?.id) pushRecentlyViewed(product.id); }, [product?.id]);
-  const compareIds = useCompareIds();
 
   const addToWishlist = async () => {
     if (!user) { toast.error("Sign in to save."); return; }
