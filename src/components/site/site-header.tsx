@@ -326,17 +326,19 @@ export function SiteHeader() {
               <Link to="/blog" onClick={() => setMobileOpen(false)} className="py-2">Blog</Link>
               <Link to="/faq" onClick={() => setMobileOpen(false)} className="py-2">FAQ</Link>
               {(headerPages ?? [])
-                .filter((p) => !["about", "contact", "blog", "faq", "shop", ""].includes(p.slug))
+                .filter((p) => !["about", "contact", "blog", "faq", "shop", "home", "categories", ""].includes(p.slug))
                 .map((p) => (
                   <Link key={p.id} to={"/" + p.slug as any} onClick={() => setMobileOpen(false)} className="py-2">
                     {p.title}
                   </Link>
                 ))}
-              {items.map((m) => (
-                <MenuLink key={m.id} item={m} onClick={() => setMobileOpen(false)} className="py-2">
-                  {m.label}
-                </MenuLink>
-              ))}
+              {items
+                .filter((m) => !["home","shop","about","blog","faq","contact","categories"].includes(m.label.trim().toLowerCase()))
+                .map((m) => (
+                  <MenuLink key={m.id} item={m} onClick={() => setMobileOpen(false)} className="py-2">
+                    {m.label}
+                  </MenuLink>
+                ))}
               {isAdmin && <Link to="/admin" onClick={() => setMobileOpen(false)} className="text-primary py-2">Admin</Link>}
             </div>
           </nav>
