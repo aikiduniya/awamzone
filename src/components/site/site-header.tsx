@@ -43,34 +43,15 @@ export function CategoriesMenu() {
       </button>
       {open && (
         <div className="absolute left-1/2 top-full -translate-x-1/2 pt-4 z-50">
-          <div className="bg-background border border-border shadow-xl rounded-md p-6 grid grid-cols-3 gap-6 min-w-[560px]">
-            {roots.slice(0, 6).map((r) => {
-              const kids = childrenOf(r.id);
-              return (
-                <div key={r.id} className="space-y-2">
-                  <Link
-                    to={"/category/" + r.slug as any}
-                    className="text-xs uppercase tracking-[0.2em] text-primary font-medium hover:underline"
-                    onClick={() => setOpen(false)}
-                  >
-                    {r.name}
-                  </Link>
-                  <ul className="space-y-1">
-                    {kids.slice(0, 6).map((k) => (
-                      <li key={k.id}>
-                        <Link
-                          to={"/category/" + k.slug as any}
-                          className="text-xs text-foreground/70 hover:text-primary normal-case tracking-normal"
-                          onClick={() => setOpen(false)}
-                        >
-                          {k.name}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              );
-            })}
+          <div className="bg-background border border-border shadow-xl rounded-md p-6 grid grid-cols-3 gap-6 min-w-[560px] max-w-[900px]">
+            {roots.slice(0, 6).map((r) => (
+              <CategoryColumn
+                key={r.id}
+                node={r}
+                childrenOf={childrenOf}
+                onNavigate={() => setOpen(false)}
+              />
+            ))}
           </div>
         </div>
       )}
