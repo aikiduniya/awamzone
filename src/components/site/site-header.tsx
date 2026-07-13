@@ -39,7 +39,7 @@ export function CategoriesMenu() {
         className="flex items-center gap-1 text-foreground/80 hover:text-primary transition-colors"
         onClick={() => setOpen((v) => !v)}
       >
-        Shop <ChevronDown size={12} />
+        Categories <ChevronDown size={12} />
       </button>
       {open && (
         <div className="absolute left-1/2 top-full -translate-x-1/2 pt-4 z-50">
