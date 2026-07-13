@@ -315,6 +315,19 @@ export function SiteHeader() {
         {mobileOpen && (
           <nav className="md:hidden border-t border-border bg-background">
             <div className="container-luxe flex flex-col py-4 gap-3 text-sm uppercase tracking-[0.2em]">
+              <Link to="/" onClick={() => setMobileOpen(false)} className="py-2">Home</Link>
+              <Link to="/shop" onClick={() => setMobileOpen(false)} className="py-2">Shop</Link>
+              <Link to="/about" onClick={() => setMobileOpen(false)} className="py-2">About</Link>
+              <Link to="/contact" onClick={() => setMobileOpen(false)} className="py-2">Contact</Link>
+              <Link to="/blog" onClick={() => setMobileOpen(false)} className="py-2">Blog</Link>
+              <Link to="/faq" onClick={() => setMobileOpen(false)} className="py-2">FAQ</Link>
+              {(headerPages ?? [])
+                .filter((p) => !["about", "contact", "blog", "faq", "shop", ""].includes(p.slug))
+                .map((p) => (
+                  <Link key={p.id} to={"/" + p.slug as any} onClick={() => setMobileOpen(false)} className="py-2">
+                    {p.title}
+                  </Link>
+                ))}
               {items.map((m) => (
                 <MenuLink key={m.id} item={m} onClick={() => setMobileOpen(false)} className="py-2">
                   {m.label}
