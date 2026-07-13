@@ -110,7 +110,7 @@ function Dashboard() {
 
       // Top products & categories from order_items
       const productTotals: Record<string, { name: string; total: number }> = {};
-      const catTotals: Record<string, number> = {};
+      
       (orderItems.data ?? []).forEach((it: any) => {
         const key = it.product_id ?? it.product_name;
         if (!productTotals[key]) productTotals[key] = { name: it.product_name ?? "Unknown", total: 0 };
