@@ -57,6 +57,60 @@ export function CategoriesMenu() {
       )}
     </div>
   );
+    </div>
+  );
+}
+
+function CategoryColumn({
+  node,
+  childrenOf,
+  onNavigate,
+  depth = 0,
+}: {
+  node: Category;
+  childrenOf: (id: string) => Category[];
+  onNavigate: () => void;
+  depth?: number;
+}) {
+  const kids = childrenOf(node.id);
+  if (depth === 0) {
+    return (
+      <div className="space-y-2">
+        <Link
+          to={"/category/" + node.slug as any}
+          className="text-xs uppercase tracking-[0.2em] text-primary font-medium hover:underline"
+          onClick={onNavigate}
+        >
+          {node.name}
+        </Link>
+        {kids.length > 0 && (
+          <ul className="space-y-1">
+            {kids.map((k) => (
+              <CategoryColumn key={k.id} node={k} childrenOf={childrenOf} onNavigate={onNavigate} depth={1} />
+            ))}
+          </ul>
+        )}
+      </div>
+    );
+  }
+  return (
+    <li>
+      <Link
+        to={"/category/" + node.slug as any}
+        className="text-xs text-foreground/70 hover:text-primary normal-case tracking-normal"
+        onClick={onNavigate}
+      >
+        {node.name}
+      </Link>
+      {kids.length > 0 && (
+        <ul className="space-y-1 pl-3 mt-1 border-l border-border/50">
+          {kids.map((k) => (
+            <CategoryColumn key={k.id} node={k} childrenOf={childrenOf} onNavigate={onNavigate} depth={depth + 1} />
+          ))}
+        </ul>
+      )}
+    </li>
+  );
 }
 
 export function AnnouncementBar() {
