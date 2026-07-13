@@ -67,7 +67,7 @@ function Dashboard() {
         supabase.from("return_requests").select("*", { count: "exact", head: true }),
         supabase.from("orders").select("id,order_number,email,total,status,created_at").order("created_at", { ascending: false }).limit(6),
         supabase.from("profiles").select("id,full_name,created_at").order("created_at", { ascending: false }).limit(6),
-        supabase.from("order_items").select("product_id,product_name,quantity,total,category_id").limit(500),
+        supabase.from("order_items").select("product_id,product_name,quantity,total").limit(500),
       ]);
 
       const sum = (rows?: any[]) => (rows ?? []).filter((o) => o.status !== "cancelled").reduce((s, o) => s + Number(o.total || 0), 0);
