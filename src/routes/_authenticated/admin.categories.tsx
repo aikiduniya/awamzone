@@ -24,6 +24,7 @@ function CategoriesAdmin() {
         { key: "sort_order", label: "Sort order", type: "number" },
         { key: "is_active", label: "Active", type: "checkbox" },
         { key: "is_featured", label: "Featured", type: "checkbox" },
+        { key: "show_in_header", label: "Show in Header", type: "checkbox" },
       ]}
       columns={[
         { key: "name", label: "Name", render: (r) => (

@@ -19,6 +19,7 @@ export function CategoriesMenu() {
         .from("categories")
         .select("id,name,slug,parent_id,image_url")
         .eq("is_active", true)
+        .eq("show_in_header", true)
         .order("sort_order")
         .order("name");
       return (data ?? []) as Category[];
