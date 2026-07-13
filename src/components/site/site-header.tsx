@@ -57,8 +57,6 @@ export function CategoriesMenu() {
       )}
     </div>
   );
-    </div>
-  );
 }
 
 function CategoryColumn({
