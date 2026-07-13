@@ -211,6 +211,21 @@ export function SiteHeader() {
     },
   });
 
+  // CMS pages flagged "Show in Header" become clean-URL menu entries (/slug).
+  const { data: headerPages } = useQuery({
+    queryKey: ["pages", "header"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("pages")
+        .select("id,title,slug,menu_order")
+        .eq("is_published", true)
+        .eq("show_in_header", true)
+        .order("menu_order")
+        .order("title");
+      return data ?? [];
+    },
+  });
+
   const { data: branding } = useQuery({
     queryKey: ["settings", "branding"],
     queryFn: async () => {
