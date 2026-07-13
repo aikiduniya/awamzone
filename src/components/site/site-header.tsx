@@ -19,6 +19,7 @@ export function CategoriesMenu() {
         .from("categories")
         .select("id,name,slug,parent_id,image_url")
         .eq("is_active", true)
+        .eq("show_in_header", true)
         .order("sort_order")
         .order("name");
       return (data ?? []) as Category[];
@@ -42,38 +43,71 @@ export function CategoriesMenu() {
       </button>
       {open && (
         <div className="absolute left-1/2 top-full -translate-x-1/2 pt-4 z-50">
-          <div className="bg-background border border-border shadow-xl rounded-md p-6 grid grid-cols-3 gap-6 min-w-[560px]">
-            {roots.slice(0, 6).map((r) => {
-              const kids = childrenOf(r.id);
-              return (
-                <div key={r.id} className="space-y-2">
-                  <Link
-                    to={"/category/" + r.slug as any}
-                    className="text-xs uppercase tracking-[0.2em] text-primary font-medium hover:underline"
-                    onClick={() => setOpen(false)}
-                  >
-                    {r.name}
-                  </Link>
-                  <ul className="space-y-1">
-                    {kids.slice(0, 6).map((k) => (
-                      <li key={k.id}>
-                        <Link
-                          to={"/category/" + k.slug as any}
-                          className="text-xs text-foreground/70 hover:text-primary normal-case tracking-normal"
-                          onClick={() => setOpen(false)}
-                        >
-                          {k.name}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              );
-            })}
+          <div className="bg-background border border-border shadow-xl rounded-md p-6 grid grid-cols-3 gap-6 min-w-[560px] max-w-[900px]">
+            {roots.slice(0, 6).map((r) => (
+              <CategoryColumn
+                key={r.id}
+                node={r}
+                childrenOf={childrenOf}
+                onNavigate={() => setOpen(false)}
+              />
+            ))}
           </div>
         </div>
       )}
     </div>
+  );
+}
+
+function CategoryColumn({
+  node,
+  childrenOf,
+  onNavigate,
+  depth = 0,
+}: {
+  node: Category;
+  childrenOf: (id: string) => Category[];
+  onNavigate: () => void;
+  depth?: number;
+}) {
+  const kids = childrenOf(node.id);
+  if (depth === 0) {
+    return (
+      <div className="space-y-2">
+        <Link
+          to={"/category/" + node.slug as any}
+          className="text-xs uppercase tracking-[0.2em] text-primary font-medium hover:underline"
+          onClick={onNavigate}
+        >
+          {node.name}
+        </Link>
+        {kids.length > 0 && (
+          <ul className="space-y-1">
+            {kids.map((k) => (
+              <CategoryColumn key={k.id} node={k} childrenOf={childrenOf} onNavigate={onNavigate} depth={1} />
+            ))}
+          </ul>
+        )}
+      </div>
+    );
+  }
+  return (
+    <li>
+      <Link
+        to={"/category/" + node.slug as any}
+        className="text-xs text-foreground/70 hover:text-primary normal-case tracking-normal"
+        onClick={onNavigate}
+      >
+        {node.name}
+      </Link>
+      {kids.length > 0 && (
+        <ul className="space-y-1 pl-3 mt-1 border-l border-border/50">
+          {kids.map((k) => (
+            <CategoryColumn key={k.id} node={k} childrenOf={childrenOf} onNavigate={onNavigate} depth={depth + 1} />
+          ))}
+        </ul>
+      )}
+    </li>
   );
 }
 
@@ -177,6 +211,21 @@ export function SiteHeader() {
     },
   });
 
+  // CMS pages flagged "Show in Header" become clean-URL menu entries (/slug).
+  const { data: headerPages } = useQuery({
+    queryKey: ["pages", "header"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("pages")
+        .select("id,title,slug,menu_order")
+        .eq("is_published", true)
+        .eq("show_in_header", true)
+        .order("menu_order")
+        .order("title");
+      return data ?? [];
+    },
+  });
+
   const { data: branding } = useQuery({
     queryKey: ["settings", "branding"],
     queryFn: async () => {
@@ -210,7 +259,19 @@ export function SiteHeader() {
           </Link>
 
           <nav className="hidden md:flex items-center gap-8 text-xs uppercase tracking-[0.24em]">
+            <Link to="/" className="text-foreground/80 hover:text-primary transition-colors">Home</Link>
             <CategoriesMenu />
+            <Link to="/about" className="text-foreground/80 hover:text-primary transition-colors">About</Link>
+            <Link to="/contact" className="text-foreground/80 hover:text-primary transition-colors">Contact</Link>
+            <Link to="/blog" className="text-foreground/80 hover:text-primary transition-colors">Blog</Link>
+            <Link to="/faq" className="text-foreground/80 hover:text-primary transition-colors">FAQ</Link>
+            {(headerPages ?? [])
+              .filter((p) => !["about", "contact", "blog", "faq", "shop", ""].includes(p.slug))
+              .map((p) => (
+                <Link key={p.id} to={"/" + p.slug as any} className="text-foreground/80 hover:text-primary transition-colors">
+                  {p.title}
+                </Link>
+              ))}
             {items.map((m) => (
               <MenuLink key={m.id} item={m} className="text-foreground/80 hover:text-primary transition-colors">
                 {m.label}
@@ -254,6 +315,19 @@ export function SiteHeader() {
         {mobileOpen && (
           <nav className="md:hidden border-t border-border bg-background">
             <div className="container-luxe flex flex-col py-4 gap-3 text-sm uppercase tracking-[0.2em]">
+              <Link to="/" onClick={() => setMobileOpen(false)} className="py-2">Home</Link>
+              <Link to="/shop" onClick={() => setMobileOpen(false)} className="py-2">Shop</Link>
+              <Link to="/about" onClick={() => setMobileOpen(false)} className="py-2">About</Link>
+              <Link to="/contact" onClick={() => setMobileOpen(false)} className="py-2">Contact</Link>
+              <Link to="/blog" onClick={() => setMobileOpen(false)} className="py-2">Blog</Link>
+              <Link to="/faq" onClick={() => setMobileOpen(false)} className="py-2">FAQ</Link>
+              {(headerPages ?? [])
+                .filter((p) => !["about", "contact", "blog", "faq", "shop", ""].includes(p.slug))
+                .map((p) => (
+                  <Link key={p.id} to={"/" + p.slug as any} onClick={() => setMobileOpen(false)} className="py-2">
+                    {p.title}
+                  </Link>
+                ))}
               {items.map((m) => (
                 <MenuLink key={m.id} item={m} onClick={() => setMobileOpen(false)} className="py-2">
                   {m.label}

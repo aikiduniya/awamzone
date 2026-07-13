@@ -23,7 +23,7 @@ export const Route = createFileRoute("/sitemap.xml")({
         (products ?? []).forEach((r: any) => urls.push(`<url><loc>${BASE_URL}/product/${r.slug}</loc><lastmod>${r.updated_at}</lastmod></url>`));
         (cats ?? []).forEach((r: any) => urls.push(`<url><loc>${BASE_URL}/category/${r.slug}</loc><lastmod>${r.updated_at}</lastmod></url>`));
         (posts ?? []).forEach((r: any) => urls.push(`<url><loc>${BASE_URL}/blog/${r.slug}</loc><lastmod>${r.updated_at}</lastmod></url>`));
-        (pages ?? []).forEach((r: any) => urls.push(`<url><loc>${BASE_URL}/pages/${r.slug}</loc><lastmod>${r.updated_at}</lastmod></url>`));
+        (pages ?? []).forEach((r: any) => urls.push(`<url><loc>${BASE_URL}/${r.slug}</loc><lastmod>${r.updated_at}</lastmod></url>`));
         const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.join("\n")}\n</urlset>`;
         return new Response(xml, { headers: { "Content-Type": "application/xml", "Cache-Control": "public, max-age=3600" } });
       },
