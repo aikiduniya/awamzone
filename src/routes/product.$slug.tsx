@@ -81,13 +81,21 @@ function ProductPage() {
     queryFn: async () => {
       const { data } = await supabase
         .from("reviews")
-        .select("*, profiles(full_name)")
+        .select("*")
         .eq("product_id", product!.id)
         .eq("is_approved", true)
         .order("created_at", { ascending: false });
-      return data ?? [];
+      const rows = data ?? [];
+      const userIds = Array.from(new Set(rows.map((r: any) => r.user_id).filter(Boolean)));
+      if (userIds.length) {
+        const { data: profs } = await supabase.from("profiles").select("id, full_name").in("id", userIds);
+        const map = new Map((profs ?? []).map((p: any) => [p.id, p]));
+        return rows.map((r: any) => ({ ...r, profiles: map.get(r.user_id) ?? null }));
+      }
+      return rows;
     },
   });
+
 
   useEffect(() => { if (product?.id) pushRecentlyViewed(product.id); }, [product?.id]);
   const compareIds = useCompareIds();
