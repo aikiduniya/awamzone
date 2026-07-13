@@ -259,7 +259,19 @@ export function SiteHeader() {
           </Link>
 
           <nav className="hidden md:flex items-center gap-8 text-xs uppercase tracking-[0.24em]">
+            <Link to="/" className="text-foreground/80 hover:text-primary transition-colors">Home</Link>
             <CategoriesMenu />
+            <Link to="/about" className="text-foreground/80 hover:text-primary transition-colors">About</Link>
+            <Link to="/contact" className="text-foreground/80 hover:text-primary transition-colors">Contact</Link>
+            <Link to="/blog" className="text-foreground/80 hover:text-primary transition-colors">Blog</Link>
+            <Link to="/faq" className="text-foreground/80 hover:text-primary transition-colors">FAQ</Link>
+            {(headerPages ?? [])
+              .filter((p) => !["about", "contact", "blog", "faq", "shop", ""].includes(p.slug))
+              .map((p) => (
+                <Link key={p.id} to={"/" + p.slug as any} className="text-foreground/80 hover:text-primary transition-colors">
+                  {p.title}
+                </Link>
+              ))}
             {items.map((m) => (
               <MenuLink key={m.id} item={m} className="text-foreground/80 hover:text-primary transition-colors">
                 {m.label}
