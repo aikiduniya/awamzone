@@ -289,15 +289,8 @@ export function SiteHeader() {
             <Link to="/shop" aria-label="Search" className="text-foreground/80 hover:text-primary">
               <Search size={18} />
             </Link>
-            {user ? (
-              <Link to="/account" aria-label="Account" className="text-foreground/80 hover:text-primary">
-                <UserIcon size={18} />
-              </Link>
-            ) : (
-              <Link to="/auth" aria-label="Sign in" className="text-foreground/80 hover:text-primary">
-                <UserIcon size={18} />
-              </Link>
-            )}
+            <UserMenu />
+
             {isAdmin && (
               <Link
                 to="/admin"
