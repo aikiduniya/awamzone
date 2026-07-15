@@ -66,6 +66,8 @@ function SmtpAdmin() {
     </label>
   );
 
+  const notConfigured = !v.from_email;
+
   return (
     <>
       <div className="eyebrow mb-2">Notifications</div>
@@ -73,6 +75,14 @@ function SmtpAdmin() {
       <p className="text-sm text-muted-foreground mb-6">
         Configure a custom SMTP relay. When disabled, the platform uses managed email by default.
       </p>
+
+      {notConfigured && (
+        <div className="mb-6 border border-yellow-500/40 bg-yellow-500/10 text-yellow-900 dark:text-yellow-200 px-4 py-3 text-sm">
+          ⚠️ Email is not configured. Transactional emails (welcome, password reset, order updates)
+          will not be sent until a sender email is set below.
+        </div>
+      )}
+
 
       <section className="border border-border p-6 bg-card grid grid-cols-1 md:grid-cols-2 gap-4">
         {field("SMTP host", "host", { placeholder: "smtp.example.com" })}
