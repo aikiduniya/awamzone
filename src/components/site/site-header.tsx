@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Search, ShoppingBag, User as UserIcon, Menu, X, ChevronDown } from "lucide-react";
+import { Search, ShoppingBag, Menu, X, ChevronDown } from "lucide-react";
+import { UserMenu } from "@/components/site/user-menu";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useCart } from "@/hooks/use-cart";
@@ -288,15 +289,8 @@ export function SiteHeader() {
             <Link to="/shop" aria-label="Search" className="text-foreground/80 hover:text-primary">
               <Search size={18} />
             </Link>
-            {user ? (
-              <Link to="/account" aria-label="Account" className="text-foreground/80 hover:text-primary">
-                <UserIcon size={18} />
-              </Link>
-            ) : (
-              <Link to="/auth" aria-label="Sign in" className="text-foreground/80 hover:text-primary">
-                <UserIcon size={18} />
-              </Link>
-            )}
+            <UserMenu />
+
             {isAdmin && (
               <Link
                 to="/admin"
