@@ -289,7 +289,14 @@ function BannerSection({ section }: { section: any }) {
 
 function BrandTile({ brand }: { brand: { id: string; name: string; slug: string; logo_url: string | null } }) {
   const [failed, setFailed] = useState(false);
-  const showImg = brand.logo_url && !failed;
+  const isUnavailableProvider = brand.logo_url?.includes("logo.clearbit.com");
+  const showImg = brand.logo_url && !isUnavailableProvider && !failed;
+  const initials = brand.name
+    .split(/\s|&/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((word) => word[0])
+    .join("");
   return (
     <Link
       to="/shop"
@@ -307,8 +314,13 @@ function BrandTile({ brand }: { brand: { id: string; name: string; slug: string;
             loading="lazy"
           />
         ) : (
-          <span className="font-serif text-xl tracking-[0.24em] uppercase text-foreground/80 group-hover:text-primary transition-colors whitespace-nowrap">
-            {brand.name}
+          <span className="flex items-center gap-3 text-foreground/80 group-hover:text-primary transition-colors">
+            <span className="grid size-10 shrink-0 place-items-center rounded-full border border-current/25 font-serif text-sm font-semibold uppercase">
+              {initials}
+            </span>
+            <span className="font-serif text-base uppercase tracking-[0.14em] whitespace-nowrap">
+              {brand.name}
+            </span>
           </span>
         )}
       </div>
