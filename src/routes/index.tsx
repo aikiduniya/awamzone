@@ -63,13 +63,13 @@ function HeroBanner() {
   const posCls = active.text_position === "top" ? "items-start pt-24" : active.text_position === "bottom" ? "items-end pb-24" : "items-center";
 
   return (
-    <section className="relative h-[85vh] min-h-[560px] w-full overflow-hidden" style={active.background_color ? { backgroundColor: active.background_color } : undefined}>
+    <section className="relative h-[92vh] min-h-[620px] w-full overflow-hidden bg-black" style={active.background_color ? { backgroundColor: active.background_color } : undefined}>
       {isVideo ? (
         <video
           key={active.id}
           src={active.video_url!}
           autoPlay muted loop playsInline
-          className="absolute inset-0 h-full w-full object-cover"
+          className="absolute inset-0 h-full w-full object-cover scale-105"
         />
       ) : (
         <picture>
@@ -78,42 +78,71 @@ function HeroBanner() {
             key={active.id}
             src={active.desktop_image || active.mobile_image || ""}
             alt={active.title ?? ""}
-            className="absolute inset-0 h-full w-full object-cover animate-in fade-in duration-700"
+            className="absolute inset-0 h-full w-full object-cover animate-in fade-in zoom-in-105 duration-[1400ms] ease-out"
           />
         </picture>
       )}
-      <div className="absolute inset-0 bg-black" style={{ opacity: active.overlay_opacity ?? 0.4 }} />
+      {/* Cinematic gradient overlays */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-black/40" />
+      <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-transparent to-black/20" />
+      <div className="absolute inset-0" style={{ opacity: active.overlay_opacity ?? 0, backgroundColor: "black" }} />
+
+      {/* Top ornamental hairline */}
+      <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent" />
+
       <div className={`container-luxe relative z-10 flex h-full ${posCls}`}>
-        <div className={`flex flex-col gap-4 max-w-xl ${alignCls}`}>
-          {active.kicker && <div className="eyebrow text-primary">{active.kicker}</div>}
-          {active.title && <h1 className="text-5xl md:text-7xl font-serif leading-[1.05] text-white drop-shadow">{active.title}</h1>}
-          {active.subtitle && <p className="text-white/90 max-w-md leading-relaxed drop-shadow">{active.subtitle}</p>}
-          <div className="mt-4 flex flex-wrap gap-3">
+        <div className={`flex flex-col gap-6 max-w-2xl ${alignCls} animate-in fade-in slide-in-from-bottom-6 duration-1000`}>
+          {active.kicker && (
+            <div className="inline-flex items-center gap-3 text-primary text-[11px] uppercase tracking-[0.4em]">
+              <span className="h-px w-10 bg-primary/70" />
+              {active.kicker}
+              <span className="h-px w-10 bg-primary/70" />
+            </div>
+          )}
+          {active.title && (
+            <h1 className="text-5xl md:text-7xl lg:text-8xl font-serif leading-[1.02] text-white drop-shadow-[0_2px_20px_rgba(0,0,0,0.6)]">
+              {active.title}
+            </h1>
+          )}
+          {active.subtitle && (
+            <p className="text-white/85 text-base md:text-lg max-w-lg leading-relaxed drop-shadow">
+              {active.subtitle}
+            </p>
+          )}
+          <div className="mt-4 flex flex-wrap gap-4">
             {active.primary_label && (
-              <Link to={active.primary_link || "/shop"} className="inline-flex items-center border border-primary bg-primary text-primary-foreground px-8 py-4 text-xs uppercase tracking-[0.28em] hover:opacity-90 transition">
+              <Link to={active.primary_link || "/shop"} className="group inline-flex items-center gap-2 bg-primary text-primary-foreground px-10 py-4 text-xs uppercase tracking-[0.32em] hover:bg-primary/90 transition-all shadow-[0_10px_40px_-10px_rgba(0,0,0,0.6)]">
                 {active.primary_label}
+                <span className="transition-transform group-hover:translate-x-1">→</span>
               </Link>
             )}
             {active.secondary_label && (
-              <Link to={active.secondary_link || "/shop"} className="inline-flex items-center border border-white text-white px-8 py-4 text-xs uppercase tracking-[0.28em] hover:bg-white hover:text-foreground transition">
+              <Link to={active.secondary_link || "/shop"} className="inline-flex items-center border border-white/70 text-white px-10 py-4 text-xs uppercase tracking-[0.32em] hover:bg-white hover:text-black transition-all backdrop-blur-sm">
                 {active.secondary_label}
               </Link>
             )}
           </div>
         </div>
       </div>
+
       {slides.length > 1 && (
-        <div className="absolute inset-x-0 bottom-6 z-10 flex justify-center gap-2">
+        <div className="absolute inset-x-0 bottom-8 z-10 flex justify-center gap-3">
           {slides.map((s, idx) => (
             <button
               key={s.id}
               onClick={() => setI(idx)}
               aria-label={`Slide ${idx + 1}`}
-              className={`h-1.5 rounded-full transition-all ${idx === i ? "w-10 bg-primary" : "w-4 bg-white/50 hover:bg-white/80"}`}
+              className={`h-[3px] rounded-full transition-all duration-500 ${idx === i ? "w-14 bg-primary" : "w-6 bg-white/40 hover:bg-white/70"}`}
             />
           ))}
         </div>
       )}
+
+      {/* Scroll cue */}
+      <div className="absolute bottom-6 right-6 z-10 hidden md:flex items-center gap-3 text-white/60 text-[10px] uppercase tracking-[0.32em]">
+        <span>Scroll</span>
+        <span className="block h-8 w-px bg-white/40 animate-pulse" />
+      </div>
     </section>
   );
 }
@@ -258,6 +287,35 @@ function BannerSection({ section }: { section: any }) {
   );
 }
 
+function BrandTile({ brand }: { brand: { id: string; name: string; slug: string; logo_url: string | null } }) {
+  const [failed, setFailed] = useState(false);
+  const showImg = brand.logo_url && !failed;
+  return (
+    <Link
+      to="/shop"
+      search={{ brand: brand.slug } as any}
+      className="shrink-0 group"
+      title={brand.name}
+    >
+      <div className="h-28 w-48 grid place-items-center px-6 rounded-md border border-border/60 bg-card/60 backdrop-blur hover:border-primary/60 hover:bg-card transition-all duration-500">
+        {showImg ? (
+          <img
+            src={brand.logo_url!}
+            alt={brand.name}
+            onError={() => setFailed(true)}
+            className="max-h-14 max-w-full object-contain opacity-90 group-hover:opacity-100 transition duration-500"
+            loading="lazy"
+          />
+        ) : (
+          <span className="font-serif text-xl tracking-[0.24em] uppercase text-foreground/80 group-hover:text-primary transition-colors whitespace-nowrap">
+            {brand.name}
+          </span>
+        )}
+      </div>
+    </Link>
+  );
+}
+
 function BrandSlider({ section }: { section: any }) {
   const { data } = useQuery({
     queryKey: ["home", "brands-all"],
@@ -271,41 +329,18 @@ function BrandSlider({ section }: { section: any }) {
     },
   });
   if (!data?.length) return null;
-  // Duplicate the list for a seamless infinite marquee.
   const loop = [...data, ...data];
   return (
-    <section className="py-20 bg-surface/40 border-y border-border overflow-hidden">
+    <section className="py-24 bg-gradient-to-b from-background via-surface/40 to-background border-y border-border overflow-hidden">
       <div className="container-luxe">
         <SectionHeading eyebrow={section.subtitle} title={section.title} description={section.description} align="center" />
       </div>
       <div className="mt-14 relative">
-        {/* edge fades */}
-        <div className="pointer-events-none absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-background to-transparent z-10" />
-        <div className="pointer-events-none absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-background to-transparent z-10" />
-        <div className="flex gap-16 animate-brand-marquee whitespace-nowrap">
+        <div className="pointer-events-none absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-background to-transparent z-10" />
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-background to-transparent z-10" />
+        <div className="flex gap-8 animate-brand-marquee whitespace-nowrap">
           {loop.map((b, i) => (
-            <Link
-              key={`${b.id}-${i}`}
-              to="/shop"
-              search={{ brand: b.slug } as any}
-              className="shrink-0 group"
-              title={b.name}
-            >
-              <div className="h-24 w-40 grid place-items-center px-6">
-                {b.logo_url ? (
-                  <img
-                    src={b.logo_url}
-                    alt={b.name}
-                    className="max-h-16 max-w-full object-contain grayscale opacity-70 group-hover:grayscale-0 group-hover:opacity-100 transition duration-500"
-                    loading="lazy"
-                  />
-                ) : (
-                  <span className="font-serif text-xl tracking-[0.2em] text-muted-foreground group-hover:text-primary transition-colors">
-                    {b.name}
-                  </span>
-                )}
-              </div>
-            </Link>
+            <BrandTile key={`${b.id}-${i}`} brand={b} />
           ))}
         </div>
       </div>
