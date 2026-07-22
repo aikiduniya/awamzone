@@ -289,43 +289,27 @@ function BannerSection({ section }: { section: any }) {
 
 function BrandTile({ brand }: { brand: { id: string; name: string; slug: string; logo_url: string | null } }) {
   const [failed, setFailed] = useState(false);
-  const isUnavailableProvider = brand.logo_url?.includes("logo.clearbit.com");
-  const showImg = brand.logo_url && !isUnavailableProvider && !failed;
-  const initials = brand.name
-    .split(/\s|&/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((word) => word[0])
-    .join("");
+  const showImg = brand.logo_url && !failed;
   return (
     <Link
       to="/shop"
       search={{ brand: brand.slug } as any}
       className="shrink-0 group"
       title={brand.name}
+      aria-label={brand.name}
     >
-      <div className="h-28 w-48 flex flex-col items-center justify-center gap-2 px-6 rounded-md border border-border/60 bg-card/60 backdrop-blur hover:border-primary/60 hover:bg-card transition-all duration-500">
+      <div className="h-32 w-56 flex items-center justify-center px-8 rounded-xl bg-white border border-black/5 shadow-[0_4px_20px_-8px_rgba(0,0,0,0.15)] transition-all duration-500 group-hover:scale-[1.04] group-hover:shadow-[0_18px_40px_-12px_rgba(0,0,0,0.28)]">
         {showImg ? (
-          <>
-            <img
-              src={brand.logo_url!}
-              alt={brand.name}
-              onError={() => setFailed(true)}
-              className="max-h-12 max-w-[140px] object-contain opacity-90 group-hover:opacity-100 transition duration-500"
-              loading="lazy"
-            />
-            <span className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground group-hover:text-primary transition-colors whitespace-nowrap">
-              {brand.name}
-            </span>
-          </>
+          <img
+            src={brand.logo_url!}
+            alt={`${brand.name} logo`}
+            onError={() => setFailed(true)}
+            className="max-h-16 max-w-[160px] object-contain"
+            loading="lazy"
+          />
         ) : (
-          <span className="flex items-center gap-3 text-foreground/80 group-hover:text-primary transition-colors">
-            <span className="grid size-10 shrink-0 place-items-center rounded-full border border-current/25 font-serif text-sm font-semibold uppercase">
-              {initials}
-            </span>
-            <span className="font-serif text-base uppercase tracking-[0.14em] whitespace-nowrap">
-              {brand.name}
-            </span>
+          <span className="font-serif text-xl uppercase tracking-[0.18em] text-black text-center">
+            {brand.name}
           </span>
         )}
       </div>
@@ -339,23 +323,28 @@ function BrandSlider({ section }: { section: any }) {
     queryFn: async () => {
       const { data } = await supabase
         .from("brands")
-        .select("id,name,slug,logo_url")
+        .select("id,name,slug,logo_url,is_featured")
         .eq("is_active", true)
         .order("sort_order");
       return data ?? [];
     },
   });
   if (!data?.length) return null;
-  const loop = [...data, ...data];
+  const featured = data.filter((b: any) => b.is_featured);
+  const list = featured.length >= 6 ? featured : data;
+  const loop = [...list, ...list];
   return (
     <section className="py-24 bg-gradient-to-b from-background via-surface/40 to-background border-y border-border overflow-hidden">
       <div className="container-luxe">
         <SectionHeading eyebrow={section.subtitle} title={section.title} description={section.description} align="center" />
       </div>
-      <div className="mt-14 relative">
+      <div className="mt-14 relative group/marquee">
         <div className="pointer-events-none absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-background to-transparent z-10" />
         <div className="pointer-events-none absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-background to-transparent z-10" />
-        <div className="flex gap-8 animate-brand-marquee whitespace-nowrap">
+        <div
+          className="flex gap-6 animate-brand-marquee whitespace-nowrap py-4 group-hover/marquee:[animation-play-state:paused] touch-pan-x"
+          style={{ touchAction: "pan-x" }}
+        >
           {loop.map((b, i) => (
             <BrandTile key={`${b.id}-${i}`} brand={b} />
           ))}
