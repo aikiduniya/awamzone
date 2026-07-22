@@ -258,6 +258,35 @@ function BannerSection({ section }: { section: any }) {
   );
 }
 
+function BrandTile({ brand }: { brand: { id: string; name: string; slug: string; logo_url: string | null } }) {
+  const [failed, setFailed] = useState(false);
+  const showImg = brand.logo_url && !failed;
+  return (
+    <Link
+      to="/shop"
+      search={{ brand: brand.slug } as any}
+      className="shrink-0 group"
+      title={brand.name}
+    >
+      <div className="h-28 w-48 grid place-items-center px-6 rounded-md border border-border/60 bg-card/60 backdrop-blur hover:border-primary/60 hover:bg-card transition-all duration-500">
+        {showImg ? (
+          <img
+            src={brand.logo_url!}
+            alt={brand.name}
+            onError={() => setFailed(true)}
+            className="max-h-14 max-w-full object-contain opacity-90 group-hover:opacity-100 transition duration-500"
+            loading="lazy"
+          />
+        ) : (
+          <span className="font-serif text-xl tracking-[0.24em] uppercase text-foreground/80 group-hover:text-primary transition-colors whitespace-nowrap">
+            {brand.name}
+          </span>
+        )}
+      </div>
+    </Link>
+  );
+}
+
 function BrandSlider({ section }: { section: any }) {
   const { data } = useQuery({
     queryKey: ["home", "brands-all"],
@@ -271,41 +300,18 @@ function BrandSlider({ section }: { section: any }) {
     },
   });
   if (!data?.length) return null;
-  // Duplicate the list for a seamless infinite marquee.
   const loop = [...data, ...data];
   return (
-    <section className="py-20 bg-surface/40 border-y border-border overflow-hidden">
+    <section className="py-24 bg-gradient-to-b from-background via-surface/40 to-background border-y border-border overflow-hidden">
       <div className="container-luxe">
         <SectionHeading eyebrow={section.subtitle} title={section.title} description={section.description} align="center" />
       </div>
       <div className="mt-14 relative">
-        {/* edge fades */}
-        <div className="pointer-events-none absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-background to-transparent z-10" />
-        <div className="pointer-events-none absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-background to-transparent z-10" />
-        <div className="flex gap-16 animate-brand-marquee whitespace-nowrap">
+        <div className="pointer-events-none absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-background to-transparent z-10" />
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-background to-transparent z-10" />
+        <div className="flex gap-8 animate-brand-marquee whitespace-nowrap">
           {loop.map((b, i) => (
-            <Link
-              key={`${b.id}-${i}`}
-              to="/shop"
-              search={{ brand: b.slug } as any}
-              className="shrink-0 group"
-              title={b.name}
-            >
-              <div className="h-24 w-40 grid place-items-center px-6">
-                {b.logo_url ? (
-                  <img
-                    src={b.logo_url}
-                    alt={b.name}
-                    className="max-h-16 max-w-full object-contain grayscale opacity-70 group-hover:grayscale-0 group-hover:opacity-100 transition duration-500"
-                    loading="lazy"
-                  />
-                ) : (
-                  <span className="font-serif text-xl tracking-[0.2em] text-muted-foreground group-hover:text-primary transition-colors">
-                    {b.name}
-                  </span>
-                )}
-              </div>
-            </Link>
+            <BrandTile key={`${b.id}-${i}`} brand={b} />
           ))}
         </div>
       </div>
