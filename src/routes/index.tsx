@@ -298,17 +298,21 @@ function BrandTile({ brand }: { brand: { id: string; name: string; slug: string;
       title={brand.name}
       aria-label={brand.name}
     >
-      <div className="h-32 w-56 flex items-center justify-center px-8 rounded-xl bg-white border border-black/5 shadow-[0_4px_20px_-8px_rgba(0,0,0,0.15)] transition-all duration-500 group-hover:scale-[1.04] group-hover:shadow-[0_18px_40px_-12px_rgba(0,0,0,0.28)]">
+      <div className="h-[100px] w-[180px] flex items-center justify-center px-5 rounded-[14px] bg-white border border-black/[0.06] shadow-[0_2px_10px_-4px_rgba(0,0,0,0.12)] transition-all duration-500 group-hover:scale-[1.05] group-hover:shadow-[0_14px_32px_-10px_rgba(0,0,0,0.25)]">
         {showImg ? (
           <img
             src={brand.logo_url!}
             alt={`${brand.name} logo`}
             onError={() => setFailed(true)}
-            className="max-h-16 max-w-[160px] object-contain"
+            className="object-contain"
+            style={{ maxHeight: 45, maxWidth: 140, width: "auto", height: "auto" }}
             loading="lazy"
           />
         ) : (
-          <span className="font-serif text-xl uppercase tracking-[0.18em] text-black text-center">
+          <span
+            className="font-serif uppercase tracking-[0.14em] text-black text-center leading-tight"
+            style={{ fontSize: brand.name.length > 12 ? 12 : 14, maxWidth: 140 }}
+          >
             {brand.name}
           </span>
         )}
@@ -339,8 +343,8 @@ function BrandSlider({ section }: { section: any }) {
         <SectionHeading eyebrow={section.subtitle} title={section.title} description={section.description} align="center" />
       </div>
       <div className="mt-14 relative group/marquee">
-        <div className="pointer-events-none absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-background to-transparent z-10" />
-        <div className="pointer-events-none absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-background to-transparent z-10" />
+        <div className="pointer-events-none absolute inset-y-0 left-0 w-12 md:w-16 bg-gradient-to-r from-background to-transparent z-10" />
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-12 md:w-16 bg-gradient-to-l from-background to-transparent z-10" />
         <div
           className="flex gap-6 animate-brand-marquee whitespace-nowrap py-4 group-hover/marquee:[animation-play-state:paused] touch-pan-x"
           style={{ touchAction: "pan-x" }}
