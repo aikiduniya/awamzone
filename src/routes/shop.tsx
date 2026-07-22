@@ -95,37 +95,90 @@ function Shop() {
         </div>
 
         <div className="mt-10 grid grid-cols-12 gap-10">
-          <aside className="col-span-12 md:col-span-3 space-y-8">
-            <div>
-              <div className="eyebrow mb-4">Category</div>
-              <ul className="space-y-2 text-sm">
-                <li><button onClick={() => update({ category: undefined })} className={!search.category ? "text-primary" : "text-muted-foreground hover:text-foreground"}>All</button></li>
-                {cats?.map((c) => (
-                  <li key={c.id}>
-                    <button onClick={() => update({ category: c.slug })} className={search.category === c.slug ? "text-primary" : "text-muted-foreground hover:text-foreground"}>{c.name}</button>
+          <aside className="col-span-12 md:col-span-3">
+            <div className="md:sticky md:top-28 space-y-8 bg-card/40 border border-border rounded-lg p-6">
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="eyebrow">Category</div>
+                  {search.category && (
+                    <button onClick={() => update({ category: undefined })} className="text-[10px] uppercase tracking-[0.2em] text-primary hover:underline">Clear</button>
+                  )}
+                </div>
+                <ul className="space-y-1 text-sm">
+                  <li>
+                    <button
+                      onClick={() => update({ category: undefined })}
+                      className={`w-full text-left px-3 py-2 rounded transition ${!search.category ? "bg-primary/15 text-primary font-medium" : "text-muted-foreground hover:bg-surface hover:text-foreground"}`}
+                    >
+                      All categories
+                    </button>
                   </li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <div className="eyebrow mb-4">Brand</div>
-              <ul className="space-y-2 text-sm">
-                <li><button onClick={() => update({ brand: undefined })} className={!search.brand ? "text-primary" : "text-muted-foreground hover:text-foreground"}>All</button></li>
-                {brands?.map((b) => (
-                  <li key={b.id}>
-                    <button onClick={() => update({ brand: b.slug })} className={search.brand === b.slug ? "text-primary" : "text-muted-foreground hover:text-foreground"}>{b.name}</button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <div className="eyebrow mb-4">Price</div>
-              <div className="flex gap-2">
-                <input type="number" defaultValue={search.min ?? ""} placeholder="Min" onBlur={(e) => update({ min: e.target.value ? Number(e.target.value) : undefined })} className="w-full border border-border bg-transparent px-3 py-2 text-sm" />
-                <input type="number" defaultValue={search.max ?? ""} placeholder="Max" onBlur={(e) => update({ max: e.target.value ? Number(e.target.value) : undefined })} className="w-full border border-border bg-transparent px-3 py-2 text-sm" />
+                  {cats?.map((c) => (
+                    <li key={c.id}>
+                      <button
+                        onClick={() => update({ category: c.slug })}
+                        className={`w-full text-left px-3 py-2 rounded transition flex items-center justify-between ${search.category === c.slug ? "bg-primary/15 text-primary font-medium" : "text-muted-foreground hover:bg-surface hover:text-foreground"}`}
+                      >
+                        <span>{c.name}</span>
+                        {search.category === c.slug && <span className="text-xs">✓</span>}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
               </div>
+
+              <div className="h-px bg-border" />
+
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="eyebrow">Brand</div>
+                  {search.brand && (
+                    <button onClick={() => update({ brand: undefined })} className="text-[10px] uppercase tracking-[0.2em] text-primary hover:underline">Clear</button>
+                  )}
+                </div>
+                <ul className="space-y-1 text-sm max-h-64 overflow-y-auto pr-1">
+                  <li>
+                    <button
+                      onClick={() => update({ brand: undefined })}
+                      className={`w-full text-left px-3 py-2 rounded transition ${!search.brand ? "bg-primary/15 text-primary font-medium" : "text-muted-foreground hover:bg-surface hover:text-foreground"}`}
+                    >
+                      All brands
+                    </button>
+                  </li>
+                  {brands?.map((b) => (
+                    <li key={b.id}>
+                      <button
+                        onClick={() => update({ brand: b.slug })}
+                        className={`w-full text-left px-3 py-2 rounded transition ${search.brand === b.slug ? "bg-primary/15 text-primary font-medium" : "text-muted-foreground hover:bg-surface hover:text-foreground"}`}
+                      >
+                        {b.name}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="h-px bg-border" />
+
+              <div>
+                <div className="eyebrow mb-4">Price (PKR)</div>
+                <div className="flex gap-2">
+                  <input type="number" defaultValue={search.min ?? ""} placeholder="Min" onBlur={(e) => update({ min: e.target.value ? Number(e.target.value) : undefined })} className="w-full border border-border bg-background rounded px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                  <input type="number" defaultValue={search.max ?? ""} placeholder="Max" onBlur={(e) => update({ max: e.target.value ? Number(e.target.value) : undefined })} className="w-full border border-border bg-background rounded px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                </div>
+              </div>
+
+              {(search.category || search.brand || search.min || search.max || search.q) && (
+                <button
+                  onClick={() => navigate({ search: {} as any })}
+                  className="w-full border border-primary text-primary text-xs uppercase tracking-[0.2em] py-2 rounded hover:bg-primary hover:text-primary-foreground transition"
+                >
+                  Reset all filters
+                </button>
+              )}
             </div>
           </aside>
+
 
           <div className="col-span-12 md:col-span-9">
             <div className="flex items-center justify-between border-b border-border pb-4 mb-8">

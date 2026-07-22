@@ -181,3 +181,15 @@ html:not(.dark) {
   padding-inline: 1.25rem;
   max-width: 1400px;
 }
+
+@keyframes brand-marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.animate-brand-marquee {
+  animation: brand-marquee 45s linear infinite;
+}
+.animate-brand-marquee:hover {
+  animation-play-state: paused;
+}
+

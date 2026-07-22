@@ -260,22 +260,54 @@ function BannerSection({ section }: { section: any }) {
 
 function BrandSlider({ section }: { section: any }) {
   const { data } = useQuery({
-    queryKey: ["home", "brands"],
+    queryKey: ["home", "brands-all"],
     queryFn: async () => {
-      const { data } = await supabase.from("brands").select("*").eq("is_active", true).eq("is_featured", true).order("sort_order");
+      const { data } = await supabase
+        .from("brands")
+        .select("id,name,slug,logo_url")
+        .eq("is_active", true)
+        .order("sort_order");
       return data ?? [];
     },
   });
   if (!data?.length) return null;
+  // Duplicate the list for a seamless infinite marquee.
+  const loop = [...data, ...data];
   return (
-    <section className="container-luxe py-16">
-      <SectionHeading eyebrow={section.subtitle} title={section.title} description={section.description} align="center" />
-      <div className="mt-12 flex flex-wrap items-center justify-center gap-x-16 gap-y-8">
-        {data.map((b) => (
-          <div key={b.id} className="text-2xl font-serif tracking-[0.18em] text-muted-foreground hover:text-primary transition-colors">
-            {b.name}
-          </div>
-        ))}
+    <section className="py-20 bg-surface/40 border-y border-border overflow-hidden">
+      <div className="container-luxe">
+        <SectionHeading eyebrow={section.subtitle} title={section.title} description={section.description} align="center" />
+      </div>
+      <div className="mt-14 relative">
+        {/* edge fades */}
+        <div className="pointer-events-none absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-background to-transparent z-10" />
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-background to-transparent z-10" />
+        <div className="flex gap-16 animate-brand-marquee whitespace-nowrap">
+          {loop.map((b, i) => (
+            <Link
+              key={`${b.id}-${i}`}
+              to="/shop"
+              search={{ brand: b.slug } as any}
+              className="shrink-0 group"
+              title={b.name}
+            >
+              <div className="h-24 w-40 grid place-items-center px-6">
+                {b.logo_url ? (
+                  <img
+                    src={b.logo_url}
+                    alt={b.name}
+                    className="max-h-16 max-w-full object-contain grayscale opacity-70 group-hover:grayscale-0 group-hover:opacity-100 transition duration-500"
+                    loading="lazy"
+                  />
+                ) : (
+                  <span className="font-serif text-xl tracking-[0.2em] text-muted-foreground group-hover:text-primary transition-colors">
+                    {b.name}
+                  </span>
+                )}
+              </div>
+            </Link>
+          ))}
+        </div>
       </div>
     </section>
   );
@@ -283,23 +315,49 @@ function BrandSlider({ section }: { section: any }) {
 
 function Testimonials({ section }: { section: any }) {
   const items = section.config?.items ?? [];
+  if (!items.length) return null;
   return (
-    <section className="bg-surface py-24">
+    <section className="bg-surface py-24 border-y border-border">
       <div className="container-luxe">
         <SectionHeading eyebrow={section.subtitle} title={section.title} align="center" />
-        <div className="mt-14 grid md:grid-cols-3 gap-10">
+        <div className="mt-14 grid md:grid-cols-3 gap-8">
           {items.map((t: any, i: number) => (
-            <div key={i} className="text-center">
-              <div className="text-primary text-3xl font-serif">"</div>
-              <p className="italic text-foreground/90 leading-relaxed">{t.quote}</p>
-              <div className="mt-4 eyebrow">{t.name} · {t.role}</div>
-            </div>
+            <figure
+              key={i}
+              className="relative bg-card border border-border rounded-lg p-8 hover:border-primary/60 hover:shadow-[0_10px_40px_-15px_rgba(0,0,0,0.4)] transition-all duration-500"
+            >
+              <span aria-hidden className="absolute -top-6 left-6 font-serif text-7xl leading-none text-primary/40 select-none">
+                &ldquo;
+              </span>
+              <div className="flex items-center gap-1 text-primary mb-4 relative">
+                {"★".repeat(t.rating ?? 5)}
+                <span className="text-muted-foreground">{"★".repeat(5 - (t.rating ?? 5))}</span>
+              </div>
+              <blockquote className="text-[15px] leading-relaxed text-foreground/90 relative">
+                {t.quote}
+              </blockquote>
+              <figcaption className="mt-6 flex items-center gap-3 pt-6 border-t border-border/60">
+                {t.avatar && (
+                  <img
+                    src={t.avatar}
+                    alt={t.name}
+                    className="h-11 w-11 rounded-full object-cover border border-primary/30"
+                    loading="lazy"
+                  />
+                )}
+                <div>
+                  <div className="font-serif text-base text-foreground">{t.name}</div>
+                  {t.role && <div className="text-[11px] uppercase tracking-[0.24em] text-muted-foreground">{t.role}</div>}
+                </div>
+              </figcaption>
+            </figure>
           ))}
         </div>
       </div>
     </section>
   );
 }
+
 
 function NewsletterSection({ section }: { section: any }) {
   return (

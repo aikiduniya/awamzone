@@ -37,22 +37,36 @@ export function CategoriesMenu() {
       onMouseLeave={() => setOpen(false)}
     >
       <button
-        className="flex items-center gap-1 text-foreground/80 hover:text-primary transition-colors"
+        className="flex items-center gap-1.5 text-foreground/80 hover:text-primary transition-colors"
         onClick={() => setOpen((v) => !v)}
       >
-        Categories <ChevronDown size={12} />
+        Categories <ChevronDown size={12} className={cn("transition-transform", open && "rotate-180")} />
       </button>
       {open && (
         <div className="absolute left-1/2 top-full -translate-x-1/2 pt-4 z-50">
-          <div className="bg-background border border-border shadow-xl rounded-md p-6 grid grid-cols-3 gap-6 min-w-[560px] max-w-[900px]">
-            {roots.slice(0, 6).map((r) => (
-              <CategoryColumn
-                key={r.id}
-                node={r}
-                childrenOf={childrenOf}
-                onNavigate={() => setOpen(false)}
-              />
-            ))}
+          <div className="bg-popover/95 backdrop-blur-xl border border-border shadow-2xl rounded-lg overflow-hidden w-[min(90vw,880px)]">
+            {/* Gold accent bar */}
+            <div className="h-[2px] bg-gradient-to-r from-transparent via-primary to-transparent" />
+            <div className="p-8 grid grid-cols-3 gap-x-10 gap-y-8">
+              {roots.slice(0, 6).map((r) => (
+                <CategoryColumn
+                  key={r.id}
+                  node={r}
+                  childrenOf={childrenOf}
+                  onNavigate={() => setOpen(false)}
+                />
+              ))}
+            </div>
+            <div className="border-t border-border/60 bg-surface/50 px-8 py-4 flex items-center justify-between text-xs">
+              <span className="text-muted-foreground uppercase tracking-[0.24em]">Explore the full collection</span>
+              <Link
+                to="/shop"
+                onClick={() => setOpen(false)}
+                className="text-primary uppercase tracking-[0.24em] hover:underline"
+              >
+                Shop all →
+              </Link>
+            </div>
           </div>
         </div>
       )}
@@ -64,53 +78,49 @@ function CategoryColumn({
   node,
   childrenOf,
   onNavigate,
-  depth = 0,
 }: {
   node: Category;
   childrenOf: (id: string) => Category[];
   onNavigate: () => void;
-  depth?: number;
 }) {
   const kids = childrenOf(node.id);
-  if (depth === 0) {
-    return (
-      <div className="space-y-2">
-        <Link
-          to={"/category/" + node.slug as any}
-          className="text-xs uppercase tracking-[0.2em] text-primary font-medium hover:underline"
-          onClick={onNavigate}
-        >
-          {node.name}
-        </Link>
-        {kids.length > 0 && (
-          <ul className="space-y-1">
-            {kids.map((k) => (
-              <CategoryColumn key={k.id} node={k} childrenOf={childrenOf} onNavigate={onNavigate} depth={1} />
-            ))}
-          </ul>
-        )}
-      </div>
-    );
-  }
   return (
-    <li>
+    <div>
       <Link
         to={"/category/" + node.slug as any}
-        className="text-xs text-foreground/70 hover:text-primary normal-case tracking-normal"
         onClick={onNavigate}
+        className="group flex items-center gap-3 pb-3 mb-3 border-b border-border/60"
       >
-        {node.name}
+        {node.image_url ? (
+          <img src={node.image_url} alt={node.name} className="h-10 w-10 rounded object-cover" />
+        ) : (
+          <span className="h-10 w-10 grid place-items-center rounded bg-primary/10 text-primary font-serif">
+            {node.name.charAt(0)}
+          </span>
+        )}
+        <span className="font-serif text-lg text-foreground group-hover:text-primary transition-colors">
+          {node.name}
+        </span>
       </Link>
       {kids.length > 0 && (
-        <ul className="space-y-1 pl-3 mt-1 border-l border-border/50">
-          {kids.map((k) => (
-            <CategoryColumn key={k.id} node={k} childrenOf={childrenOf} onNavigate={onNavigate} depth={depth + 1} />
+        <ul className="space-y-1.5">
+          {kids.slice(0, 6).map((k) => (
+            <li key={k.id}>
+              <Link
+                to={"/category/" + k.slug as any}
+                onClick={onNavigate}
+                className="text-[13px] text-muted-foreground hover:text-primary hover:translate-x-0.5 inline-block transition"
+              >
+                {k.name}
+              </Link>
+            </li>
           ))}
         </ul>
       )}
-    </li>
+    </div>
   );
 }
+
 
 export function AnnouncementBar() {
   const { data } = useQuery({
