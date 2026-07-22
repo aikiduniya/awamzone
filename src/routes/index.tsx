@@ -343,8 +343,8 @@ function BrandSlider({ section }: { section: any }) {
         <SectionHeading eyebrow={section.subtitle} title={section.title} description={section.description} align="center" />
       </div>
       <div className="mt-14 relative group/marquee">
-        <div className="pointer-events-none absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-background to-transparent z-10" />
-        <div className="pointer-events-none absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-background to-transparent z-10" />
+        <div className="pointer-events-none absolute inset-y-0 left-0 w-12 md:w-16 bg-gradient-to-r from-background to-transparent z-10" />
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-12 md:w-16 bg-gradient-to-l from-background to-transparent z-10" />
         <div
           className="flex gap-6 animate-brand-marquee whitespace-nowrap py-4 group-hover/marquee:[animation-play-state:paused] touch-pan-x"
           style={{ touchAction: "pan-x" }}
