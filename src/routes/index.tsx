@@ -304,15 +304,20 @@ function BrandTile({ brand }: { brand: { id: string; name: string; slug: string;
       className="shrink-0 group"
       title={brand.name}
     >
-      <div className="h-28 w-48 grid place-items-center px-6 rounded-md border border-border/60 bg-card/60 backdrop-blur hover:border-primary/60 hover:bg-card transition-all duration-500">
+      <div className="h-28 w-48 flex flex-col items-center justify-center gap-2 px-6 rounded-md border border-border/60 bg-card/60 backdrop-blur hover:border-primary/60 hover:bg-card transition-all duration-500">
         {showImg ? (
-          <img
-            src={brand.logo_url!}
-            alt={brand.name}
-            onError={() => setFailed(true)}
-            className="max-h-14 max-w-full object-contain opacity-90 group-hover:opacity-100 transition duration-500"
-            loading="lazy"
-          />
+          <>
+            <img
+              src={brand.logo_url!}
+              alt={brand.name}
+              onError={() => setFailed(true)}
+              className="max-h-12 max-w-[140px] object-contain opacity-90 group-hover:opacity-100 transition duration-500"
+              loading="lazy"
+            />
+            <span className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground group-hover:text-primary transition-colors whitespace-nowrap">
+              {brand.name}
+            </span>
+          </>
         ) : (
           <span className="flex items-center gap-3 text-foreground/80 group-hover:text-primary transition-colors">
             <span className="grid size-10 shrink-0 place-items-center rounded-full border border-current/25 font-serif text-sm font-semibold uppercase">
