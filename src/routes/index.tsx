@@ -63,13 +63,13 @@ function HeroBanner() {
   const posCls = active.text_position === "top" ? "items-start pt-24" : active.text_position === "bottom" ? "items-end pb-24" : "items-center";
 
   return (
-    <section className="relative h-[85vh] min-h-[560px] w-full overflow-hidden" style={active.background_color ? { backgroundColor: active.background_color } : undefined}>
+    <section className="relative h-[92vh] min-h-[620px] w-full overflow-hidden bg-black" style={active.background_color ? { backgroundColor: active.background_color } : undefined}>
       {isVideo ? (
         <video
           key={active.id}
           src={active.video_url!}
           autoPlay muted loop playsInline
-          className="absolute inset-0 h-full w-full object-cover"
+          className="absolute inset-0 h-full w-full object-cover scale-105"
         />
       ) : (
         <picture>
@@ -78,42 +78,71 @@ function HeroBanner() {
             key={active.id}
             src={active.desktop_image || active.mobile_image || ""}
             alt={active.title ?? ""}
-            className="absolute inset-0 h-full w-full object-cover animate-in fade-in duration-700"
+            className="absolute inset-0 h-full w-full object-cover animate-in fade-in zoom-in-105 duration-[1400ms] ease-out"
           />
         </picture>
       )}
-      <div className="absolute inset-0 bg-black" style={{ opacity: active.overlay_opacity ?? 0.4 }} />
+      {/* Cinematic gradient overlays */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-black/40" />
+      <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-transparent to-black/20" />
+      <div className="absolute inset-0" style={{ opacity: active.overlay_opacity ?? 0, backgroundColor: "black" }} />
+
+      {/* Top ornamental hairline */}
+      <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent" />
+
       <div className={`container-luxe relative z-10 flex h-full ${posCls}`}>
-        <div className={`flex flex-col gap-4 max-w-xl ${alignCls}`}>
-          {active.kicker && <div className="eyebrow text-primary">{active.kicker}</div>}
-          {active.title && <h1 className="text-5xl md:text-7xl font-serif leading-[1.05] text-white drop-shadow">{active.title}</h1>}
-          {active.subtitle && <p className="text-white/90 max-w-md leading-relaxed drop-shadow">{active.subtitle}</p>}
-          <div className="mt-4 flex flex-wrap gap-3">
+        <div className={`flex flex-col gap-6 max-w-2xl ${alignCls} animate-in fade-in slide-in-from-bottom-6 duration-1000`}>
+          {active.kicker && (
+            <div className="inline-flex items-center gap-3 text-primary text-[11px] uppercase tracking-[0.4em]">
+              <span className="h-px w-10 bg-primary/70" />
+              {active.kicker}
+              <span className="h-px w-10 bg-primary/70" />
+            </div>
+          )}
+          {active.title && (
+            <h1 className="text-5xl md:text-7xl lg:text-8xl font-serif leading-[1.02] text-white drop-shadow-[0_2px_20px_rgba(0,0,0,0.6)]">
+              {active.title}
+            </h1>
+          )}
+          {active.subtitle && (
+            <p className="text-white/85 text-base md:text-lg max-w-lg leading-relaxed drop-shadow">
+              {active.subtitle}
+            </p>
+          )}
+          <div className="mt-4 flex flex-wrap gap-4">
             {active.primary_label && (
-              <Link to={active.primary_link || "/shop"} className="inline-flex items-center border border-primary bg-primary text-primary-foreground px-8 py-4 text-xs uppercase tracking-[0.28em] hover:opacity-90 transition">
+              <Link to={active.primary_link || "/shop"} className="group inline-flex items-center gap-2 bg-primary text-primary-foreground px-10 py-4 text-xs uppercase tracking-[0.32em] hover:bg-primary/90 transition-all shadow-[0_10px_40px_-10px_rgba(0,0,0,0.6)]">
                 {active.primary_label}
+                <span className="transition-transform group-hover:translate-x-1">→</span>
               </Link>
             )}
             {active.secondary_label && (
-              <Link to={active.secondary_link || "/shop"} className="inline-flex items-center border border-white text-white px-8 py-4 text-xs uppercase tracking-[0.28em] hover:bg-white hover:text-foreground transition">
+              <Link to={active.secondary_link || "/shop"} className="inline-flex items-center border border-white/70 text-white px-10 py-4 text-xs uppercase tracking-[0.32em] hover:bg-white hover:text-black transition-all backdrop-blur-sm">
                 {active.secondary_label}
               </Link>
             )}
           </div>
         </div>
       </div>
+
       {slides.length > 1 && (
-        <div className="absolute inset-x-0 bottom-6 z-10 flex justify-center gap-2">
+        <div className="absolute inset-x-0 bottom-8 z-10 flex justify-center gap-3">
           {slides.map((s, idx) => (
             <button
               key={s.id}
               onClick={() => setI(idx)}
               aria-label={`Slide ${idx + 1}`}
-              className={`h-1.5 rounded-full transition-all ${idx === i ? "w-10 bg-primary" : "w-4 bg-white/50 hover:bg-white/80"}`}
+              className={`h-[3px] rounded-full transition-all duration-500 ${idx === i ? "w-14 bg-primary" : "w-6 bg-white/40 hover:bg-white/70"}`}
             />
           ))}
         </div>
       )}
+
+      {/* Scroll cue */}
+      <div className="absolute bottom-6 right-6 z-10 hidden md:flex items-center gap-3 text-white/60 text-[10px] uppercase tracking-[0.32em]">
+        <span>Scroll</span>
+        <span className="block h-8 w-px bg-white/40 animate-pulse" />
+      </div>
     </section>
   );
 }
